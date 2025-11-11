@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 import numpy as np
 from typing import Tuple
-from IsingModule import FullIsingModule
-from utils import AnnealingSettings
+from .IsingModule import FullIsingModule
+from .utils import AnnealingSettings
 from torch.utils.data import DataLoader
 
 class MultiIsingNetwork(nn.Module):

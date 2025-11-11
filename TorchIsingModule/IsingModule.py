@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch.autograd import Function
 import numpy as np
-from utils import utils, SimAnnealModel, AnnealingSettings, QPUModel, ExactModel
+from .utils import utils, SimAnnealModel, AnnealingSettings, QPUModel, ExactModel
 import threading
 
 NUM_THREADS = 16

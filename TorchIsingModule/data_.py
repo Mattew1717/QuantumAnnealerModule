@@ -5,7 +5,7 @@ import torch
 from torch.utils.data import Dataset
 import numpy as np
 
-from utils import GammaInitialization, utils
+from .utils import GammaInitialization, utils
 from dimod import ExactSolver
 
 

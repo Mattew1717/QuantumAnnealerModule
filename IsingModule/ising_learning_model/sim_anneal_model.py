@@ -1,6 +1,6 @@
 """ Simulated Annealing Model"""
 from __future__ import annotations
-from model import Model
+from .model import Model
 from dimod import SampleSet
 from neal import SimulatedAnnealingSampler
 import sys

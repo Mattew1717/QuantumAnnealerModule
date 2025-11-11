@@ -1,6 +1,6 @@
 """Exact model."""
 from __future__ import annotations
-from model import Model
+from .model import Model
 from dimod import ExactSolver, SampleSet
 
 class ExactModel(Model):

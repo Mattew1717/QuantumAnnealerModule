@@ -13,8 +13,8 @@ from dimod import SampleSet
 
 from time import perf_counter
 from torch.utils.data import DataLoader
-from utils import GammaInitialization, utils
-from data import SimpleDataset, HiddenNodesInitialization
+from .utils import GammaInitialization, utils
+from .data import SimpleDataset, HiddenNodesInitialization
 
 import threading
 import sys
