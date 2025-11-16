@@ -21,7 +21,7 @@ _repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if _repo_root not in sys.path:
     sys.path.insert(0, _repo_root)
 
-from NeuralNetworkIsing.data_ import SimpleDataset, HiddenNodesInitialization
+from NeuralNetworkIsing.data_ import HiddenNodesInitialization
 
 
 # -- Environment helpers -------------------------------------------------
@@ -38,68 +38,69 @@ def _get_env(name, default=None, parse_json=False):
             return default
     return val
 
-def prepare_datasets(X_train, y_train, X_val, y_val, input_dim):
-    """Prepare SimpleDataset wrappers and DataLoader instances.
+def prepare_datasets(
+    X_train, y_train, X_val, y_val, input_dim,
+    HN_init="function", HN_function=None, HN_fun_args=None
+):
     """
+    Prepare dataset/testset and dataloaders.
+    Accepts HiddenNodesInitialization parameters:
+      - HN_init: mode string ('random'|'function' etc.)
+      - HN_function: callable or None
+      - HN_fun_args: args for the function or None
+    """
+    from NeuralNetworkIsing.data_ import SimpleDataset, HiddenNodesInitialization
+
+    # Create SimpleDataset objects
     dataset = SimpleDataset()
     test_set = SimpleDataset()
     dataset.x = torch.tensor(X_train, dtype=torch.float32)
     dataset.y = torch.tensor(y_train, dtype=torch.float32)
-    dataset.data_size = input_dim
-    dataset.len = len(y_train)
-
     test_set.x = torch.tensor(X_val, dtype=torch.float32)
     test_set.y = torch.tensor(y_val, dtype=torch.float32)
-    test_set.data_size = input_dim
-    test_set.len = len(y_val)
 
-    # Read hidden nodes init mode from env, fallback to 'function'
-    HN_init = _get_env('HN_init', default='function')
+    # Create HiddenNodesInitialization with mode
     hn = HiddenNodesInitialization(HN_init)
+    if HN_function is not None:
+        hn.function = HN_function
+    if HN_fun_args is not None:
+        hn.fun_args = HN_fun_args
 
-    # HN_function is usually a callable set in code; allow an override via
-    # a provided attribute on the SimpleDataset or via env name (not deserialized)
-    # Default: no change
-    # If HN_function is a string name of a callable in this module, try to resolve it
-    hn_fun_env = _get_env('HN_function', default=None)
-    if hn_fun_env is not None and hasattr(SimpleDataset, hn_fun_env):
-        hn.function = getattr(SimpleDataset, hn_fun_env)
+    # Determine dataset size for resizing
+    SIZE = input_dim + 5
 
-    # Additional args for hidden nodes initialization
-    hn.fun_args = _get_env('HN_fun_args', default=None, parse_json=True)
+    # Check environment or defaults
+    PARTITION_INPUT = False
+    NUM_ISING_PERCEPTRONS = 20
 
-    SIZE = input_dim + 5  # keep original adjustment
-
-    PARTITION_INPUT = _get_env('PARTITION_INPUT', default=False, parse_json=True)
-    NUM_ISING_PERCEPTRONS = _get_env('NUM_ISING_PERCEPTRONS', default=1, parse_json=True)
-
+    # Resize datasets using hn
     if PARTITION_INPUT:
-        dataset.resize(SIZE * int(NUM_ISING_PERCEPTRONS), hn)
-        dataset.len = len(dataset.y)
-        dataset.data_size = len(dataset.x[0])
-        test_set.resize(SIZE * int(NUM_ISING_PERCEPTRONS), hn)
-        test_set.len = len(test_set.y)
-        test_set.data_size = len(test_set.x[0])
+        resize_size = SIZE * int(NUM_ISING_PERCEPTRONS)
     else:
-        dataset.resize(SIZE, hn)
-        dataset.len = len(dataset.y)
-        dataset.data_size = len(dataset.x[0])
-        test_set.resize(SIZE, hn)
-        test_set.len = len(test_set.y)
-        test_set.data_size = len(test_set.x[0])
+        resize_size = SIZE
 
-    BATCH_SIZE = _get_env('BATCH_SIZE', default=32, parse_json=True)
+    dataset.resize(resize_size, hn)
+    test_set.resize(resize_size, hn)
+
+    # Update dataset metadata
+    dataset.len = len(dataset.y)
+    dataset.data_size = dataset.x.shape[1]
+    test_set.len = len(test_set.y)
+    test_set.data_size = test_set.x.shape[1]
+
+    # Batch size
+    BATCH_SIZE = 32
 
     train_loader = DataLoader(
         TensorDataset(dataset.x, dataset.y),
         batch_size=int(BATCH_SIZE),
         shuffle=True,
-        num_workers=0,
+        num_workers=0
     )
     test_loader = DataLoader(
         TensorDataset(test_set.x, test_set.y),
         batch_size=int(BATCH_SIZE),
-        shuffle=False,
+        shuffle=False
     )
 
     return dataset, test_set, train_loader, test_loader
