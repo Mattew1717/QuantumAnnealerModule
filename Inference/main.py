@@ -57,7 +57,7 @@ class Logger:
         fh = logging.FileHandler(log_file, mode='w', encoding='utf-8')
         fh.setLevel(logging.INFO)
         
-        # Console handler
+        # Console handler 
         ch = logging.StreamHandler()
         ch.setLevel(logging.INFO)
         
@@ -163,12 +163,9 @@ def print_config_header(logger, config, run_timestamp):
 
 def load_csv_dataset(csv_path, classes, logger):
     """Load and preprocess CSV dataset."""
-    logger.info(f"    Loading dataset from: {csv_path}")
     df = pd.read_csv(csv_path)
-    
-    # Replace labels
-    df.iloc[:, -1] = df.iloc[:, -1].replace({-1: classes[0], 1: classes[1]})
-    
+    df = df.sample(frac=1, random_state=42).reset_index(drop=True)
+
     X = df.iloc[:, :-1].values.astype(np.float32)
     y = df.iloc[:, -1].values.astype(np.float32)
     
@@ -176,14 +173,11 @@ def load_csv_dataset(csv_path, classes, logger):
     scaler = MinMaxScaler()
     X = scaler.fit_transform(X)
     
-    logger.info(f"    Dataset shape: X={X.shape}, y={y.shape}")
-    logger.info(f"    Class distribution: {np.bincount(y.astype(int))}")
     return X, y
 
 
 def prepare_datasets(X_train, y_train, X_val, y_val, config, logger):
     """Prepare datasets with hidden nodes initialization."""
-    logger.info("    Preparing datasets...")
     
     dataset = SimpleDataset()
     test_set = SimpleDataset()
@@ -612,9 +606,6 @@ def compare_models():
         torch.manual_seed(random_seed)
         np.random.seed(random_seed)
 
-    # Default lambda init
-    lambda_init_default = 0.1
-
     # Config dict
     config = {
         'classes': classes,
@@ -622,7 +613,7 @@ def compare_models():
         'epochs': epochs,
         'size': size,
         'num_ising_perceptrons': num_isings,
-        'lambda_init': float(_getenv_parsed('LAMBDA_INIT', lambda_init_default)),
+        'lambda_init': float(_getenv_parsed('LAMBDA_INIT', 0.1)),
         'offset_init': float(_getenv_parsed('OFFSET_INIT', 0)),
         'lr_gamma': float(_getenv_parsed('LEARNING_RATE_GAMMA', 0.02)),
         'lr_lambda': float(_getenv_parsed('LEARNING_RATE_LAMBDA', 0.01)),

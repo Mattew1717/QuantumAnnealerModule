@@ -44,48 +44,6 @@ class SimpleDataset(Dataset):
     def __init__(self):
         super().__init__()
 
-    def create_data_ising(
-        self,
-        size: int,
-        num_samples: int,
-        value_range_biases: tuple[float, float] = (-1, 1),
-        value_range_couplings: tuple[float, float] = (-1, 1),
-        seed: int = 42
-        ):
-
-        """ Create Dataset containing Ising data """
-
-        np.random.seed(seed)
-        xs = []
-        ys = []
-        theta = torch.Tensor([])
-        # create coupling matrix and add noise
-        gamma_data = GammaInitialization("random").initialize(
-            size, value_range_couplings
-        )
-        self._ising_configs = []
-        for i in range(num_samples):
-            theta = torch.Tensor(
-                np.random.uniform(
-                    value_range_biases[0], value_range_biases[1], size
-                )
-            )
-            xs.append(theta)
-            sample_set = ExactSolver().sample_ising(
-                utils.vector_to_biases(theta),
-                utils.gamma_to_couplings(gamma_data),
-            )
-            sample_set.resolve()
-            ys.append(sample_set.first.energy)
-            self._ising_configs.append(
-                np.array(list(sample_set.first.sample.values()))
-            )
-        self.x = torch.stack(xs)
-        self.y = torch.Tensor(ys)
-        self.len = len(self.y)
-        self.data_size = len(theta)
-        self._gamma_data = gamma_data.copy()
-
     def create_data_fun(
         self, function: callable, num_samples: int, ranges: list
     ):
@@ -108,62 +66,6 @@ class SimpleDataset(Dataset):
         self.y = torch.Tensor(ys)
         self.len = len(self.y)
         self.data_size = len(x)
-
-    def create_data_rand(self,
-                         size: int,
-                         num_samples: int,
-                         value_range_biases: tuple[float, float] = (-1, 1),
-                         value_range_energies: tuple[float, float] = (-1, 0),
-                         seed: int = 42,
-                         ):
-        np.random.seed(seed)
-        self.x = torch.Tensor(np.random.uniform(value_range_biases[0], value_range_biases[1], (num_samples, size)))
-        self.y = torch.Tensor(np.random.uniform(value_range_energies[0], value_range_energies[1], num_samples))
-        self.len = len(self.y)
-        self.data_size = size
-
-
-    @staticmethod
-    def create_bas(stripes: bool, size: int):
-        """ Create Dataset containing bars and stripes data encodes in a matrix with 0/1 entries"""
-        matrix = np.zeros((size,size))
-        found = False
-        while not found:
-            one_rows = 0
-            for i in range(size):
-                make_ones = bool(np.random.randint(0,2))
-                if make_ones:
-                    one_rows += 1
-                    matrix[i,:] = np.ones(size)
-            if one_rows != 0 and one_rows != size:
-                found = True
-        if stripes:
-            return matrix.T.flatten()
-        else:
-            return matrix.flatten()
-
-
-    def create_data_bas(self,
-                        size : int,
-                        num_samples : int,
-                        multiplier : float = 1):
-        """
-        Create Dataset containing bars and stripes data encodes in a matrix with 0/1 entries
-        store in x,y
-        """
-        xs = []
-        ys = []
-        for i in range(num_samples):
-            b_or_s = np.random.randint(0,2)
-            ys.append(torch.tensor(b_or_s * multiplier))
-            xs.append(torch.tensor(SimpleDataset.create_bas(bool(b_or_s),size)))
-
-        self.x = torch.stack(xs)
-        self.y = torch.Tensor(ys)
-        self.len = len(self.y)
-        self.data_size = size ** 2
-
-
 
     def __len__(self):
         return len(self.y)
