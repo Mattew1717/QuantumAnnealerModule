@@ -11,7 +11,7 @@ class Logger:
     """Custom logger that writes to both console and file."""
     
     def __init__(self):
-        self.log_dir = log_dir
+        # self.log_dir = log_dir
 
         # Configure logging
         self.logger = logging.getLogger('IsingComparison')
