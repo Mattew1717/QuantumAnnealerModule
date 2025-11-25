@@ -6,6 +6,8 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader, TensorDataset
 import os
+from dotenv import load_dotenv
+load_dotenv(override = True)
 
 class DatasetManager:
     
@@ -64,15 +66,18 @@ class DatasetManager:
         hn = HiddenNodesInitialization('function')
         hn.function = SimpleDataset.offset
         hn.fun_args = [-0.02]
+        
+        if int(os.getenv("MODEL_SIZE")) == -1:
+            size = dataset.data_size if dataset.data_size > 10 else 10
+        else:
+            size = int(os.getenv("MODEL_SIZE"))
 
-        if params['model_size'] == -1:
-            params['model_size'] = dataset.data_size if dataset.data_size > 10 else 10
-            
         # Resize datasets
         if params['partition_input']:
-            target_size = params['model_size'] * params['num_ising_perceptrons']
+            target_size = size * params['num_ising_perceptrons']
         else:
-            target_size = params['model_size']
+            target_size = size
+
         dataset.resize(target_size, hn)
         test_set.resize(target_size, hn)
 

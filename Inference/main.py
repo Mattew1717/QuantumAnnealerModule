@@ -9,7 +9,7 @@ from sklearn.metrics import accuracy_score
 import dotenv
 
 # Load environment variables
-dotenv.load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+dotenv.load_dotenv()
 
 # Add repository root to sys.path
 _repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -54,7 +54,7 @@ def print_config(params, run_timestamp):
     """Print configuration parameters."""
     logger.info(f"\n[RUN {run_timestamp}]")
     logger.info(f"Device: {params['device']} | Batch: {params['batch_size']} | Epochs: {params['epochs']} | K-Folds: {params['k_folds']}")
-    logger.info(f"Model: size={params['model_size']}, perceptrons={params['num_ising_perceptrons']}, partition={params['partition_input']}")
+    logger.info(f"Model: size={"auto" if params['model_size'] == -1 else params['model_size']}, perceptrons={params['num_ising_perceptrons']}, partition={params['partition_input']}")
     logger.info(f"LR: gamma={params['lr_gamma']:.4f}, lambda={params['lr_lambda']:.4f}, offset={params['lr_offset']:.4f}, combiner={params['lr_combiner']:.4f}")
     logger.info(f"SA: beta={params['sa_beta_range']}, reads={params['sa_num_reads']}, sweeps={params['sa_num_sweeps']}")
     logger.info(f"Init: lambda={params['lambda_init']:.4f}, offset={params['offset_init']:.4f}\n")
@@ -79,13 +79,13 @@ def train_single_model(X_train, y_train, X_test, y_test, params):
     SA_settings.num_sweeps = params['sa_num_sweeps']
     SA_settings.sweeps_per_beta = params['sa_sweeps_per_beta']
 
-    if params['model_size'] == -1:
-        params['model_size'] = X_train.shape[1] if X_train.shape[1] > 10 else 10
-    logger.info(f"Using model size: {params['model_size']}")
+    if int(os.getenv("MODEL_SIZE")) == -1:
+        size = X_train.shape[1] if X_train.shape[1] > 10 else 10
+    logger.info(f"Using model size: {size}")
     
     # Create model
     model = FullIsingModule(
-        params['model_size'],
+        size,
         SA_settings,
         params['lambda_init'],
         params['offset_init']
@@ -159,13 +159,13 @@ def train_neural_net(X_train, y_train, X_test, y_test, params):
     SA_settings.num_sweeps = params['sa_num_sweeps']
     SA_settings.sweeps_per_beta = params['sa_sweeps_per_beta']
 
-    if params['model_size'] == -1:
-        params['model_size'] = X_train.shape[1] if X_train.shape[1] > 10 else 10
-    logger.info(f"Using model size: {params['model_size']}")
+    if int(os.getenv("MODEL_SIZE")) == -1:
+        size = X_train.shape[1] if X_train.shape[1] > 10 else 10
+    logger.info(f"Using model size: {size}")
     # Create model
     model = MultiIsingNetwork(
         num_ising_perceptrons=params['num_ising_perceptrons'],
-        sizeAnnealModel=params['model_size'],
+        sizeAnnealModel=size,
         anneal_settings=SA_settings,
         lambda_init=params['lambda_init'],
         offset_init=params['offset_init'],

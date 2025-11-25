@@ -1,9 +1,12 @@
 import numpy as np
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
 from matplotlib.patches import Patch
 from sklearn.metrics import confusion_matrix
+
 
 # Set paper style
 plt.rcParams['font.family'] = 'serif'
@@ -50,8 +53,7 @@ class Plot:
         epochs = range(1, len(loss) + 1)
 
         # Subplot loss (left)
-        ax1.plot(epochs, loss, color=self.colors['primary'], linewidth=2, marker='o',
-                markersize=4, markerfacecolor='white', markeredgewidth=1.5)
+        ax1.plot(epochs, loss, color=self.colors['primary'], linewidth=2)
         ax1.set_xlabel('Epoch', fontweight='bold')
         ax1.set_ylabel('Loss', fontweight='bold')
         ax1.set_title('(a) Training Loss', loc='left', fontweight='bold')
@@ -59,8 +61,7 @@ class Plot:
         ax1.spines['right'].set_visible(False)
 
         # Subplot accuracy (right)
-        ax2.plot(epochs, accuracy, color=self.colors['success'], linewidth=2, marker='s',
-                markersize=4, markerfacecolor='white', markeredgewidth=1.5)
+        ax2.plot(epochs, accuracy, color=self.colors['success'], linewidth=2)
         ax2.set_xlabel('Epoch', fontweight='bold')
         ax2.set_ylabel('Accuracy', fontweight='bold')
         ax2.set_title('(b) Validation Accuracy', loc='left', fontweight='bold')
