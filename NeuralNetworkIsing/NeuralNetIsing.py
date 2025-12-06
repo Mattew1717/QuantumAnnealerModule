@@ -39,8 +39,8 @@ class MultiIsingNetwork(nn.Module):
             )
 
             with torch.no_grad():
-                random_gamma = torch.randn(sizeAnnealModel, sizeAnnealModel) * 0.01 + np.random.uniform(-0.1, 0.1)
-                #random_gamma = torch.randn(sizeAnnealModel, sizeAnnealModel) * 0
+                #random_gamma = torch.randn(sizeAnnealModel, sizeAnnealModel) * 0.01 + np.random.uniform(-0.1, 0.1)
+                random_gamma = torch.randn(sizeAnnealModel, sizeAnnealModel) * 0
                 random_gamma = torch.triu(random_gamma, diagonal=1)
                 module.ising_layer.gamma.copy_(random_gamma)
 

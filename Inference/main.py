@@ -80,7 +80,7 @@ def train_single_model(X_train, y_train, X_test, y_test, params):
     SA_settings.sweeps_per_beta = params['sa_sweeps_per_beta']
 
     if int(os.getenv("MODEL_SIZE")) == -1:
-        size = X_train.shape[1] if X_train.shape[1] > 10 else 10
+        size = X_train.shape[1] if X_train.shape[1] > int(os.getenv("MINIMUM_MODEL_SIZE")) else int(os.getenv("MINIMUM_MODEL_SIZE"))
     logger.info(f"Using model size: {size}")
     
     # Create model
@@ -92,13 +92,13 @@ def train_single_model(X_train, y_train, X_test, y_test, params):
     ).to(params['device'])
 
     # Setup optimizer
-    optimizer = torch.optim.SGD([
+    optimizer = torch.optim.Adam([
         {'params': [model.ising_layer.gamma], 'lr': params['lr_gamma']},
         {'params': [model.lmd], 'lr': params['lr_lambda']},
         {'params': [model.offset], 'lr': params['lr_offset']},
     ])
 
-    loss_fn = torch.nn.BCEWithLogitsLoss()
+    loss_fn = torch.nn.BCE()
 
     # Training loop
     training_losses = []
@@ -129,8 +129,8 @@ def train_single_model(X_train, y_train, X_test, y_test, params):
         model.eval()
         with torch.no_grad():
             preds_tensor = model(test_set.x.to(params['device'])).view(-1)
-            probs = torch.sigmoid(preds_tensor).cpu().numpy()
-            predictions = np.where(probs < 0.5, 0, 1)
+            #probs = torch.sigmoid(preds_tensor).cpu().numpy()
+            predictions = np.where(preds_tensor < 0.5, 0, 1)
             epoch_accuracy = accuracy_score(y_test, predictions)
             validation_accuracies.append(epoch_accuracy)
 
@@ -160,7 +160,7 @@ def train_neural_net(X_train, y_train, X_test, y_test, params):
     SA_settings.sweeps_per_beta = params['sa_sweeps_per_beta']
 
     if int(os.getenv("MODEL_SIZE")) == -1:
-        size = X_train.shape[1] if X_train.shape[1] > 10 else 10
+        size = X_train.shape[1] if X_train.shape[1] > int(os.getenv("MINIMUM_MODEL_SIZE")) else int(os.getenv("MINIMUM_MODEL_SIZE"))
     logger.info(f"Using model size: {size}")
     # Create model
     model = MultiIsingNetwork(
@@ -193,7 +193,7 @@ def train_neural_net(X_train, y_train, X_test, y_test, params):
     })
 
     optimizer = torch.optim.SGD(optimizer_grouped_parameters)
-    loss_fn = torch.nn.BCEWithLogitsLoss()
+    loss_fn = torch.nn.MSELoss()
 
     # Training loop
     training_losses = []
@@ -225,8 +225,8 @@ def train_neural_net(X_train, y_train, X_test, y_test, params):
         model.eval()
         with torch.no_grad():
             preds_tensor = model(test_set.x.to(params['device'])).view(-1)
-            probs = torch.sigmoid(preds_tensor).cpu().numpy()
-            predictions = np.where(probs < 0.5, 0, 1)
+            #probs = torch.sigmoid(preds_tensor).cpu().numpy()
+            predictions = np.where(preds_tensor < 0.5, 0, 1)
             epoch_accuracy = accuracy_score(test_set.y.numpy(), predictions)
             validation_accuracies.append(epoch_accuracy)
 

@@ -21,6 +21,11 @@ class DatasetManager:
         self.logger.info(f"Loading dataset from: {csv_path}")
         df = pd.read_csv(csv_path)
 
+        # If last column contains -1 labels, convert them to 0
+        label_col = df.columns[-1]
+        if (df[label_col] == -1).any():
+            self.logger.info("Converting -1 labels to 0 in last column")
+            df[label_col] = df[label_col].replace(-1, 0)
         #Shuffle dataset
         df = df.sample(frac=1, random_state=int(os.getenv('RANDOM_SEED'))).reset_index(drop=True)
 
@@ -68,7 +73,7 @@ class DatasetManager:
         hn.fun_args = [-0.02]
         
         if int(os.getenv("MODEL_SIZE")) == -1:
-            size = dataset.data_size if dataset.data_size > 10 else 10
+            size = dataset.data_size if dataset.data_size > int(os.getenv("MINIMUM_MODEL_SIZE")) else int(os.getenv("MINIMUM_MODEL_SIZE"))
         else:
             size = int(os.getenv("MODEL_SIZE"))
 
