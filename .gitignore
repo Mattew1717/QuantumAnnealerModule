@@ -3,5 +3,3 @@ venv
 .env
 logs
 results
-Plots
-plots_*
