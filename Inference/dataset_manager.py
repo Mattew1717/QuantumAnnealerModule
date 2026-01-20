@@ -32,9 +32,6 @@ class DatasetManager:
         X = df.iloc[:, :-1].values.astype(np.float32)
         y = df.iloc[:, -1].values.astype(np.float32)
         
-        # Normalize features
-        scaler = MinMaxScaler()
-        X = scaler.fit_transform(X)
 
         self.logger.info(f"Dataset num features: X={X.shape},")
         self.logger.info(f"Class distribution: {np.bincount(y.astype(int))}")
@@ -53,7 +50,17 @@ class DatasetManager:
         return folds
     
     def create_dataloader(self, X_train, y_train, X_test, y_test, params):
-        """Prepare datasets with hidden nodes initialization."""
+
+        # standardization without leakage of test_set
+        mean = X_train.mean(axis=0)
+        std = X_train.std(axis=0)
+
+        # avoid 0 division
+        std[std == 0] = 1e-8
+
+        X_train = (X_train - mean) / std
+        X_test = (X_test - mean) / std
+        
         dataset = SimpleDataset()
         test_set = SimpleDataset()
 
@@ -86,11 +93,9 @@ class DatasetManager:
         dataset.resize(target_size, hn)
         test_set.resize(target_size, hn)
 
-        # Update data_size after resize
         dataset.data_size = target_size
         test_set.data_size = target_size
 
-        # Create data loaders
         train_loader = DataLoader(
             TensorDataset(dataset.x, dataset.y),
             batch_size=params['batch_size'],
@@ -101,6 +106,7 @@ class DatasetManager:
             batch_size=params['batch_size'],
             shuffle=False
         )
+
         return dataset, test_set, train_loader, test_loader
 
 

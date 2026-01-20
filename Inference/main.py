@@ -7,6 +7,7 @@ import torch
 from datetime import datetime
 from sklearn.metrics import accuracy_score
 import dotenv
+from scipy.stats import wilcoxon
 
 # Load environment variables
 dotenv.load_dotenv()
@@ -98,7 +99,7 @@ def train_single_model(X_train, y_train, X_test, y_test, params):
         {'params': [model.offset], 'lr': params['lr_offset']},
     ])
 
-    loss_fn = torch.nn.BCE()
+    loss_fn = torch.nn.BCEWithLogitsLoss()
 
     # Training loop
     training_losses = []
@@ -129,8 +130,8 @@ def train_single_model(X_train, y_train, X_test, y_test, params):
         model.eval()
         with torch.no_grad():
             preds_tensor = model(test_set.x.to(params['device'])).view(-1)
-            #probs = torch.sigmoid(preds_tensor).cpu().numpy()
-            predictions = np.where(preds_tensor < 0.5, 0, 1)
+            probs = torch.sigmoid(preds_tensor).cpu().numpy()
+            predictions = np.where(probs < 0.5, 0, 1)
             epoch_accuracy = accuracy_score(y_test, predictions)
             validation_accuracies.append(epoch_accuracy)
 
@@ -192,8 +193,8 @@ def train_neural_net(X_train, y_train, X_test, y_test, params):
         'lr': params['lr_combiner']
     })
 
-    optimizer = torch.optim.SGD(optimizer_grouped_parameters)
-    loss_fn = torch.nn.MSELoss()
+    optimizer = torch.optim.Adam(optimizer_grouped_parameters)
+    loss_fn = torch.nn.BCEWithLogitsLoss()
 
     # Training loop
     training_losses = []
@@ -225,8 +226,8 @@ def train_neural_net(X_train, y_train, X_test, y_test, params):
         model.eval()
         with torch.no_grad():
             preds_tensor = model(test_set.x.to(params['device'])).view(-1)
-            #probs = torch.sigmoid(preds_tensor).cpu().numpy()
-            predictions = np.where(preds_tensor < 0.5, 0, 1)
+            probs = torch.sigmoid(preds_tensor).cpu().numpy()
+            predictions = np.where(probs < 0.5, 0, 1)
             epoch_accuracy = accuracy_score(test_set.y.numpy(), predictions)
             validation_accuracies.append(epoch_accuracy)
 
@@ -344,7 +345,17 @@ def compare_models():
     plotter.plot_tot_accuracy(single_means, dataset_names)
     plotter.plot_compare_accuracy(single_means, neural_means, dataset_names)
     plotter.plot_parity_scatter(single_means, neural_means, dataset_names)
-
+    try:
+        # Assumiamo che single_means e neural_means siano già calcolati
+        stat, p_value = wilcoxon(single_means, neural_means)
+        logger.info(f"\nWilcoxon signed-rank test: statistic={stat:.4f}, p-value={p_value:.4f}")
+        if p_value < 0.05:
+            logger.info("Differenza significativa tra i modelli (p < 0.05).")
+        else:
+            logger.info("Nessuna differenza significativa tra i modelli (p ≥ 0.05).")
+    except Exception as e:
+        logger.error(f"Errore nel test di Wilcoxon: {e}")
+    
     # Box plots for both models
     plotter.box_plot(
         single_accuracies_all,
