@@ -25,36 +25,49 @@ Each `FullIsingModule` represents a **learnable Ising Hamiltonian** whose minimu
 
 ### High-level structure
 
-flowchart LR
-    A["Input θ ∈ ℝ^(n + hidden)"]
-
-    subgraph L1["First Ising Layer (k modules)"]
-        B1["FullIsing(z) → E₁"]
-        B2["FullIsing(z) → E₂"]
-        B3["…"]
-        Bk["FullIsing(z) → E_k"]
-    end
-
-    C["Stack energies → ℝᵏ"]
-    D["LayerNorm"]
-    E["Linear (k → 20)"]
-    F["Tanh"]
-
-    subgraph L2["Second Ising Layer (k₂ modules)"]
-        G1["FullIsing(20) → E₁'"]
-        G2["FullIsing(20) → E₂'"]
-        G3["…"]
-        Gk["FullIsing(20) → E_k₂"]
-    end
-
-    H["Stack energies → ℝ^(k₂)"]
-    I["LayerNorm"]
-    J["Linear (k₂ → 1)"]
-    K["Output"]
-
-    A --> L1
-    L1 --> C --> D --> E --> F --> L2
-    L2 --> H --> I --> J --> K
+Input θ ∈ ℝ^(n + hidden)
+        │
+        ▼
+First Ising Layer (k modules)
+ ┌────────────────────┐
+ │ FullIsing(z) → E₁  │
+ │ FullIsing(z) → E₂  │
+ │ …                  │
+ │ FullIsing(z) → E_k │
+ └────────────────────┘
+        │
+        ▼
+Stack energies → ℝᵏ
+        │
+        ▼
+    LayerNorm
+        │
+        ▼
+  Linear (k → 20)
+        │
+        ▼
+      Tanh
+        │
+        ▼
+Second Ising Layer (k₂ modules)
+ ┌──────────────────────┐
+ │ FullIsing(20) → E₁'  │
+ │ FullIsing(20) → E₂'  │
+ │ …                    │
+ │ FullIsing(20) → E_k₂ │
+ └──────────────────────┘
+        │
+        ▼
+Stack energies → ℝ^(k₂)
+        │
+        ▼
+    LayerNorm
+        │
+        ▼
+  Linear (k₂ → 1)
+        │
+        ▼
+     Output
 
 
 ---
