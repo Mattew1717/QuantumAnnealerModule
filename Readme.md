@@ -25,6 +25,7 @@ Each `FullIsingModule` represents a **learnable Ising Hamiltonian** whose minimu
 
 ### High-level structure
 
+```text
 Input θ ∈ ℝ^(n + hidden)
         │
         ▼
@@ -69,7 +70,7 @@ Stack energies → ℝ^(k₂)
         ▼
      Output
 
-
+```
 ---
 
 ## Core Components
