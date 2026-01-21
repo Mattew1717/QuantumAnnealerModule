@@ -1,10 +1,10 @@
 import torch
 import torch.nn as nn
 import numpy as np
-from typing import Tuple 
-from ..IsingModule.utils import AnnealingSettings
+from typing import Tuple
+from IsingModule.utils import AnnealingSettings
 from torch.utils.data import DataLoader
-from ..IsingModule.FullIsingModule import FullIsingModule
+from IsingModule.FullIsingModule import FullIsingModule
 
 class MultiIsingNetwork(nn.Module):
 

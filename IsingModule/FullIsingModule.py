@@ -93,7 +93,9 @@ class IsingLayer(nn.Module):
     def __init__(self, sizeAnnealModel: int, anneal_settings: AnnealingSettings = AnnealingSettings()):
         super().__init__()
         self.sizeAnnealModel = sizeAnnealModel
-        initial_gamma = torch.zeros((sizeAnnealModel, sizeAnnealModel), dtype=torch.float32)
+        # Initialize gamma with small random values instead of zeros
+        initial_gamma = torch.randn((sizeAnnealModel, sizeAnnealModel), dtype=torch.float32) * 0.01
+        initial_gamma = torch.triu(initial_gamma, diagonal=1)  # Keep upper triangular
         self.gamma = nn.Parameter(initial_gamma)
         self.annealModel = AnnealModel(sizeAnnealModel, settings=anneal_settings)
 
