@@ -109,7 +109,7 @@ class Plot:
         plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white', edgecolor='none')
         plt.close()
 
-    def plot_compare_accuracy(self, accuracy_list1, accuracy_list2, labels):
+    def plot_compare_accuracy(self, accuracy_list1, accuracy_list2, labels, model_name1='Model 1', model_name2='Model 2'):
         """
         Creates a bar chart comparing two accuracy lists.
         """
@@ -118,9 +118,9 @@ class Plot:
         x_pos = np.arange(len(labels))
         width = 0.35
 
-        ax.bar(x_pos - width/2, accuracy_list1, width, label='Model 1',
+        ax.bar(x_pos - width/2, accuracy_list1, width, label=model_name1,
                color=self.colors['primary'], alpha=0.85, edgecolor='black', linewidth=1.2)
-        ax.bar(x_pos + width/2, accuracy_list2, width, label='Model 2',
+        ax.bar(x_pos + width/2, accuracy_list2, width, label=model_name2,
                color=self.colors['secondary'], alpha=0.85, edgecolor='black', linewidth=1.2)
 
         ax.set_xlabel('Dataset', fontweight='bold')
@@ -138,7 +138,7 @@ class Plot:
         plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white', edgecolor='none')
         plt.close()
 
-    def plot_parity_scatter(self, accuracy_list1, accuracy_list2, dataset_names):
+    def plot_parity_scatter(self, accuracy_list1, accuracy_list2, dataset_names, model_name1='Model 1', model_name2='Model 2'):
         """
         Creates a parity scatter plot comparing two accuracy lists.
         """
@@ -162,8 +162,8 @@ class Plot:
         ax.plot([min_val - padding, max_val + padding], [min_val - padding, max_val + padding],
                'k--', linewidth=2, label='Perfect Parity', zorder=2)
 
-        ax.set_xlabel('Model 1 Accuracy', fontweight='bold')
-        ax.set_ylabel('Model 2 Accuracy', fontweight='bold')
+        ax.set_xlabel(f'{model_name1} Accuracy', fontweight='bold')
+        ax.set_ylabel(f'{model_name2} Accuracy', fontweight='bold')
         ax.set_title('Parity Plot - Model Comparison', fontweight='bold', pad=15)
         ax.legend(frameon=True, shadow=True, loc='lower right')
         ax.set_aspect('equal', adjustable='box')
@@ -222,7 +222,7 @@ class Plot:
         plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white', edgecolor='none')
         plt.close()
 
-    def plot_confusion_matrix(self, y_true, y_pred, labels=None, save_path=None):
+    def plot_confusion_matrix(self, y_true, y_pred, labels=None, filename='confusion_matrix', save_path=None):
         """Create and save a confusion matrix"""
         plt.style.use('classic')
         cm = confusion_matrix(y_true, y_pred, labels=labels)
@@ -237,5 +237,5 @@ class Plot:
         ax.set_yticklabels(labels, fontsize=12, fontname='serif', rotation=0)
         ax.set_title('Confusion Matrix', fontsize=16, fontname='serif', pad=12)
         plt.tight_layout()
-        output_path = self.output_dir / f'confusion_matrix.png'
+        output_path = save_path if save_path else self.output_dir / f'{filename}.png'
         plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white', edgecolor='none')

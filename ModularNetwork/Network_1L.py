@@ -1,9 +1,7 @@
 import torch
 import torch.nn as nn
 import numpy as np
-from typing import Tuple
 from IsingModule.utils import AnnealingSettings
-from torch.utils.data import DataLoader
 from IsingModule.FullIsingModule import FullIsingModule
 
 class MultiIsingNetwork(nn.Module):
@@ -25,11 +23,8 @@ class MultiIsingNetwork(nn.Module):
         self.ising_perceptrons_layer = nn.ModuleList()
         for i in range(num_ising_perceptrons):
             # Noise to the initial parameters
-            #lambda_i = (-1 ** (i //2) )*lambda_init 
             lambda_i = lambda_init + np.random.uniform(-0.1, 0.1)
             offset_i = offset_init + np.random.uniform(-0.1, 0.1)
-            #lambda_i = lambda_init
-            #offset_i = offset_init
 
             module = FullIsingModule(
                 sizeAnnealModel=sizeAnnealModel,
@@ -37,12 +32,6 @@ class MultiIsingNetwork(nn.Module):
                 lambda_init=lambda_i,
                 offset_init=offset_i
             )
-
-            with torch.no_grad():
-                #random_gamma = torch.randn(sizeAnnealModel, sizeAnnealModel) * 0.01 + np.random.uniform(-0.1, 0.1)
-                random_gamma = torch.randn(sizeAnnealModel, sizeAnnealModel) * 0
-                random_gamma = torch.triu(random_gamma, diagonal=1)
-                module.ising_layer.gamma.copy_(random_gamma)
 
             self.ising_perceptrons_layer.append(module)
 

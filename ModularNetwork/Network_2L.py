@@ -5,24 +5,23 @@ from IsingModule.utils import AnnealingSettings
 from IsingModule.FullIsingModule import FullIsingModule
 
 
-class TwoStageIsingNetwork(nn.Module):
-
+class TwoLayerIsingNetwork(nn.Module):
     def __init__(
         self,
-        sizeModule: int,         # n + hidden (deciso dal main)
-        num_ising_1: int,        # k
-        num_ising_2: int,        # k2
+        input_dim: int,
+        num_ising_1: int,
+        num_ising_2: int,
         anneal_settings: AnnealingSettings,
-        lambda_init: float = 0.0,
+        lambda_init: float = 0.1,
         offset_init: float = 0.0,
         bias: bool = True,
     ):
         super().__init__()
 
-        # -------- First Ising layer (dimension sizeModule) --------
-        self.ising_layer1 = nn.ModuleList([
+        # ---- First Ising ----
+        self.ising1 = nn.ModuleList([
             FullIsingModule(
-                sizeAnnealModel=sizeModule,
+                sizeAnnealModel=input_dim,
                 anneal_settings=anneal_settings,
                 lambda_init=lambda_init + np.random.uniform(-0.1, 0.1),
                 offset_init=offset_init + np.random.uniform(-0.1, 0.1),
@@ -30,17 +29,16 @@ class TwoStageIsingNetwork(nn.Module):
             for _ in range(num_ising_1)
         ])
 
-        # Normalization after first Ising stack
-        self.norm1 = nn.LayerNorm(num_ising_1)
+        # Linear layer
+        self.lin1 = nn.Linear(num_ising_1, num_ising_1, bias=bias)
 
-        # -------- Classical projection to 20 --------
-        self.to_20 = nn.Linear(num_ising_1, 10, bias=bias)
-        self.activation = nn.Tanh()
+        # ---- Second Ising ----
+        # input = [mixed Ising outputs | original x]
+        second_input_dim = num_ising_1 + input_dim
 
-        # -------- Second Ising layer (fixed size = 20) --------
-        self.ising_layer2 = nn.ModuleList([
+        self.ising2 = nn.ModuleList([
             FullIsingModule(
-                sizeAnnealModel=10,
+                sizeAnnealModel=second_input_dim,
                 anneal_settings=anneal_settings,
                 lambda_init=lambda_init + np.random.uniform(-0.1, 0.1),
                 offset_init=offset_init + np.random.uniform(-0.1, 0.1),
@@ -48,47 +46,22 @@ class TwoStageIsingNetwork(nn.Module):
             for _ in range(num_ising_2)
         ])
 
-        # Normalization after second Ising stack
-        self.norm2 = nn.LayerNorm(num_ising_2)
+        self.lin2 = nn.Linear(num_ising_2, 1, bias=bias)
 
-        # -------- Final output --------
-        self.output_layer = nn.Linear(num_ising_2, 1, bias=bias)
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # ---- pass through first Ising ----
+        E1 = torch.stack([ising(x) for ising in self.ising1], dim=1)
+        
+        # ---- Linear Combination ----
+        E1_lin = self.lin1(E1)
 
-    def forward(self, thetas: torch.Tensor) -> torch.Tensor:
-        """
-        thetas: (batch, sizeModule)
+        # ---- Combine Energies + Input. [E1, E2, ... En | x1, x2, xn] ----
+        z = torch.cat([E1_lin, x], dim=1)
 
-        Optimized forward with pre-allocated tensors and in-place operations.
-        """
-        batch_size = thetas.size(0)
+        # ---- pass through second Ising ----
+        E2 = torch.stack([ising(z) for ising in self.ising2], dim=1)
 
-        # ----- First Ising layer -----
-        # Pre-allocate output tensor
-        E1 = torch.empty(batch_size, len(self.ising_layer1),
-                        dtype=thetas.dtype, device=thetas.device)
+        # ---- Final linear combination ----
+        E2_lin = self.lin2(E2).squeeze(-1)
 
-        for i, ising in enumerate(self.ising_layer1):
-            E1[:, i] = ising(thetas)
-
-        E1 = self.norm1(E1)
-
-        # ----- Classical projection to 20 -----
-        h20 = self.to_20(E1)
-        h20 = self.activation(h20)
-
-        # ----- Residual connection -----
-        h20_res = h20
-
-        # ----- Second Ising layer -----
-        # Pre-allocate output tensor
-        E2 = torch.empty(batch_size, len(self.ising_layer2),
-                        dtype=h20_res.dtype, device=h20_res.device)
-
-        for i, ising in enumerate(self.ising_layer2):
-            E2[:, i] = ising(h20_res)
-
-        E2 = self.norm2(E2)
-
-        # ----- Output -----
-        out = self.output_layer(E2)
-        return out.squeeze(-1)
+        return E2_lin

@@ -7,6 +7,7 @@ import os
 import sys
 import numpy as np
 import torch
+from datetime import datetime
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from sklearn.model_selection import train_test_split
 import dotenv
@@ -22,8 +23,8 @@ if _repo_root not in sys.path:
 from Inference.logger import Logger
 from Inference.plot import Plot
 from Inference.utils import generate_xor_balanced
-from Inference.dataset_manager import DatasetManager, HiddenNodesInitialization, SimpleDataset
-from ModularNetwork.Network_2L import TwoStageIsingNetwork
+from Inference.dataset_manager import  HiddenNodesInitialization, SimpleDataset
+from ModularNetwork.Network_2L import TwoLayerIsingNetwork
 from IsingModule.utils import AnnealingSettings
 from torch.utils.data import DataLoader, TensorDataset
 
@@ -33,25 +34,25 @@ logger = Logger()
 def get_xor_params():
     """Load parameters for XOR experiments."""
     return {
-        'random_seed': int(os.getenv('RANDOM_SEED', 42)),
-        'batch_size': int(os.getenv('BATCH_SIZE', 8)),
-        'model_size': int(os.getenv('MODEL_SIZE', 8)),
-        'num_ising_1': int(os.getenv('NUM_ISING_1', 5)),  # First layer Ising modules
-        'num_ising_2': int(os.getenv('NUM_ISING_2', 5)),  # Second layer Ising modules
-        'epochs': int(os.getenv('EPOCHS', 200)),
-        'lambda_init': float(os.getenv('LAMBDA_INIT', -0.01)),
-        'offset_init': float(os.getenv('OFFSET_INIT', 0)),
-        'lr_gamma': float(os.getenv('LEARNING_RATE_GAMMA', 0.02)),
-        'lr_lambda': float(os.getenv('LEARNING_RATE_LAMBDA', 0.01)),
-        'lr_offset': float(os.getenv('LEARNING_RATE_OFFSET', 0.01)),
-        'lr_classical': float(os.getenv('LEARNING_RATE_COMBINER', 0.01)),
-        'sa_beta_range': [1, 10],
-        'sa_num_reads': int(os.getenv('SA_NUM_READS', 1)),
-        'sa_num_sweeps': int(os.getenv('SA_NUM_SWEEPS', 100)),
-        'sa_sweeps_per_beta': int(os.getenv('SA_SWEEPS_PER_BETA', 1)),
+        'random_seed': int(os.getenv('RANDOM_SEED')),
+        'batch_size': int(os.getenv('BATCH_SIZE')),
+        'model_size': int(os.getenv('MODEL_SIZE')),
+        'num_ising_1': int(os.getenv('NUM_ISING_1')),  
+        'num_ising_2': int(os.getenv('NUM_ISING_2')),  
+        'epochs': int(os.getenv('EPOCHS')),
+        'lambda_init': float(os.getenv('LAMBDA_INIT')),
+        'offset_init': float(os.getenv('OFFSET_INIT')),
+        'lr_gamma': float(os.getenv('LEARNING_RATE_GAMMA')),
+        'lr_lambda': float(os.getenv('LEARNING_RATE_LAMBDA')),
+        'lr_offset': float(os.getenv('LEARNING_RATE_OFFSET')),
+        'lr_classical': float(os.getenv('LEARNING_RATE_COMBINER')),
+        'sa_beta_range': [int(os.getenv('SA_BETA_MIN')), int(os.getenv('SA_BETA_MAX'))],
+        'sa_num_reads': int(os.getenv('SA_NUM_READS')),
+        'sa_num_sweeps': int(os.getenv('SA_NUM_SWEEPS')),
+        'sa_sweeps_per_beta': int(os.getenv('SA_SWEEPS_PER_BETA')),
         'device': 'cuda' if torch.cuda.is_available() else 'cpu',
-        'n_samples_per_region': int(os.getenv('N_SAMPLES_PER_REGION', 100)),  # Samples per XOR region (50 train + 50 test = 100 total / 4 regions = 25 per region)
-        'test_size': float(os.getenv('TEST_SIZE', 0.5)),  # 50% for test to get 50 train and 50 test samples
+        'n_samples_per_region': int(os.getenv('N_SAMPLES_PER_REGION')),  
+        'test_size': float(os.getenv('TEST_SIZE')), 
     }
 
 
@@ -156,7 +157,6 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
         model_size = params['model_size']
 
     logger.info(f"Model size: {model_size}")
-    logger.info(f"Architecture: {params['num_ising_1']} Ising modules → 20 → {params['num_ising_2']} Ising modules → 1")
 
     # Prepare data
     train_dataset, test_dataset, train_loader, test_loader = create_dataloaders(
@@ -171,8 +171,8 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
     SA_settings.sweeps_per_beta = params['sa_sweeps_per_beta']
 
     # Create Network_2L
-    model = TwoStageIsingNetwork(
-        sizeModule=model_size,
+    model = TwoLayerIsingNetwork(
+        input_dim=model_size,
         num_ising_1=params['num_ising_1'],
         num_ising_2=params['num_ising_2'],
         anneal_settings=SA_settings,
@@ -187,7 +187,7 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
     optimizer_groups = []
 
     # First Ising layer parameters
-    for module in model.ising_layer1:
+    for module in model.ising1:
         optimizer_groups.append({
             'params': [module.ising_layer.gamma],
             'lr': params['lr_gamma']
@@ -202,7 +202,7 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
         })
 
     # Second Ising layer parameters
-    for module in model.ising_layer2:
+    for module in model.ising2:
         optimizer_groups.append({
             'params': [module.ising_layer.gamma],
             'lr': params['lr_gamma']
@@ -216,9 +216,9 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
             'lr': params['lr_offset']
         })
 
-    # Classical layers (to_20, output_layer)
+    # Classical layers (lin1, lin2)
     optimizer_groups.append({
-        'params': list(model.to_20.parameters()) + list(model.output_layer.parameters()),
+        'params': list(model.lin1.parameters()) + list(model.lin2.parameters()),
         'lr': params['lr_classical']
     })
 
@@ -240,7 +240,7 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
             y_batch = y_batch.to(params['device']).float()
 
             optimizer.zero_grad()
-            pred = model(x_batch).view(-1)  # BCEWithLogitsLoss applies sigmoid internally
+            pred = model(x_batch).view(-1)
             loss = loss_fn(pred, y_batch)
             loss.backward()
             optimizer.step()
@@ -297,7 +297,7 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
     plotter.plot_loss_accuracy(training_losses, validation_accuracies, f"XOR_{dim}D_Network2L")
 
     # Plot confusion matrix
-    plotter.plot_confusion_matrix(y_test, predictions, labels=[0, 1], save_path=f"confusion_matrix_xor_{dim}d")
+    plotter.plot_confusion_matrix(y_test, predictions, labels=[0, 1], filename=f"confusion_matrix_xor_{dim}d")
 
     return final_accuracy, training_losses, validation_accuracies, predictions, y_test
 
@@ -307,6 +307,14 @@ def test_xor_all_dimensions():
 
     # Initialize
     params = get_xor_params()
+    
+    # Create output directory with timestamp
+    run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    plotter = Plot(output_dir=f'plots_xor_{run_timestamp}')
+    
+    # Reinitialize logger to write to plots directory
+    global logger
+    logger = Logger(log_dir=f'plots_xor_{run_timestamp}')
 
     logger.info("\n" + "="*80)
     logger.info("XOR Test Suite for Network_2L (TwoStageIsingNetwork)")
@@ -315,12 +323,8 @@ def test_xor_all_dimensions():
     logger.info(f"Batch size: {params['batch_size']}")
     logger.info(f"Epochs: {params['epochs']}")
     logger.info(f"Model size: {params['model_size']}")
-    logger.info(f"Architecture: {params['num_ising_1']} → 20 → {params['num_ising_2']} → 1")
     logger.info(f"Learning rates: gamma={params['lr_gamma']}, lambda={params['lr_lambda']}, offset={params['lr_offset']}, classical={params['lr_classical']}")
     logger.info(f"Annealing: beta={params['sa_beta_range']}, reads={params['sa_num_reads']}, sweeps={params['sa_num_sweeps']}")
-
-    # Create output directory
-    plotter = Plot(output_dir='plots_xor_network2l')
 
     # Store results
     results = {

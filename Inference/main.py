@@ -20,9 +20,9 @@ if _repo_root not in sys.path:
 from logger import Logger
 from dataset_manager import DatasetManager
 from plot import Plot
-from NeuralNetworkIsing.NeuralNetIsing import MultiIsingNetwork
-from TorchIsingModule.IsingModule import FullIsingModule
-from IsingModule.ising_learning_model.sim_anneal_model import AnnealingSettings
+from IsingModule.FullIsingModule import FullIsingModule
+from ModularNetwork.Network_1L import MultiIsingNetwork
+from IsingModule.utils import AnnealingSettings
 
 logger = Logger()
 
@@ -30,23 +30,24 @@ logger = Logger()
 def get_env_params():
     """Load all parameters from .env file."""
     return {
-        'random_seed': int(os.getenv('RANDOM_SEED', 42)),
-        'batch_size': int(os.getenv('BATCH_SIZE', 64)),
-        'model_size': int(os.getenv('MODEL_SIZE', 20)),
-        'partition_input': os.getenv('PARTITION_INPUT', 'False').lower() == 'true',
-        'num_ising_perceptrons': int(os.getenv('NUM_ISING_PERCEPTRONS', 2)),
-        'epochs': int(os.getenv('EPOCHS', 100)),
-        'lambda_init': float(os.getenv('LAMBDA_INIT', 0.1)),
-        'offset_init': float(os.getenv('OFFSET_INIT', -0.05)),
-        'lr_gamma': float(os.getenv('LEARNING_RATE_GAMMA', 0.02)),
-        'lr_lambda': float(os.getenv('LEARNING_RATE_LAMBDA', 0.01)),
-        'lr_offset': float(os.getenv('LEARNING_RATE_OFFSET', 0.01)),
-        'lr_combiner': float(os.getenv('LEARNING_RATE_COMBINER', 0.01)),
-        'sa_beta_range': [1, 10],
-        'sa_num_reads': int(os.getenv('SA_NUM_READS', 1)),
-        'sa_num_sweeps': int(os.getenv('SA_NUM_SWEEPS', 100)),
-        'sa_sweeps_per_beta': int(os.getenv('SA_SWEEPS_PER_BETA', 1)),
-        'k_folds': int(os.getenv('K_FOLDS', 5)),
+        'random_seed': int(os.getenv('RANDOM_SEED')),
+        'batch_size': int(os.getenv('BATCH_SIZE')),
+        'model_size': int(os.getenv('MODEL_SIZE')),
+        'minimum_model_size': int(os.getenv('MINIMUM_MODEL_SIZE')),
+        'partition_input': os.getenv('PARTITION_INPUT').lower() == 'true',
+        'num_ising_perceptrons': int(os.getenv('NUM_ISING_PERCEPTRONS')),
+        'epochs': int(os.getenv('EPOCHS')),
+        'lambda_init': float(os.getenv('LAMBDA_INIT')),
+        'offset_init': float(os.getenv('OFFSET_INIT')),
+        'lr_gamma': float(os.getenv('LEARNING_RATE_GAMMA')),
+        'lr_lambda': float(os.getenv('LEARNING_RATE_LAMBDA')),
+        'lr_offset': float(os.getenv('LEARNING_RATE_OFFSET')),
+        'lr_combiner': float(os.getenv('LEARNING_RATE_COMBINER')),
+        'sa_beta_range': [int(os.getenv('SA_BETA_MIN')), int(os.getenv('SA_BETA_MAX'))],
+        'sa_num_reads': int(os.getenv('SA_NUM_READS')),
+        'sa_num_sweeps': int(os.getenv('SA_NUM_SWEEPS')),
+        'sa_sweeps_per_beta': int(os.getenv('SA_SWEEPS_PER_BETA')),
+        'k_folds': int(os.getenv('K_FOLDS')),
         'device': 'cuda' if torch.cuda.is_available() else 'cpu'
     }
 
@@ -80,8 +81,10 @@ def train_single_model(X_train, y_train, X_test, y_test, params):
     SA_settings.num_sweeps = params['sa_num_sweeps']
     SA_settings.sweeps_per_beta = params['sa_sweeps_per_beta']
 
-    if int(os.getenv("MODEL_SIZE")) == -1:
-        size = X_train.shape[1] if X_train.shape[1] > int(os.getenv("MINIMUM_MODEL_SIZE")) else int(os.getenv("MINIMUM_MODEL_SIZE"))
+    if params['model_size'] == -1:
+        size = X_train.shape[1] if X_train.shape[1] > params['minimum_model_size'] else params['minimum_model_size']
+    else:
+        size = params['model_size']
     logger.info(f"Using model size: {size}")
     
     # Create model
@@ -160,8 +163,10 @@ def train_neural_net(X_train, y_train, X_test, y_test, params):
     SA_settings.num_sweeps = params['sa_num_sweeps']
     SA_settings.sweeps_per_beta = params['sa_sweeps_per_beta']
 
-    if int(os.getenv("MODEL_SIZE")) == -1:
-        size = X_train.shape[1] if X_train.shape[1] > int(os.getenv("MINIMUM_MODEL_SIZE")) else int(os.getenv("MINIMUM_MODEL_SIZE"))
+    if params['model_size'] == -1:
+        size = X_train.shape[1] if X_train.shape[1] > params['minimum_model_size'] else params['minimum_model_size']
+    else:
+        size = params['model_size']
     logger.info(f"Using model size: {size}")
     # Create model
     model = MultiIsingNetwork(
@@ -245,10 +250,15 @@ def compare_models():
     # Initialize
     params = get_env_params()
     run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    # Reinitialize logger to write to plots directory BEFORE using it
+    global logger
+    plotter = Plot(output_dir=f'plots_{run_timestamp}')
+    logger = Logger(log_dir=f'plots_{run_timestamp}')
+    
     print_config(params, run_timestamp)
 
     dataset_manager = DatasetManager()
-    plotter = Plot(output_dir=f'plots_{run_timestamp}')
 
     # Find all datasets
     datasets_dir = os.path.join(os.path.dirname(__file__), 'datasets')
@@ -343,8 +353,8 @@ def compare_models():
 
     # Plot overall accuracy comparison
     plotter.plot_tot_accuracy(single_means, dataset_names)
-    plotter.plot_compare_accuracy(single_means, neural_means, dataset_names)
-    plotter.plot_parity_scatter(single_means, neural_means, dataset_names)
+    plotter.plot_compare_accuracy(single_means, neural_means, dataset_names, model_name1="FullIsingModule", model_name2="MultiIsingNetwork")
+    plotter.plot_parity_scatter(single_means, neural_means, dataset_names, model_name1="FullIsingModule", model_name2="MultiIsingNetwork")
     try:
         # Assumiamo che single_means e neural_means siano già calcolati
         stat, p_value = wilcoxon(single_means, neural_means)
