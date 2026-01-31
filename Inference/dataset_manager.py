@@ -1,5 +1,4 @@
-from logger import Logger
-from sklearn.preprocessing import MinMaxScaler
+from Inference.logger import Logger
 from sklearn.model_selection import StratifiedKFold
 import pandas as pd
 import numpy as np

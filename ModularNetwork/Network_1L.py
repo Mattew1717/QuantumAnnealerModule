@@ -1,15 +1,16 @@
 import torch
 import torch.nn as nn
 import numpy as np
-from IsingModule.utils import AnnealingSettings
-from IsingModule.FullIsingModule import FullIsingModule
+from IsingModule.annealers import AnnealingSettings, AnnealerType
+from IsingModule.full_ising_module import FullIsingModule
 
 class MultiIsingNetwork(nn.Module):
 
     def __init__(self,
              num_ising_perceptrons: int,
-             sizeAnnealModel: int,
-             anneal_settings: AnnealingSettings,
+             size_annealer: int,
+             annealing_settings: AnnealingSettings,
+             annealer_type: AnnealerType = AnnealerType.SIMULATED,
              lambda_init: float = 1.0,
              offset_init: float = 0.0,
              combiner_bias: bool = True,
@@ -17,7 +18,7 @@ class MultiIsingNetwork(nn.Module):
 
         super().__init__()
         self.num_ising_perceptrons = num_ising_perceptrons
-        self.sizeAnnealModel = sizeAnnealModel
+        self.size_annealer = size_annealer
         self.partition_input = partition_input
     
         self.ising_perceptrons_layer = nn.ModuleList()
@@ -27,8 +28,9 @@ class MultiIsingNetwork(nn.Module):
             offset_i = offset_init + np.random.uniform(-0.1, 0.1)
 
             module = FullIsingModule(
-                sizeAnnealModel=sizeAnnealModel,
-                anneal_settings=anneal_settings,
+                size_annealer=size_annealer,
+                annealer_type=annealer_type,
+                annealing_settings=annealing_settings,
                 lambda_init=lambda_i,
                 offset_init=offset_i
             )

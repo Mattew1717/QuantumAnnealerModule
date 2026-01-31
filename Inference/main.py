@@ -17,12 +17,12 @@ _repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if _repo_root not in sys.path:
     sys.path.insert(0, _repo_root)
 
-from logger import Logger
-from dataset_manager import DatasetManager
-from plot import Plot
-from IsingModule.FullIsingModule import FullIsingModule
-from ModularNetwork.Network_1L import MultiIsingNetwork
-from IsingModule.utils import AnnealingSettings
+from Inference.logger import Logger
+from Inference.dataset_manager import DatasetManager
+from Inference.plot import Plot
+from IsingModule.full_ising_module import FullIsingModule
+from ModularNetwork.network_1L import MultiIsingNetwork
+from IsingModule.annealers import AnnealingSettings, AnnealerType
 
 logger = Logger()
 
@@ -97,7 +97,7 @@ def train_single_model(X_train, y_train, X_test, y_test, params):
 
     # Setup optimizer
     optimizer = torch.optim.Adam([
-        {'params': [model.ising_layer.gamma], 'lr': params['lr_gamma']},
+        {'params': [model.gamma], 'lr': params['lr_gamma']},
         {'params': [model.lmd], 'lr': params['lr_lambda']},
         {'params': [model.offset], 'lr': params['lr_offset']},
     ])
@@ -127,7 +127,7 @@ def train_single_model(X_train, y_train, X_test, y_test, params):
 
         avg_loss = float(np.mean(epoch_losses)) if epoch_losses else 0.0
         training_losses.append(avg_loss)
-        if epoch % 10 == 0:
+        if epoch % 1 == 0:
                 logger.info(f"Epoch {epoch+1}/{params['epochs']} | Loss: {avg_loss:.4f}")
         # Evaluate on validation set
         model.eval()
@@ -171,8 +171,9 @@ def train_neural_net(X_train, y_train, X_test, y_test, params):
     # Create model
     model = MultiIsingNetwork(
         num_ising_perceptrons=params['num_ising_perceptrons'],
-        sizeAnnealModel=size,
-        anneal_settings=SA_settings,
+        size_annealer=size,
+        annealing_settings=SA_settings,
+        annealer_type=AnnealerType.SIMULATED,
         lambda_init=params['lambda_init'],
         offset_init=params['offset_init'],
         partition_input=params['partition_input'],
@@ -182,7 +183,7 @@ def train_neural_net(X_train, y_train, X_test, y_test, params):
     optimizer_grouped_parameters = []
     for p_idx, single_module in enumerate(model.ising_perceptrons_layer):
         optimizer_grouped_parameters.append({
-            'params': [single_module.ising_layer.gamma],
+            'params': [single_module.gamma],
             'lr': params['lr_gamma']
         })
         optimizer_grouped_parameters.append({

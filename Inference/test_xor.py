@@ -24,8 +24,9 @@ from Inference.logger import Logger
 from Inference.plot import Plot
 from Inference.utils import generate_xor_balanced
 from Inference.dataset_manager import  HiddenNodesInitialization, SimpleDataset
-from ModularNetwork.Network_2L import TwoLayerIsingNetwork
-from IsingModule.utils import AnnealingSettings
+from ModularNetwork.network_2L import TwoLayerIsingNetwork
+from IsingModule.full_ising_module import FullIsingModule
+from IsingModule.annealers import AnnealingSettings, AnnealerType
 from torch.utils.data import DataLoader, TensorDataset
 
 logger = Logger()
@@ -47,12 +48,13 @@ def get_xor_params():
         'lr_offset': float(os.getenv('LEARNING_RATE_OFFSET')),
         'lr_classical': float(os.getenv('LEARNING_RATE_COMBINER')),
         'sa_beta_range': [int(os.getenv('SA_BETA_MIN')), int(os.getenv('SA_BETA_MAX'))],
-        'sa_num_reads': int(os.getenv('SA_NUM_READS')),
+        'num_reads': int(os.getenv('NUM_READS')),
         'sa_num_sweeps': int(os.getenv('SA_NUM_SWEEPS')),
         'sa_sweeps_per_beta': int(os.getenv('SA_SWEEPS_PER_BETA')),
         'device': 'cuda' if torch.cuda.is_available() else 'cpu',
         'n_samples_per_region': int(os.getenv('N_SAMPLES_PER_REGION')),  
         'test_size': float(os.getenv('TEST_SIZE')), 
+        'num_workers': int(os.getenv("NUM_THREADS"))
     }
 
 
@@ -166,7 +168,7 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
     # Setup annealing
     SA_settings = AnnealingSettings()
     SA_settings.beta_range = params['sa_beta_range']
-    SA_settings.num_reads = params['sa_num_reads']
+    SA_settings.num_reads = params['num_reads']
     SA_settings.num_sweeps = params['sa_num_sweeps']
     SA_settings.sweeps_per_beta = params['sa_sweeps_per_beta']
 
@@ -175,7 +177,8 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
         input_dim=model_size,
         num_ising_1=params['num_ising_1'],
         num_ising_2=params['num_ising_2'],
-        anneal_settings=SA_settings,
+        annealing_settings=SA_settings,
+        annealer_type=AnnealerType.SIMULATED,
         lambda_init=params['lambda_init'],
         offset_init=params['offset_init'],
         bias=True
@@ -189,7 +192,7 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
     # First Ising layer parameters
     for module in model.ising1:
         optimizer_groups.append({
-            'params': [module.ising_layer.gamma],
+            'params': [module.gamma],
             'lr': params['lr_gamma']
         })
         optimizer_groups.append({
@@ -204,7 +207,7 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
     # Second Ising layer parameters
     for module in model.ising2:
         optimizer_groups.append({
-            'params': [module.ising_layer.gamma],
+            'params': [module.gamma],
             'lr': params['lr_gamma']
         })
         optimizer_groups.append({
@@ -324,7 +327,7 @@ def test_xor_all_dimensions():
     logger.info(f"Epochs: {params['epochs']}")
     logger.info(f"Model size: {params['model_size']}")
     logger.info(f"Learning rates: gamma={params['lr_gamma']}, lambda={params['lr_lambda']}, offset={params['lr_offset']}, classical={params['lr_classical']}")
-    logger.info(f"Annealing: beta={params['sa_beta_range']}, reads={params['sa_num_reads']}, sweeps={params['sa_num_sweeps']}")
+    logger.info(f"Annealing: beta={params['sa_beta_range']}, reads={params['num_reads']}, sweeps={params['sa_num_sweeps']}")
 
     # Store results
     results = {
@@ -376,5 +379,128 @@ def test_xor_all_dimensions():
     logger.info("\nXOR Test Suite Completed!")
 
 
+def test_xor_2d_full_ising_module(params=None, plotter=None):
+    """Train and evaluate a FullIsingModule on 2D XOR data."""
+
+    logger.info("\n" + "="*60)
+    logger.info("Training FullIsingModule on 2D XOR")
+    logger.info("="*60)
+
+    # Load params
+    if params is None:
+        params = get_xor_params()
+
+    # Prepare data (2D)
+    X_train, X_test, y_train, y_test = prepare_xor_data(2, params)
+
+    # Determine model size
+    if params['model_size'] == -1:
+        min_size = int(os.getenv('MINIMUM_MODEL_SIZE', 20))
+        model_size = max(X_train.shape[1], min_size)
+    else:
+        model_size = params['model_size']
+
+    # Create dataloaders
+    train_dataset, test_dataset, train_loader, test_loader = create_dataloaders(
+        X_train, y_train, X_test, y_test, model_size, params
+    )
+
+    # Setup annealing
+    SA_settings = AnnealingSettings()
+    SA_settings.beta_range = params['sa_beta_range']
+    SA_settings.num_reads = params['num_reads']
+    SA_settings.num_sweeps = params['sa_num_sweeps']
+    SA_settings.sweeps_per_beta = params['sa_sweeps_per_beta']
+
+    # Create FullIsingModule
+    model = FullIsingModule(
+        size_annealer=model_size,
+        annealer_type=AnnealerType.QUANTUM,
+        #annealing_settings=SA_settings,
+        num_reads=params['num_reads'],
+        lambda_init=params['lambda_init'],
+        offset_init=params['offset_init'],
+        num_workers=params['num_workers']
+    ).to(params['device'])
+
+    logger.info(f"Model created with {sum(p.numel() for p in model.parameters())} parameters")
+
+    # Setup optimizer
+    optimizer = torch.optim.Adam([
+        {'params': [model.gamma], 'lr': params['lr_gamma']},
+        {'params': [model.lmd], 'lr': params['lr_lambda']},
+        {'params': [model.offset], 'lr': params['lr_offset']},
+    ])
+
+    loss_fn = torch.nn.BCEWithLogitsLoss()
+
+    # Training loop
+    training_losses = []
+    validation_accuracies = []
+
+    for epoch in range(params['epochs']):
+        model.train()
+        epoch_losses = []
+
+        for batch_idx, (x_batch, y_batch) in enumerate(train_loader):
+            x_batch = x_batch.to(params['device'])
+            y_batch = y_batch.to(params['device']).float()
+
+            optimizer.zero_grad()
+            pred = model(x_batch).view(-1)
+            loss = loss_fn(pred, y_batch)
+            loss.backward()
+            optimizer.step()
+
+            epoch_losses.append(loss.item())
+
+        avg_loss = float(np.mean(epoch_losses)) if epoch_losses else 0.0
+        training_losses.append(avg_loss)
+
+        # Validation at each epoch (small datasets)
+        model.eval()
+        with torch.no_grad():
+            preds_tensor = model(test_dataset.x.to(params['device'])).view(-1)
+            probs = torch.sigmoid(preds_tensor).cpu().numpy()
+            predictions = np.where(probs < 0.5, 0, 1)
+            epoch_accuracy = accuracy_score(y_test, predictions)
+            validation_accuracies.append(epoch_accuracy)
+
+        if (epoch + 1) % 10 == 0 or epoch == 0 or epoch == params['epochs'] - 1:
+            logger.info(f"Epoch {epoch+1}/{params['epochs']} | Loss: {avg_loss:.4f} | Val Acc: {epoch_accuracy:.4f}")
+
+    # Final evaluation
+    logger.info("\n" + "="*60)
+    logger.info("Final Evaluation - FullIsingModule on 2D XOR")
+    logger.info("="*60)
+
+    model.eval()
+    with torch.no_grad():
+        preds_tensor = model(test_dataset.x.to(params['device'])).view(-1)
+        probs = torch.sigmoid(preds_tensor).cpu().numpy()
+        predictions = np.where(probs < 0.5, 0, 1)
+
+    final_accuracy = accuracy_score(y_test, predictions)
+    logger.info(f"Final Test Accuracy: {final_accuracy:.4f}")
+    logger.info("\nClassification Report:")
+    logger.info(classification_report(y_test, predictions, target_names=['Class 0', 'Class 1']))
+
+    cm = confusion_matrix(y_test, predictions)
+    logger.info("\nConfusion Matrix:")
+    logger.info(cm)
+
+    # Plotting (if plotter provided)
+    if plotter is None:
+        run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        plotter = Plot(output_dir=f'plots_xor_{run_timestamp}')
+
+    plotter.plot_loss_accuracy(training_losses, validation_accuracies, f"XOR_2D_FullIsing")
+    plotter.plot_confusion_matrix(y_test, predictions, labels=[0, 1], filename=f"confusion_matrix_xor_2d")
+
+    return final_accuracy, training_losses, validation_accuracies, predictions, y_test
+
+
 if __name__ == '__main__':
-    test_xor_all_dimensions()
+    #test_xor_all_dimensions()
+    # Run 2D FullIsingModule quick test
+    test_xor_2d_full_ising_module()

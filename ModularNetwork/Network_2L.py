@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 import numpy as np
-from IsingModule.utils import AnnealingSettings
-from IsingModule.FullIsingModule import FullIsingModule
+from IsingModule.annealers import AnnealingSettings, AnnealerType
+from IsingModule.full_ising_module import FullIsingModule
 
 
 class TwoLayerIsingNetwork(nn.Module):
@@ -11,7 +11,8 @@ class TwoLayerIsingNetwork(nn.Module):
         input_dim: int,
         num_ising_1: int,
         num_ising_2: int,
-        anneal_settings: AnnealingSettings,
+        annealing_settings: AnnealingSettings,
+        annealer_type: AnnealerType = AnnealerType.SIMULATED,
         lambda_init: float = 0.1,
         offset_init: float = 0.0,
         bias: bool = True,
@@ -21,8 +22,9 @@ class TwoLayerIsingNetwork(nn.Module):
         # ---- First Ising ----
         self.ising1 = nn.ModuleList([
             FullIsingModule(
-                sizeAnnealModel=input_dim,
-                anneal_settings=anneal_settings,
+                size_annealer=input_dim,
+                annealer_type=annealer_type,
+                annealing_settings=annealing_settings,
                 lambda_init=lambda_init + np.random.uniform(-0.1, 0.1),
                 offset_init=offset_init + np.random.uniform(-0.1, 0.1),
             )
@@ -38,8 +40,9 @@ class TwoLayerIsingNetwork(nn.Module):
 
         self.ising2 = nn.ModuleList([
             FullIsingModule(
-                sizeAnnealModel=second_input_dim,
-                anneal_settings=anneal_settings,
+                size_annealer=second_input_dim,
+                annealer_type=annealer_type,
+                annealing_settings=annealing_settings,
                 lambda_init=lambda_init + np.random.uniform(-0.1, 0.1),
                 offset_init=offset_init + np.random.uniform(-0.1, 0.1),
             )

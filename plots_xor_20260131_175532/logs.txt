@@ -1,0 +1,36 @@
+============================================================
+Training FullIsingModule on 2D XOR
+============================================================
+Generating 2D XOR data...
+Total samples: 800, Features: 2
+Class distribution: [400 400]
+Train set: 640 samples - Class distribution: [320 320] ([50. 50.]%)
+Test set: 160 samples - Class distribution: [80 80] ([50. 50.]%)
+Resizing from 2 to 10 with hidden nodes
+Model created with 102 parameters
+Epoch 1/50 | Loss: 0.6902 | Val Acc: 0.5563
+Epoch 10/50 | Loss: 0.5182 | Val Acc: 0.8063
+Epoch 20/50 | Loss: 0.4506 | Val Acc: 0.8063
+Epoch 30/50 | Loss: 0.4270 | Val Acc: 0.8313
+Epoch 40/50 | Loss: 0.4077 | Val Acc: 0.8313
+Epoch 50/50 | Loss: 0.3932 | Val Acc: 0.8313
+
+============================================================
+Final Evaluation - FullIsingModule on 2D XOR
+============================================================
+Final Test Accuracy: 0.8313
+
+Classification Report:
+              precision    recall  f1-score   support
+
+     Class 0       0.85      0.80      0.83        80
+     Class 1       0.81      0.86      0.84        80
+
+    accuracy                           0.83       160
+   macro avg       0.83      0.83      0.83       160
+weighted avg       0.83      0.83      0.83       160
+
+
+Confusion Matrix:
+[[64 16]
+ [11 69]]
