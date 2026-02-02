@@ -25,8 +25,8 @@ from Inference.plot import Plot
 from Inference.utils import generate_xor_balanced
 from Inference.dataset_manager import  HiddenNodesInitialization, SimpleDataset
 from ModularNetwork.network_2L import TwoLayerIsingNetwork
-from IsingModule.full_ising_module import FullIsingModule
-from IsingModule.annealers import AnnealingSettings, AnnealerType
+from full_ising_model.full_ising_module import FullIsingModule
+from full_ising_model.annealers import AnnealingSettings, AnnealerType
 from torch.utils.data import DataLoader, TensorDataset
 
 logger = Logger()

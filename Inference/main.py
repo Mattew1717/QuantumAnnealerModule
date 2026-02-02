@@ -20,9 +20,9 @@ if _repo_root not in sys.path:
 from Inference.logger import Logger
 from Inference.dataset_manager import DatasetManager
 from Inference.plot import Plot
-from IsingModule.full_ising_module import FullIsingModule
+from full_ising_model.full_ising_module import FullIsingModule
 from ModularNetwork.network_1L import MultiIsingNetwork
-from IsingModule.annealers import AnnealingSettings, AnnealerType
+from full_ising_model.annealers import AnnealingSettings, AnnealerType
 
 logger = Logger()
 

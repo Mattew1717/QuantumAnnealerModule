@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 import numpy as np
-from IsingModule.annealers import AnnealingSettings, AnnealerType
-from IsingModule.full_ising_module import FullIsingModule
+from full_ising_model.annealers import AnnealingSettings, AnnealerType
+from full_ising_model.full_ising_module import FullIsingModule
 
 class MultiIsingNetwork(nn.Module):
 
