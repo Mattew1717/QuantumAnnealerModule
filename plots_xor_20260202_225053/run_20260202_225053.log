@@ -1,0 +1,426 @@
+
+================================================================================
+XOR Test Suite for Network_2L (TwoStageIsingNetwork)
+================================================================================
+Device: cpu
+Batch size: 16
+Epochs: 300
+Model size: -1
+Learning rates: gamma=0.001, lambda=0.001, offset=0.001, classical=0.001
+Annealing: beta=[1, 10], reads=1, sweeps=1000
+Generating 1D XOR data...
+Total samples: 100, Features: 1
+Class distribution: [50 50]
+Train set: 80 samples - Class distribution: [40 40] ([50. 50.]%)
+Test set: 20 samples - Class distribution: [10 10] ([50. 50.]%)
+
+============================================================
+Training Network_2L on 1D XOR
+============================================================
+Model size: 10
+Resizing from 1 to 10 with hidden nodes
+Model created with 835 parameters
+
+Starting training...
+Epoch 10/300 | Loss: 0.6654 | Val Acc: 0.5500
+Epoch 20/300 | Loss: 0.6240 | Val Acc: 0.7500
+Epoch 30/300 | Loss: 0.5862 | Val Acc: 0.9500
+Epoch 40/300 | Loss: 0.5470 | Val Acc: 1.0000
+Epoch 50/300 | Loss: 0.5057 | Val Acc: 1.0000
+Epoch 60/300 | Loss: 0.4631 | Val Acc: 1.0000
+Epoch 70/300 | Loss: 0.4249 | Val Acc: 1.0000
+Epoch 80/300 | Loss: 0.3840 | Val Acc: 1.0000
+Epoch 90/300 | Loss: 0.3506 | Val Acc: 1.0000
+Epoch 100/300 | Loss: 0.3150 | Val Acc: 1.0000
+Epoch 110/300 | Loss: 0.2844 | Val Acc: 1.0000
+Epoch 120/300 | Loss: 0.2588 | Val Acc: 1.0000
+Epoch 130/300 | Loss: 0.2321 | Val Acc: 1.0000
+Epoch 140/300 | Loss: 0.2104 | Val Acc: 1.0000
+Epoch 150/300 | Loss: 0.1917 | Val Acc: 1.0000
+Epoch 160/300 | Loss: 0.1724 | Val Acc: 1.0000
+Epoch 170/300 | Loss: 0.1573 | Val Acc: 1.0000
+Epoch 180/300 | Loss: 0.1440 | Val Acc: 1.0000
+Epoch 190/300 | Loss: 0.1313 | Val Acc: 1.0000
+Epoch 200/300 | Loss: 0.1217 | Val Acc: 1.0000
+Epoch 210/300 | Loss: 0.1119 | Val Acc: 1.0000
+Epoch 220/300 | Loss: 0.1038 | Val Acc: 1.0000
+Epoch 230/300 | Loss: 0.0969 | Val Acc: 1.0000
+Epoch 240/300 | Loss: 0.0899 | Val Acc: 1.0000
+Epoch 250/300 | Loss: 0.0843 | Val Acc: 1.0000
+Epoch 260/300 | Loss: 0.0785 | Val Acc: 1.0000
+Epoch 270/300 | Loss: 0.0739 | Val Acc: 1.0000
+Epoch 280/300 | Loss: 0.0696 | Val Acc: 1.0000
+Epoch 290/300 | Loss: 0.0658 | Val Acc: 1.0000
+Epoch 300/300 | Loss: 0.0626 | Val Acc: 1.0000
+
+============================================================
+Final Evaluation
+============================================================
+Final Test Accuracy: 1.0000
+
+Classification Report:
+              precision    recall  f1-score   support
+
+     Class 0       1.00      1.00      1.00        10
+     Class 1       1.00      1.00      1.00        10
+
+    accuracy                           1.00        20
+   macro avg       1.00      1.00      1.00        20
+weighted avg       1.00      1.00      1.00        20
+
+
+Confusion Matrix:
+[[10  0]
+ [ 0 10]]
+
+1D XOR completed with accuracy: 1.0000
+
+Generating 2D XOR data...
+Total samples: 200, Features: 2
+Class distribution: [100 100]
+Train set: 160 samples - Class distribution: [80 80] ([50. 50.]%)
+Test set: 40 samples - Class distribution: [20 20] ([50. 50.]%)
+
+============================================================
+Training Network_2L on 2D XOR
+============================================================
+Model size: 10
+Resizing from 2 to 10 with hidden nodes
+Model created with 835 parameters
+
+Starting training...
+Epoch 10/300 | Loss: 0.6225 | Val Acc: 0.7250
+Epoch 20/300 | Loss: 0.5310 | Val Acc: 0.9750
+Epoch 30/300 | Loss: 0.4337 | Val Acc: 0.9750
+Epoch 40/300 | Loss: 0.3540 | Val Acc: 0.9500
+Epoch 50/300 | Loss: 0.3014 | Val Acc: 0.9500
+Epoch 60/300 | Loss: 0.2656 | Val Acc: 0.9500
+Epoch 70/300 | Loss: 0.2346 | Val Acc: 0.9750
+Epoch 80/300 | Loss: 0.2240 | Val Acc: 0.9750
+Epoch 90/300 | Loss: 0.1989 | Val Acc: 0.9500
+Epoch 100/300 | Loss: 0.1904 | Val Acc: 0.9750
+Epoch 110/300 | Loss: 0.1764 | Val Acc: 0.9500
+Epoch 120/300 | Loss: 0.1741 | Val Acc: 0.9750
+Epoch 130/300 | Loss: 0.1584 | Val Acc: 0.9750
+Epoch 140/300 | Loss: 0.1515 | Val Acc: 0.9500
+Epoch 150/300 | Loss: 0.1435 | Val Acc: 0.9750
+Epoch 160/300 | Loss: 0.1390 | Val Acc: 0.9500
+Epoch 170/300 | Loss: 0.1396 | Val Acc: 0.9500
+Epoch 180/300 | Loss: 0.1433 | Val Acc: 0.9500
+Epoch 190/300 | Loss: 0.1373 | Val Acc: 0.9250
+Epoch 200/300 | Loss: 0.1234 | Val Acc: 0.9500
+Epoch 210/300 | Loss: 0.1373 | Val Acc: 0.9500
+Epoch 220/300 | Loss: 0.1212 | Val Acc: 0.9500
+Epoch 230/300 | Loss: 0.1317 | Val Acc: 0.9500
+Epoch 240/300 | Loss: 0.1152 | Val Acc: 0.9750
+Epoch 250/300 | Loss: 0.1164 | Val Acc: 0.9500
+Epoch 260/300 | Loss: 0.1140 | Val Acc: 0.9750
+Epoch 270/300 | Loss: 0.1092 | Val Acc: 0.9750
+Epoch 280/300 | Loss: 0.1050 | Val Acc: 0.9750
+Epoch 290/300 | Loss: 0.1053 | Val Acc: 0.9500
+Epoch 300/300 | Loss: 0.1014 | Val Acc: 0.9500
+
+============================================================
+Final Evaluation
+============================================================
+Final Test Accuracy: 0.9750
+
+Classification Report:
+              precision    recall  f1-score   support
+
+     Class 0       0.95      1.00      0.98        20
+     Class 1       1.00      0.95      0.97        20
+
+    accuracy                           0.97        40
+   macro avg       0.98      0.97      0.97        40
+weighted avg       0.98      0.97      0.97        40
+
+
+Confusion Matrix:
+[[20  0]
+ [ 1 19]]
+
+2D XOR completed with accuracy: 0.9750
+
+Generating 3D XOR data...
+Total samples: 400, Features: 3
+Class distribution: [200 200]
+Train set: 320 samples - Class distribution: [160 160] ([50. 50.]%)
+Test set: 80 samples - Class distribution: [40 40] ([50. 50.]%)
+
+============================================================
+Training Network_2L on 3D XOR
+============================================================
+Model size: 10
+Resizing from 3 to 10 with hidden nodes
+Model created with 835 parameters
+
+Starting training...
+Epoch 10/300 | Loss: 0.6893 | Val Acc: 0.4750
+Epoch 20/300 | Loss: 0.6798 | Val Acc: 0.6375
+Epoch 30/300 | Loss: 0.6705 | Val Acc: 0.6375
+Epoch 40/300 | Loss: 0.6575 | Val Acc: 0.6750
+Epoch 50/300 | Loss: 0.6411 | Val Acc: 0.7250
+Epoch 60/300 | Loss: 0.6201 | Val Acc: 0.7250
+Epoch 70/300 | Loss: 0.5973 | Val Acc: 0.7625
+Epoch 80/300 | Loss: 0.5741 | Val Acc: 0.7625
+Epoch 90/300 | Loss: 0.5419 | Val Acc: 0.7875
+Epoch 100/300 | Loss: 0.5114 | Val Acc: 0.8375
+Epoch 110/300 | Loss: 0.4844 | Val Acc: 0.9125
+Epoch 120/300 | Loss: 0.4583 | Val Acc: 0.9375
+Epoch 130/300 | Loss: 0.4366 | Val Acc: 0.9125
+Epoch 140/300 | Loss: 0.4176 | Val Acc: 0.9250
+Epoch 150/300 | Loss: 0.4079 | Val Acc: 0.9250
+Epoch 160/300 | Loss: 0.3837 | Val Acc: 0.9250
+Epoch 170/300 | Loss: 0.3625 | Val Acc: 0.9250
+Epoch 180/300 | Loss: 0.3504 | Val Acc: 0.9250
+Epoch 190/300 | Loss: 0.3414 | Val Acc: 0.9375
+Epoch 200/300 | Loss: 0.3328 | Val Acc: 0.9375
+Epoch 210/300 | Loss: 0.3115 | Val Acc: 0.9250
+Epoch 220/300 | Loss: 0.3033 | Val Acc: 0.9250
+Epoch 230/300 | Loss: 0.2963 | Val Acc: 0.9500
+Epoch 240/300 | Loss: 0.2806 | Val Acc: 0.9375
+Epoch 250/300 | Loss: 0.2746 | Val Acc: 0.9250
+Epoch 260/300 | Loss: 0.2711 | Val Acc: 0.9125
+Epoch 270/300 | Loss: 0.2570 | Val Acc: 0.9375
+Epoch 280/300 | Loss: 0.2666 | Val Acc: 0.9625
+Epoch 290/300 | Loss: 0.2499 | Val Acc: 0.9250
+Epoch 300/300 | Loss: 0.2435 | Val Acc: 0.9125
+
+============================================================
+Final Evaluation
+============================================================
+Final Test Accuracy: 0.9000
+
+Classification Report:
+              precision    recall  f1-score   support
+
+     Class 0       0.90      0.90      0.90        40
+     Class 1       0.90      0.90      0.90        40
+
+    accuracy                           0.90        80
+   macro avg       0.90      0.90      0.90        80
+weighted avg       0.90      0.90      0.90        80
+
+
+Confusion Matrix:
+[[36  4]
+ [ 4 36]]
+
+3D XOR completed with accuracy: 0.9000
+
+Generating 4D XOR data...
+Total samples: 800, Features: 4
+Class distribution: [400 400]
+Train set: 640 samples - Class distribution: [320 320] ([50. 50.]%)
+Test set: 160 samples - Class distribution: [80 80] ([50. 50.]%)
+
+============================================================
+Training Network_2L on 4D XOR
+============================================================
+Model size: 10
+Resizing from 4 to 10 with hidden nodes
+Model created with 835 parameters
+
+Starting training...
+Epoch 10/300 | Loss: 0.6926 | Val Acc: 0.4188
+Epoch 20/300 | Loss: 0.6877 | Val Acc: 0.4000
+Epoch 30/300 | Loss: 0.6808 | Val Acc: 0.4437
+Epoch 40/300 | Loss: 0.6680 | Val Acc: 0.5000
+Epoch 50/300 | Loss: 0.6449 | Val Acc: 0.5813
+Epoch 60/300 | Loss: 0.6139 | Val Acc: 0.6562
+Epoch 70/300 | Loss: 0.5916 | Val Acc: 0.7250
+Epoch 80/300 | Loss: 0.5629 | Val Acc: 0.7250
+Epoch 90/300 | Loss: 0.5393 | Val Acc: 0.7750
+Epoch 100/300 | Loss: 0.5241 | Val Acc: 0.8125
+Epoch 110/300 | Loss: 0.5031 | Val Acc: 0.7875
+Epoch 120/300 | Loss: 0.4810 | Val Acc: 0.8125
+Epoch 130/300 | Loss: 0.4751 | Val Acc: 0.7937
+Epoch 140/300 | Loss: 0.4574 | Val Acc: 0.8063
+Epoch 150/300 | Loss: 0.4489 | Val Acc: 0.8250
+Epoch 160/300 | Loss: 0.4405 | Val Acc: 0.7937
+Epoch 170/300 | Loss: 0.4363 | Val Acc: 0.8250
+Epoch 180/300 | Loss: 0.4202 | Val Acc: 0.8063
+Epoch 190/300 | Loss: 0.4191 | Val Acc: 0.8187
+Epoch 200/300 | Loss: 0.4049 | Val Acc: 0.8125
+Epoch 210/300 | Loss: 0.4142 | Val Acc: 0.8000
+Epoch 220/300 | Loss: 0.3962 | Val Acc: 0.8313
+Epoch 230/300 | Loss: 0.3971 | Val Acc: 0.8125
+Epoch 240/300 | Loss: 0.4054 | Val Acc: 0.7937
+Epoch 250/300 | Loss: 0.3894 | Val Acc: 0.8313
+Epoch 260/300 | Loss: 0.3868 | Val Acc: 0.8250
+Epoch 270/300 | Loss: 0.3671 | Val Acc: 0.7812
+Epoch 280/300 | Loss: 0.3680 | Val Acc: 0.8250
+Epoch 290/300 | Loss: 0.3662 | Val Acc: 0.8187
+Epoch 300/300 | Loss: 0.3690 | Val Acc: 0.8125
+
+============================================================
+Final Evaluation
+============================================================
+Final Test Accuracy: 0.8125
+
+Classification Report:
+              precision    recall  f1-score   support
+
+     Class 0       0.82      0.80      0.81        80
+     Class 1       0.80      0.82      0.81        80
+
+    accuracy                           0.81       160
+   macro avg       0.81      0.81      0.81       160
+weighted avg       0.81      0.81      0.81       160
+
+
+Confusion Matrix:
+[[64 16]
+ [14 66]]
+
+4D XOR completed with accuracy: 0.8125
+
+Generating 5D XOR data...
+Total samples: 1600, Features: 5
+Class distribution: [800 800]
+Train set: 1280 samples - Class distribution: [640 640] ([50. 50.]%)
+Test set: 320 samples - Class distribution: [160 160] ([50. 50.]%)
+
+============================================================
+Training Network_2L on 5D XOR
+============================================================
+Model size: 10
+Resizing from 5 to 10 with hidden nodes
+Model created with 835 parameters
+
+Starting training...
+Epoch 10/300 | Loss: 0.6905 | Val Acc: 0.4500
+Epoch 20/300 | Loss: 0.6855 | Val Acc: 0.4375
+Epoch 30/300 | Loss: 0.6786 | Val Acc: 0.4719
+Epoch 40/300 | Loss: 0.6699 | Val Acc: 0.5031
+Epoch 50/300 | Loss: 0.6618 | Val Acc: 0.5125
+Epoch 60/300 | Loss: 0.6529 | Val Acc: 0.5344
+Epoch 70/300 | Loss: 0.6417 | Val Acc: 0.5469
+Epoch 80/300 | Loss: 0.6301 | Val Acc: 0.5750
+Epoch 90/300 | Loss: 0.6169 | Val Acc: 0.5875
+Epoch 100/300 | Loss: 0.6076 | Val Acc: 0.6156
+Epoch 110/300 | Loss: 0.5904 | Val Acc: 0.6188
+Epoch 120/300 | Loss: 0.5837 | Val Acc: 0.6531
+Epoch 130/300 | Loss: 0.5741 | Val Acc: 0.6438
+Epoch 140/300 | Loss: 0.5622 | Val Acc: 0.6344
+Epoch 150/300 | Loss: 0.5527 | Val Acc: 0.6375
+Epoch 160/300 | Loss: 0.5490 | Val Acc: 0.6562
+Epoch 170/300 | Loss: 0.5385 | Val Acc: 0.6562
+Epoch 180/300 | Loss: 0.5309 | Val Acc: 0.6531
+Epoch 190/300 | Loss: 0.5311 | Val Acc: 0.6594
+Epoch 200/300 | Loss: 0.5207 | Val Acc: 0.6875
+Epoch 210/300 | Loss: 0.5227 | Val Acc: 0.6625
+Epoch 220/300 | Loss: 0.5133 | Val Acc: 0.6687
+Epoch 230/300 | Loss: 0.5083 | Val Acc: 0.6656
+Epoch 240/300 | Loss: 0.5045 | Val Acc: 0.6562
+Epoch 250/300 | Loss: 0.5001 | Val Acc: 0.6656
+Epoch 260/300 | Loss: 0.4963 | Val Acc: 0.6687
+Epoch 270/300 | Loss: 0.4955 | Val Acc: 0.6875
+Epoch 280/300 | Loss: 0.4929 | Val Acc: 0.6781
+Epoch 290/300 | Loss: 0.4907 | Val Acc: 0.7125
+Epoch 300/300 | Loss: 0.4899 | Val Acc: 0.6813
+
+============================================================
+Final Evaluation
+============================================================
+Final Test Accuracy: 0.6750
+
+Classification Report:
+              precision    recall  f1-score   support
+
+     Class 0       0.66      0.71      0.68       160
+     Class 1       0.69      0.64      0.66       160
+
+    accuracy                           0.68       320
+   macro avg       0.68      0.68      0.67       320
+weighted avg       0.68      0.68      0.67       320
+
+
+Confusion Matrix:
+[[113  47]
+ [ 57 103]]
+
+5D XOR completed with accuracy: 0.6750
+
+Generating 6D XOR data...
+Total samples: 3200, Features: 6
+Class distribution: [1600 1600]
+Train set: 2560 samples - Class distribution: [1280 1280] ([50. 50.]%)
+Test set: 640 samples - Class distribution: [320 320] ([50. 50.]%)
+
+============================================================
+Training Network_2L on 6D XOR
+============================================================
+Model size: 10
+Resizing from 6 to 10 with hidden nodes
+Model created with 835 parameters
+
+Starting training...
+Epoch 10/300 | Loss: 0.6934 | Val Acc: 0.4719
+Epoch 20/300 | Loss: 0.6918 | Val Acc: 0.5094
+Epoch 30/300 | Loss: 0.6891 | Val Acc: 0.5406
+Epoch 40/300 | Loss: 0.6847 | Val Acc: 0.5563
+Epoch 50/300 | Loss: 0.6792 | Val Acc: 0.5375
+Epoch 60/300 | Loss: 0.6690 | Val Acc: 0.5906
+Epoch 70/300 | Loss: 0.6541 | Val Acc: 0.6234
+Epoch 80/300 | Loss: 0.6365 | Val Acc: 0.6344
+Epoch 90/300 | Loss: 0.6183 | Val Acc: 0.6281
+Epoch 100/300 | Loss: 0.6024 | Val Acc: 0.6641
+Epoch 110/300 | Loss: 0.5906 | Val Acc: 0.6641
+Epoch 120/300 | Loss: 0.5753 | Val Acc: 0.6953
+Epoch 130/300 | Loss: 0.5654 | Val Acc: 0.6781
+Epoch 140/300 | Loss: 0.5559 | Val Acc: 0.6875
+Epoch 150/300 | Loss: 0.5470 | Val Acc: 0.6766
+Epoch 160/300 | Loss: 0.5445 | Val Acc: 0.6969
+Epoch 170/300 | Loss: 0.5318 | Val Acc: 0.6937
+Epoch 180/300 | Loss: 0.5321 | Val Acc: 0.6969
+Epoch 190/300 | Loss: 0.5236 | Val Acc: 0.7109
+Epoch 200/300 | Loss: 0.5268 | Val Acc: 0.6875
+Epoch 210/300 | Loss: 0.5166 | Val Acc: 0.6891
+Epoch 220/300 | Loss: 0.5139 | Val Acc: 0.7125
+Epoch 230/300 | Loss: 0.5158 | Val Acc: 0.6844
+Epoch 240/300 | Loss: 0.5066 | Val Acc: 0.7016
+Epoch 250/300 | Loss: 0.5072 | Val Acc: 0.6953
+Epoch 260/300 | Loss: 0.5035 | Val Acc: 0.6875
+Epoch 270/300 | Loss: 0.4998 | Val Acc: 0.7031
+Epoch 280/300 | Loss: 0.4993 | Val Acc: 0.7172
+Epoch 290/300 | Loss: 0.5007 | Val Acc: 0.7156
+Epoch 300/300 | Loss: 0.4961 | Val Acc: 0.6906
+
+============================================================
+Final Evaluation
+============================================================
+Final Test Accuracy: 0.6937
+
+Classification Report:
+              precision    recall  f1-score   support
+
+     Class 0       0.65      0.84      0.73       320
+     Class 1       0.77      0.55      0.64       320
+
+    accuracy                           0.69       640
+   macro avg       0.71      0.69      0.69       640
+weighted avg       0.71      0.69      0.69       640
+
+
+Confusion Matrix:
+[[268  52]
+ [144 176]]
+
+6D XOR completed with accuracy: 0.6937
+
+
+================================================================================
+SUMMARY - XOR Performance Across Dimensions
+================================================================================
+1D XOR: 1.0000
+2D XOR: 0.9750
+3D XOR: 0.9000
+4D XOR: 0.8125
+5D XOR: 0.6750
+6D XOR: 0.6937
+
+Plots saved to plots_xor_20260202_225053
+
+XOR Test Suite Completed!

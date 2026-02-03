@@ -24,7 +24,7 @@ from Inference.logger import Logger
 from Inference.plot import Plot
 from Inference.utils import generate_xor_balanced
 from Inference.dataset_manager import  HiddenNodesInitialization, SimpleDataset
-from ModularNetwork.network_2L import TwoLayerIsingNetwork
+from ModularNetwork.Network_2L import TwoLayerIsingNetwork
 from full_ising_model.full_ising_module import FullIsingModule
 from full_ising_model.annealers import AnnealingSettings, AnnealerType
 from torch.utils.data import DataLoader, TensorDataset
@@ -501,6 +501,6 @@ def test_xor_2d_full_ising_module(params=None, plotter=None):
 
 
 if __name__ == '__main__':
-    #test_xor_all_dimensions()
+    test_xor_all_dimensions()
     # Run 2D FullIsingModule quick test
-    test_xor_2d_full_ising_module()
+    #test_xor_2d_full_ising_module()
