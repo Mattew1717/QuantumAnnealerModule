@@ -41,6 +41,7 @@ def get_xor_params():
         'model_size': int(os.getenv('MODEL_SIZE')),
         'num_ising_1': int(os.getenv('NUM_ISING_1')),  
         'num_ising_2': int(os.getenv('NUM_ISING_2')),  
+        'num_ising_net': int(os.getenv('NUM_ISING_PERCEPTRONS')),
         'epochs': int(os.getenv('EPOCHS')),
         'lambda_init': float(os.getenv('LAMBDA_INIT')),
         'offset_init': float(os.getenv('OFFSET_INIT')),
@@ -325,7 +326,7 @@ def train_network_1L(dim, X_train, y_train, X_test, y_test, params, plotter):
 
     # Create Network_1L (MultiIsingNetwork)
     model = MultiIsingNetwork(
-        num_ising_perceptrons=params['num_ising_1'],  # Use num_ising_1 as the number of perceptrons
+        num_ising_perceptrons=params['num_ising_net'],  # Use num_ising_1 as the number of perceptrons
         size_annealer=model_size,
         annealing_settings=SA_settings,
         annealer_type=AnnealerType.SIMULATED,
