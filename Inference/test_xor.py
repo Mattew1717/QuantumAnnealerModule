@@ -25,6 +25,7 @@ from Inference.plot import Plot
 from Inference.utils import generate_xor_balanced
 from Inference.dataset_manager import  HiddenNodesInitialization, SimpleDataset
 from ModularNetwork.Network_2L import TwoLayerIsingNetwork
+from ModularNetwork.Network_1L import MultiIsingNetwork
 from full_ising_model.full_ising_module import FullIsingModule
 from full_ising_model.annealers import AnnealingSettings, AnnealerType
 from torch.utils.data import DataLoader, TensorDataset
@@ -115,18 +116,7 @@ def create_dataloaders(X_train, y_train, X_test, y_test, model_size, params):
     test_dataset.data_size = X_test.shape[1]
     test_dataset.len = len(y_test)
 
-    # Resize with hidden nodes if needed
-    if model_size > train_dataset.data_size:
-        logger.info(f"Resizing from {train_dataset.data_size} to {model_size} with hidden nodes")
-        hn = HiddenNodesInitialization('function')
-        hn.function = SimpleDataset.offset
-        hn.fun_args = [-0.02]
-
-        train_dataset.resize(model_size, hn)
-        test_dataset.resize(model_size, hn)
-
-        train_dataset.data_size = model_size
-        test_dataset.data_size = model_size
+    # No manual resize needed - FullIsingModule handles it automatically in forward()
 
     # Create dataloaders
     train_loader = DataLoader(
@@ -305,6 +295,151 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
     return final_accuracy, training_losses, validation_accuracies, predictions, y_test
 
 
+def train_network_1L(dim, X_train, y_train, X_test, y_test, params, plotter):
+    """Train MultiIsingNetwork (1L) on XOR data."""
+
+    logger.info(f"\n{'='*60}")
+    logger.info(f"Training Network_1L on {dim}D XOR")
+    logger.info(f"{'='*60}")
+
+    # Determine model size
+    if params['model_size'] == -1:
+        min_size = int(os.getenv('MINIMUM_MODEL_SIZE', 20))
+        model_size = max(X_train.shape[1], min_size)
+    else:
+        model_size = params['model_size']
+
+    logger.info(f"Model size: {model_size}")
+
+    # Prepare data
+    train_dataset, test_dataset, train_loader, test_loader = create_dataloaders(
+        X_train, y_train, X_test, y_test, model_size, params
+    )
+
+    # Setup annealing
+    SA_settings = AnnealingSettings()
+    SA_settings.beta_range = params['sa_beta_range']
+    SA_settings.num_reads = params['num_reads']
+    SA_settings.num_sweeps = params['sa_num_sweeps']
+    SA_settings.sweeps_per_beta = params['sa_sweeps_per_beta']
+
+    # Create Network_1L (MultiIsingNetwork)
+    model = MultiIsingNetwork(
+        num_ising_perceptrons=params['num_ising_1'],  # Use num_ising_1 as the number of perceptrons
+        size_annealer=model_size,
+        annealing_settings=SA_settings,
+        annealer_type=AnnealerType.SIMULATED,
+        lambda_init=params['lambda_init'],
+        offset_init=params['offset_init'],
+        partition_input=False  # No partitioning for fair comparison
+    ).to(params['device'])
+
+    logger.info(f"Model created with {sum(p.numel() for p in model.parameters())} parameters")
+
+    # Setup optimizer with grouped learning rates
+    optimizer_groups = []
+
+    # Ising layer parameters
+    for module in model.ising_perceptrons_layer:
+        optimizer_groups.append({
+            'params': [module.gamma],
+            'lr': params['lr_gamma']
+        })
+        optimizer_groups.append({
+            'params': [module.lmd],
+            'lr': params['lr_lambda']
+        })
+        optimizer_groups.append({
+            'params': [module.offset],
+            'lr': params['lr_offset']
+        })
+
+    # Combiner layer
+    optimizer_groups.append({
+        'params': model.combiner_layer.parameters(),
+        'lr': params['lr_classical']
+    })
+
+    optimizer = torch.optim.Adam(optimizer_groups)
+    loss_fn = torch.nn.BCEWithLogitsLoss()
+
+    # Training loop
+    logger.info("\nStarting training...")
+    training_losses = []
+    validation_accuracies = []
+    val_interval = int(os.getenv('VALIDATION_INTERVAL', 5))  # Validate every N epochs
+
+    for epoch in range(params['epochs']):
+        model.train()
+        epoch_losses = []
+
+        for batch_idx, (x_batch, y_batch) in enumerate(train_loader):
+            x_batch = x_batch.to(params['device'])
+            y_batch = y_batch.to(params['device']).float()
+
+            optimizer.zero_grad()
+            pred = model(x_batch).view(-1)
+            loss = loss_fn(pred, y_batch)
+            loss.backward()
+            optimizer.step()
+
+            epoch_losses.append(loss.item())
+
+        avg_loss = float(np.mean(epoch_losses)) if epoch_losses else 0.0
+        training_losses.append(avg_loss)
+
+        # Validation - only every val_interval epochs to save time
+        if (epoch + 1) % val_interval == 0 or epoch == 0 or epoch == params['epochs'] - 1:
+            model.eval()
+            with torch.no_grad():
+                preds_tensor = model(test_dataset.x.to(params['device'])).view(-1)
+                probs = torch.sigmoid(preds_tensor).cpu().numpy()
+                predictions = np.where(probs < 0.5, 0, 1)
+                epoch_accuracy = accuracy_score(y_test, predictions)
+                validation_accuracies.append(epoch_accuracy)
+
+            if (epoch + 1) % 10 == 0:
+                logger.info(f"Epoch {epoch+1}/{params['epochs']} | Loss: {avg_loss:.4f} | Val Acc: {epoch_accuracy:.4f}")
+        else:
+            # Append last known accuracy for plotting
+            if validation_accuracies:
+                validation_accuracies.append(validation_accuracies[-1])
+
+            if (epoch + 1) % 10 == 0:
+                logger.info(f"Epoch {epoch+1}/{params['epochs']} | Loss: {avg_loss:.4f}")
+
+    # Final evaluation
+    logger.info("\n" + "="*60)
+    logger.info("Final Evaluation")
+    logger.info("="*60)
+
+    model.eval()
+    with torch.no_grad():
+        preds_tensor = model(test_dataset.x.to(params['device'])).view(-1)
+        probs = torch.sigmoid(preds_tensor).cpu().numpy()
+        predictions = np.where(probs < 0.5, 0, 1)
+
+    final_accuracy = accuracy_score(y_test, predictions)
+    logger.info(f"Final Test Accuracy: {final_accuracy:.4f}")
+
+    # Classification report
+    logger.info("\nClassification Report:")
+    logger.info(classification_report(y_test, predictions, target_names=['Class 0', 'Class 1']))
+
+    # Confusion matrix
+    cm = confusion_matrix(y_test, predictions)
+    logger.info("\nConfusion Matrix:")
+    logger.info(cm)
+
+    # Plot loss and accuracy curves
+    plotter.plot_loss_accuracy(training_losses, validation_accuracies, f"XOR_{dim}D_Network1L")
+
+    # Plot confusion matrix
+    plotter.plot_confusion_matrix(y_test, predictions, labels=[0, 1], filename=f"confusion_matrix_xor_{dim}d_1L")
+
+    return final_accuracy, training_losses, validation_accuracies, predictions, y_test
+
+
 def test_xor_all_dimensions():
     """Test XOR from 1D to 6D on Network_2L."""
 
@@ -377,6 +512,81 @@ def test_xor_all_dimensions():
     plotter.plot_tot_accuracy(results['accuracies'], [f"{d}D" for d in results['dimensions']])
 
     logger.info("\nXOR Test Suite Completed!")
+
+
+def test_xor_all_dimensions_1L():
+    """Test XOR from 1D to 6D on Network_1L (MultiIsingNetwork)."""
+
+    # Initialize
+    params = get_xor_params()
+
+    # Create output directory with timestamp
+    run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    plotter = Plot(output_dir=f'plots_xor_1L_{run_timestamp}')
+
+    # Reinitialize logger to write to plots directory
+    global logger
+    logger = Logger(log_dir=f'plots_xor_1L_{run_timestamp}')
+
+    logger.info("\n" + "="*80)
+    logger.info("XOR Test Suite for Network_1L (MultiIsingNetwork)")
+    logger.info("="*80)
+    logger.info(f"Device: {params['device']}")
+    logger.info(f"Batch size: {params['batch_size']}")
+    logger.info(f"Epochs: {params['epochs']}")
+    logger.info(f"Model size: {params['model_size']}")
+    logger.info(f"Num Ising Perceptrons: {params['num_ising_1']}")
+    logger.info(f"Learning rates: gamma={params['lr_gamma']}, lambda={params['lr_lambda']}, offset={params['lr_offset']}, classical={params['lr_classical']}")
+    logger.info(f"Annealing: beta={params['sa_beta_range']}, reads={params['num_reads']}, sweeps={params['sa_num_sweeps']}")
+
+    # Store results
+    results = {
+        'dimensions': [],
+        'accuracies': [],
+        'losses': [],
+        'val_accuracies': []
+    }
+
+    # Test each dimension
+    for dim in range(1, 7):
+        try:
+            # Generate data
+            X_train, X_test, y_train, y_test = prepare_xor_data(dim, params)
+
+            # Train and evaluate
+            accuracy, losses, val_accs, predictions, y_true = train_network_1L(
+                dim, X_train, y_train, X_test, y_test, params, plotter
+            )
+
+            # Store results
+            results['dimensions'].append(dim)
+            results['accuracies'].append(accuracy)
+            results['losses'].append(losses)
+            results['val_accuracies'].append(val_accs)
+
+            logger.info(f"\n{dim}D XOR completed with accuracy: {accuracy:.4f}\n")
+
+        except Exception as e:
+            logger.error(f"Error on {dim}D XOR: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            continue
+
+    # Summary
+    logger.info("\n" + "="*80)
+    logger.info("SUMMARY - XOR Performance Across Dimensions (Network_1L)")
+    logger.info("="*80)
+
+    for dim, acc in zip(results['dimensions'], results['accuracies']):
+        logger.info(f"{dim}D XOR: {acc:.4f}")
+
+    # Plot summary
+    logger.info(f"\nPlots saved to {plotter.output_dir}")
+
+    # Create dimension comparison plot
+    plotter.plot_tot_accuracy(results['accuracies'], [f"{d}D" for d in results['dimensions']])
+
+    logger.info("\nXOR Test Suite for Network_1L Completed!")
 
 
 def test_xor_2d_full_ising_module(params=None, plotter=None):
@@ -504,3 +714,4 @@ if __name__ == '__main__':
     test_xor_all_dimensions()
     # Run 2D FullIsingModule quick test
     #test_xor_2d_full_ising_module()
+    #test_xor_all_dimensions_1L()

@@ -65,13 +65,32 @@ def print_config(params, run_timestamp):
 def train_single_model(X_train, y_train, X_test, y_test, params):
     """Train and evaluate single Ising model."""
 
-    # Prepare datasets
-    dataset_manager = DatasetManager()
-    saved_part_input = params["partition_input"]
-    params["partition_input"] = False  # Ensure single model does not partition input
-    
-    _, test_set, train_loader, _ = dataset_manager.create_dataloader(
-        X_train, y_train, X_test, y_test, params
+    # Standardization without leakage
+    mean = X_train.mean(axis=0)
+    std = X_train.std(axis=0)
+    std[std == 0] = 1e-8
+    X_train = (X_train - mean) / std
+    X_test = (X_test - mean) / std
+
+    # Create datasets without manual resize (FullIsingModule handles it)
+    from Inference.dataset_manager import SimpleDataset
+    train_set = SimpleDataset()
+    train_set.x = torch.tensor(X_train, dtype=torch.float32)
+    train_set.y = torch.tensor(y_train, dtype=torch.float32)
+    train_set.data_size = X_train.shape[1]
+    train_set.len = len(y_train)
+
+    test_set = SimpleDataset()
+    test_set.x = torch.tensor(X_test, dtype=torch.float32)
+    test_set.y = torch.tensor(y_test, dtype=torch.float32)
+    test_set.data_size = X_test.shape[1]
+    test_set.len = len(y_test)
+
+    # Create dataloaders
+    train_loader = torch.utils.data.DataLoader(
+        torch.utils.data.TensorDataset(train_set.x, train_set.y),
+        batch_size=params['batch_size'],
+        shuffle=True
     )
 
     # Setup simulated annealing
@@ -89,10 +108,11 @@ def train_single_model(X_train, y_train, X_test, y_test, params):
     
     # Create model
     model = FullIsingModule(
-        size,
-        SA_settings,
-        params['lambda_init'],
-        params['offset_init']
+        size_annealer=size,
+        annealer_type=AnnealerType.SIMULATED,
+        annealing_settings=SA_settings,
+        lambda_init=params['lambda_init'],
+        offset_init=params['offset_init']
     ).to(params['device'])
 
     # Setup optimizer
@@ -143,17 +163,61 @@ def train_single_model(X_train, y_train, X_test, y_test, params):
     # Final accuracy is the last one
     final_accuracy = validation_accuracies[-1]
 
-    params["partition_input"] = saved_part_input  # Restore original setting
     return final_accuracy, training_losses, validation_accuracies
 
 
 def train_neural_net(X_train, y_train, X_test, y_test, params):
     """Train and evaluate neural Ising network."""
 
-    # Prepare datasets using create_dataloader
-    dataset_manager = DatasetManager()
-    _, test_set, train_loader, _ = dataset_manager.create_dataloader(
-        X_train, y_train, X_test, y_test, params
+    # Standardization without leakage
+    mean = X_train.mean(axis=0)
+    std = X_train.std(axis=0)
+    std[std == 0] = 1e-8
+    X_train = (X_train - mean) / std
+    X_test = (X_test - mean) / std
+
+    # Create datasets without manual resize (FullIsingModule handles it)
+    from Inference.dataset_manager import SimpleDataset
+    train_set = SimpleDataset()
+    train_set.x = torch.tensor(X_train, dtype=torch.float32)
+    train_set.y = torch.tensor(y_train, dtype=torch.float32)
+    train_set.data_size = X_train.shape[1]
+    train_set.len = len(y_train)
+
+    test_set = SimpleDataset()
+    test_set.x = torch.tensor(X_test, dtype=torch.float32)
+    test_set.y = torch.tensor(y_test, dtype=torch.float32)
+    test_set.data_size = X_test.shape[1]
+    test_set.len = len(y_test)
+
+    # Determine model size
+    if params['model_size'] == -1:
+        size = X_train.shape[1] if X_train.shape[1] > params['minimum_model_size'] else params['minimum_model_size']
+    else:
+        size = params['model_size']
+    logger.info(f"Using model size: {size}")
+
+    # Handle partitioning: if partition_input, we need to manually resize for partitioning
+    # Otherwise, FullIsingModule will handle the resize automatically
+    if params['partition_input']:
+        target_size = size * params['num_ising_perceptrons']
+
+        # Resize for partitioning
+        from Inference.dataset_manager import HiddenNodesInitialization
+        hn = HiddenNodesInitialization('function')
+        hn.function = SimpleDataset.offset
+        hn.fun_args = [-0.02]
+
+        train_set.resize(target_size, hn)
+        test_set.resize(target_size, hn)
+        train_set.data_size = target_size
+        test_set.data_size = target_size
+
+    # Create dataloaders
+    train_loader = torch.utils.data.DataLoader(
+        torch.utils.data.TensorDataset(train_set.x, train_set.y),
+        batch_size=params['batch_size'],
+        shuffle=True
     )
 
     # Setup simulated annealing
@@ -162,12 +226,6 @@ def train_neural_net(X_train, y_train, X_test, y_test, params):
     SA_settings.num_reads = params['sa_num_reads']
     SA_settings.num_sweeps = params['sa_num_sweeps']
     SA_settings.sweeps_per_beta = params['sa_sweeps_per_beta']
-
-    if params['model_size'] == -1:
-        size = X_train.shape[1] if X_train.shape[1] > params['minimum_model_size'] else params['minimum_model_size']
-    else:
-        size = params['model_size']
-    logger.info(f"Using model size: {size}")
     # Create model
     model = MultiIsingNetwork(
         num_ising_perceptrons=params['num_ising_perceptrons'],
@@ -387,4 +445,16 @@ def compare_models():
 
 
 if __name__ == '__main__':
-    compare_models()
+    # Import test functions
+    from Inference.test_xor import test_xor_all_dimensions, test_xor_all_dimensions_1L
+
+    # Uncomment the test you want to run:
+
+    # Test Network_2L (TwoLayerIsingNetwork) on XOR 1D-6D
+    #test_xor_all_dimensions()
+
+    # Test Network_1L (MultiIsingNetwork) on XOR 1D-6D
+    #test_xor_all_dimensions_1L()
+
+    # Compare Single vs Multi Ising on all datasets
+    # compare_models()
