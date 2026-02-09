@@ -59,7 +59,7 @@ class TwoLayerIsingNetwork(nn.Module):
         E1_lin = self.lin1(E1)
 
         # ---- Combine Energies + Input. [E1, E2, ... En | x1, x2, xn] ----
-        z = torch.cat([E1_lin, x], dim=1)
+        z = torch.cat([E1_lin,x], dim=1)
 
         # ---- pass through second Ising ----
         E2 = torch.stack([ising(z) for ising in self.ising2], dim=1)

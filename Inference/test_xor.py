@@ -8,6 +8,7 @@ import sys
 import numpy as np
 import torch
 from datetime import datetime
+from time import perf_counter
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from sklearn.model_selection import train_test_split
 import dotenv
@@ -470,12 +471,19 @@ def test_xor_all_dimensions():
         'dimensions': [],
         'accuracies': [],
         'losses': [],
-        'val_accuracies': []
+        'val_accuracies': [],
+        'execution_times': []
     }
+
+    # Start total timer
+    total_start = perf_counter()
 
     # Test each dimension
     for dim in range(1, 7):
         try:
+            # Start timer for this dimension
+            dim_start = perf_counter()
+
             # Generate data
             X_train, X_test, y_train, y_test = prepare_xor_data(dim, params)
 
@@ -484,13 +492,17 @@ def test_xor_all_dimensions():
                 dim, X_train, y_train, X_test, y_test, params, plotter
             )
 
+            # End timer for this dimension
+            dim_time = perf_counter() - dim_start
+
             # Store results
             results['dimensions'].append(dim)
             results['accuracies'].append(accuracy)
             results['losses'].append(losses)
             results['val_accuracies'].append(val_accs)
+            results['execution_times'].append(dim_time)
 
-            logger.info(f"\n{dim}D XOR completed with accuracy: {accuracy:.4f}\n")
+            logger.info(f"\n{dim}D XOR completed with accuracy: {accuracy:.4f} | Execution time: {dim_time:.2f}s\n")
 
         except Exception as e:
             logger.error(f"Error on {dim}D XOR: {str(e)}")
@@ -498,13 +510,18 @@ def test_xor_all_dimensions():
             traceback.print_exc()
             continue
 
+    # End total timer
+    total_time = perf_counter() - total_start
+
     # Summary
     logger.info("\n" + "="*80)
     logger.info("SUMMARY - XOR Performance Across Dimensions")
     logger.info("="*80)
 
-    for dim, acc in zip(results['dimensions'], results['accuracies']):
-        logger.info(f"{dim}D XOR: {acc:.4f}")
+    for dim, acc, exec_time in zip(results['dimensions'], results['accuracies'], results['execution_times']):
+        logger.info(f"{dim}D XOR: {acc:.4f} | Execution time: {exec_time:.2f}s")
+
+    logger.info(f"\nTotal execution time: {total_time:.2f}s ({total_time/60:.2f} minutes)")
 
     # Plot summary
     logger.info(f"\nPlots saved to {plotter.output_dir}")
@@ -545,12 +562,19 @@ def test_xor_all_dimensions_1L():
         'dimensions': [],
         'accuracies': [],
         'losses': [],
-        'val_accuracies': []
+        'val_accuracies': [],
+        'execution_times': []
     }
+
+    # Start total timer
+    total_start = perf_counter()
 
     # Test each dimension
     for dim in range(1, 7):
         try:
+            # Start timer for this dimension
+            dim_start = perf_counter()
+
             # Generate data
             X_train, X_test, y_train, y_test = prepare_xor_data(dim, params)
 
@@ -559,13 +583,17 @@ def test_xor_all_dimensions_1L():
                 dim, X_train, y_train, X_test, y_test, params, plotter
             )
 
+            # End timer for this dimension
+            dim_time = perf_counter() - dim_start
+
             # Store results
             results['dimensions'].append(dim)
             results['accuracies'].append(accuracy)
             results['losses'].append(losses)
             results['val_accuracies'].append(val_accs)
+            results['execution_times'].append(dim_time)
 
-            logger.info(f"\n{dim}D XOR completed with accuracy: {accuracy:.4f}\n")
+            logger.info(f"\n{dim}D XOR completed with accuracy: {accuracy:.4f} | Execution time: {dim_time:.2f}s\n")
 
         except Exception as e:
             logger.error(f"Error on {dim}D XOR: {str(e)}")
@@ -573,13 +601,18 @@ def test_xor_all_dimensions_1L():
             traceback.print_exc()
             continue
 
+    # End total timer
+    total_time = perf_counter() - total_start
+
     # Summary
     logger.info("\n" + "="*80)
     logger.info("SUMMARY - XOR Performance Across Dimensions (Network_1L)")
     logger.info("="*80)
 
-    for dim, acc in zip(results['dimensions'], results['accuracies']):
-        logger.info(f"{dim}D XOR: {acc:.4f}")
+    for dim, acc, exec_time in zip(results['dimensions'], results['accuracies'], results['execution_times']):
+        logger.info(f"{dim}D XOR: {acc:.4f} | Execution time: {exec_time:.2f}s")
+
+    logger.info(f"\nTotal execution time: {total_time:.2f}s ({total_time/60:.2f} minutes)")
 
     # Plot summary
     logger.info(f"\nPlots saved to {plotter.output_dir}")
@@ -592,6 +625,9 @@ def test_xor_all_dimensions_1L():
 
 def test_xor_2d_full_ising_module(params=None, plotter=None):
     """Train and evaluate a FullIsingModule on 2D XOR data."""
+
+    # Start total timer
+    total_start = perf_counter()
 
     logger.info("\n" + "="*60)
     logger.info("Training FullIsingModule on 2D XOR")
@@ -626,8 +662,8 @@ def test_xor_2d_full_ising_module(params=None, plotter=None):
     # Create FullIsingModule
     model = FullIsingModule(
         size_annealer=model_size,
-        annealer_type=AnnealerType.QUANTUM,
-        #annealing_settings=SA_settings,
+        annealer_type=AnnealerType.SIMULATED,
+        annealing_settings=SA_settings,
         num_reads=params['num_reads'],
         lambda_init=params['lambda_init'],
         offset_init=params['offset_init'],
@@ -700,6 +736,10 @@ def test_xor_2d_full_ising_module(params=None, plotter=None):
     logger.info("\nConfusion Matrix:")
     logger.info(cm)
 
+    # End total timer
+    total_time = perf_counter() - total_start
+    logger.info(f"\nTotal execution time: {total_time:.2f}s ({total_time/60:.2f} minutes)")
+
     # Plotting (if plotter provided)
     if plotter is None:
         run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -712,7 +752,7 @@ def test_xor_2d_full_ising_module(params=None, plotter=None):
 
 
 if __name__ == '__main__':
-    test_xor_all_dimensions()
+    #test_xor_all_dimensions()
     # Run 2D FullIsingModule quick test
-    #test_xor_2d_full_ising_module()
+    test_xor_2d_full_ising_module()
     #test_xor_all_dimensions_1L()
