@@ -201,22 +201,22 @@ class Model(ABC):
         losses_bulk = []
         configurations_bulk = []
         energies_bulk = []
-        if len(ys) < NUM_THREADS:
-            print("Error: too many threads for the batch size")
-            sys.exit()
+
+        # Adapt number of threads to batch size
+        num_threads_to_use = min(len(ys), NUM_THREADS)
 
         threads = []
-        results = [None] * NUM_THREADS  # Preallocate a list to store results in the correct order
+        results = [None] * num_threads_to_use  # Preallocate a list to store results in the correct order
 
         def run(thread_index, sub_thetas, sub_ys):
             res = self._sample_mbt(sub_thetas, sub_ys)
             results[thread_index] = res  # save the result in the correct index
 
-        # divide the batch into NUM_THREADS parts
-        batch_size_mini = len(ys) // NUM_THREADS
-        for i in range(NUM_THREADS):
+        # divide the batch into num_threads_to_use parts
+        batch_size_mini = len(ys) // num_threads_to_use
+        for i in range(num_threads_to_use):
             start = i * batch_size_mini
-            end = (i + 1) * batch_size_mini if i < NUM_THREADS - 1 else len(ys)
+            end = (i + 1) * batch_size_mini if i < num_threads_to_use - 1 else len(ys)
             thread = threading.Thread(target=run, args=(i, thetas[start:end], ys[start:end]))
             threads.append(thread)
             thread.start()
@@ -229,7 +229,7 @@ class Model(ABC):
             losses_bulk.extend(res[0])
             energies_bulk.extend(res[1])
             configurations_bulk.extend(res[2])
-        
+
         return losses_bulk, energies_bulk, configurations_bulk
 
 
@@ -347,19 +347,20 @@ class Model(ABC):
                             )
 
                     # update the parameters
-                    
-                    delta_theta = np.mean(
-                        [
-                            (f - y) * c
-                            for f, y, c in zip(
-                            energies_bulk, ys.tolist(), configurations_bulk
-                        )
-                        ]
-                    )
 
+                    # delta_theta = np.mean(
+                    #     [
+                    #         (f - y) * c
+                    #         for f, y, c in zip(
+                    #         energies_bulk, ys.tolist(), configurations_bulk
+                    #     )
+                    #     ]
+                    # )
+
+                    
                     delta_gamma = np.mean(
                         [
-                            self._lmd * (f - y) * np.outer(c, c)
+                            2 * self._lmd * (f - y) * np.outer(c, c)
                             for f, y, c in zip(
                             energies_bulk, ys.tolist(), configurations_bulk
                         )
@@ -377,20 +378,20 @@ class Model(ABC):
                     
 
                     #f : energia predetta
-                    # y : target    
-                    
+                    # y : target
+
                     delta_lmd = np.mean(
-                        [   
-                            (f - y) * ((f - self._offset) / self._lmd ) 
+                        [
+                            2 * (f - y) * ((f - self._offset) / self._lmd )
                             for f, y in zip(
-                            energies_bulk, ys.tolist() 
+                            energies_bulk, ys.tolist()
                         )
                         ]
                     )
-                    
+
                     delta_offset = np.mean(
                         [
-                            (f - y)
+                            2 * (f - y)
                             for f, y, c in zip(
                             energies_bulk, ys.tolist(), configurations_bulk
                         )
@@ -405,15 +406,12 @@ class Model(ABC):
                     self._gamma -= utils.make_upper_triangular(eta_gamma * delta_gamma)
                     self._lmd -= eta_lmd * delta_lmd
                     self._offset -= eta_offset * delta_offset
-                    for theta in thetas:
-                        theta[input_dim:] -= eta_theta * delta_theta  #update only the hidden nodes
+                    # for theta in thetas:
+                    #     theta[input_dim:] -= eta_theta * delta_theta  #update only the hidden nodes
 
 
                     loss = np.mean(losses_bulk)
                     energy = np.mean(energies_bulk)
-                    print("\nloss: ",loss)
-                    if verbose:
-                        print(loss)
                     result_row = {
                         "epoch": epoch,
                         "idx_minibatch": idx_mini_batch,
@@ -431,7 +429,7 @@ class Model(ABC):
 
                 # test the model -----------------------------
                 if test_set is not None:
-                    print("sampling test set")
+                    #print("sampling test set")
                     for idx_mini_batch, (thetas, ys, indices) in enumerate(
                             train_loader_test
                     ):
@@ -463,6 +461,14 @@ class Model(ABC):
 
                         loss = np.mean(losses_bulk)
                         energy = np.mean(energies_bulk)
+
+                        # Calculate validation accuracy
+                        pred_binary = np.where(np.array(energies_bulk) < 0.5, 0, 1)
+                        y_test_binary = np.where(ys.numpy() < 0.5, 0, 1)
+                        val_accuracy = np.mean(pred_binary == y_test_binary)
+
+                        print(f"Epoch {epoch+1}/{self.settings.optim_steps} | Val Loss: {loss:.4f} | Val Accuracy: {val_accuracy:.4f}")
+
                         result_row_test = {
                             "epoch": epoch,
                             "idx_minibatch": idx_mini_batch,

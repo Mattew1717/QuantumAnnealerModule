@@ -60,6 +60,14 @@ class utils:
         return float((y_prediction - y_true) ** 2)
 
     @staticmethod
+    def bce_loss_function(y_prediction: float, y_true: float) -> float:
+        """Binary Cross Entropy loss function."""
+        # Clip predictions to avoid log(0)
+        eps = 1e-7
+        y_pred_clipped = np.clip(y_prediction, eps, 1 - eps)
+        return float(-(y_true * np.log(y_pred_clipped) + (1 - y_true) * np.log(1 - y_pred_clipped)))
+
+    @staticmethod
     def vector_to_biases(theta: np.array) -> dict:
         """
         Convert the theta vector to biases of an Ising model.
