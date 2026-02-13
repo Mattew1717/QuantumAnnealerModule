@@ -222,6 +222,34 @@ class Plot:
         plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white', edgecolor='none')
         plt.close()
 
+    def plot_comparison_accuracies(self, szp_accs, pt_accs, filename='comparison_accuracies'):
+        """
+        Overlapping line plot of per-fold accuracies for SZP vs TorchModel.
+        """
+        fig, ax = plt.subplots(figsize=(8, 5))
+
+        folds = np.arange(1, len(szp_accs) + 1)
+
+        ax.plot(folds, szp_accs, marker='o', linewidth=2, markersize=7,
+                color=self.colors['primary'], label='SZP')
+        ax.plot(folds, pt_accs, marker='s', linewidth=2, markersize=7,
+                color=self.colors['secondary'], label='TorchModel')
+
+        ax.set_xlabel('Fold', fontweight='bold')
+        ax.set_ylabel('Accuracy', fontweight='bold')
+        ax.set_title('Per-Fold Accuracy: SZP vs TorchModel', fontweight='bold', pad=15)
+        ax.set_xticks(folds)
+        ax.set_ylim(0, 1.05)
+        ax.legend(frameon=True, shadow=True, loc='best')
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+
+        plt.tight_layout()
+        output_path = self.output_dir / f'{filename}.png'
+        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white', edgecolor='none')
+        plt.close()
+        return output_path
+
     def plot_confusion_matrix(self, y_true, y_pred, labels=None, filename='confusion_matrix', save_path=None):
         """Create and save a confusion matrix"""
         plt.style.use('classic')

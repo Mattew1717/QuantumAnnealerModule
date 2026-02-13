@@ -19,6 +19,7 @@ dotenv.load_dotenv(_env_path)
 
 from Inference.logger import Logger
 from Inference.dataset_manager import DatasetManager
+from Inference.plot import Plot
 from SZP_Model.sim_anneal_model import SimAnnealModel, AnnealingSettings as SZP_AnnealingSettings
 from SZP_Model.data import SimpleDataset as SZP_SimpleDataset, HiddenNodesInitialization
 from SZP_Model.utils import GammaInitialization
@@ -26,6 +27,37 @@ from full_ising_model.full_ising_module import FullIsingModule
 from full_ising_model.annealers import AnnealingSettings, AnnealerType
 
 logger = Logger()
+
+
+def print_params_table(params):
+    """Print a formatted table of all comparison parameters."""
+    rows = [
+        ('random_seed',          params['random_seed']),
+        ('k_folds',              params['k_folds']),
+        ('epochs',               params['epochs']),
+        ('batch_size',           params['batch_size']),
+        ('model_size',           'n_features + 5'),
+        ('lambda_init',          params['lambda_init']),
+        ('offset_init',          params['offset_init']),
+        ('learning_rate_gamma',  params['learning_rate_gamma']),
+        ('learning_rate_lambda', params['learning_rate_lambda']),
+        ('learning_rate_offset', params['learning_rate_offset']),
+        ('sa_beta_range',        params['sa_beta_range']),
+        ('num_reads',            params['num_reads']),
+        ('sa_num_sweeps',        params['sa_num_sweeps']),
+        ('sa_sweeps_per_beta',   params['sa_sweeps_per_beta']),
+        ('num_workers',          params['num_workers']),
+    ]
+    col_w = max(len(r[0]) for r in rows) + 2
+    val_w = max(len(str(r[1])) for r in rows) + 2
+    sep = '+' + '-' * col_w + '+' + '-' * val_w + '+'
+    header = f"| {'Parameter':<{col_w-1}}| {'Value':<{val_w-1}}|"
+    logger.info(sep)
+    logger.info(header)
+    logger.info(sep)
+    for name, val in rows:
+        logger.info(f"| {name:<{col_w-1}}| {str(val):<{val_w-1}}|")
+    logger.info(sep)
 
 
 def get_params():
@@ -138,7 +170,8 @@ def train_pytorch(X_train, y_train, X_test, y_test, model_size, params):
         lambda_init=params['lambda_init'],
         offset_init=params['offset_init'],
         num_workers=params['num_workers'],
-        hidden_nodes_offset_value=-0.1
+        hidden_nodes_offset_value=-0.1,
+        gamma_init=torch.zeros((model_size, model_size), dtype=torch.float32)
     )
 
     optimizer = torch.optim.SGD([
@@ -185,6 +218,7 @@ def run_comparison():
     logger.info(f"\n{'='*60}")
     logger.info(f"K-Fold ({k}) comparison on iris | model_size={model_size} | epochs={params['epochs']}")
     logger.info(f"{'='*60}")
+    print_params_table(params)
 
     szp_accs, pt_accs = [], []
     szp_times, pt_times = [], []
@@ -207,6 +241,11 @@ def run_comparison():
     logger.info(f"  SZP     mean acc={np.mean(szp_accs):.4f} ± {np.std(szp_accs):.4f}  avg time={np.mean(szp_times):.2f}s")
     logger.info(f"  PyTorch mean acc={np.mean(pt_accs):.4f} ± {np.std(pt_accs):.4f}  avg time={np.mean(pt_times):.2f}s")
     logger.info(f"{'='*60}")
+
+    plots_dir = os.path.join(os.path.dirname(__file__), 'plots')
+    plotter = Plot(output_dir=plots_dir)
+    out = plotter.plot_comparison_accuracies(szp_accs, pt_accs)
+    logger.info(f"Accuracy plot saved to: {out}")
 
 
 if __name__ == '__main__':
