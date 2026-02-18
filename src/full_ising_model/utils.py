@@ -11,18 +11,8 @@ class HiddenNodesInitialization:
     fun_args: tuple = None
 
     def __init__(self, mode) -> None:
-        self._function = None
-        self._resize_cache = {}  # Cache for resize transformation
-        if mode == "repeat" or "random" or "zeros":
-            self.mode = mode
-        elif mode == "function":
-            self.mode = mode
-            self._function = lambda theta, index_new: theta[
-                index_new % len(theta)
-            ]
-        else:
-            msg = "invalid gamma initialization mode"
-            raise ValueError(msg)
+        self._resize_cache = {}
+        self.mode = mode
 
     def resize(
         self, thetas: torch.Tensor, target_size: int
@@ -177,13 +167,7 @@ def resize_tensor(
 class utils:
     @staticmethod
     def make_upper_triangular_torch(gamma_tensor: torch.Tensor) -> torch.Tensor:
-        size = gamma_tensor.shape[0]
-        with torch.no_grad():   # Disable gradient tracking
-            for i in range(size):
-                gamma_tensor[i, i] = 0  # Zero out diagonal
-                for j in range(i):      # Zero out lower triangle (j < i)
-                    gamma_tensor[i, j] = 0
-        return gamma_tensor
+        return torch.triu(gamma_tensor, diagonal=1)
 
     @staticmethod
     def vector_to_biases(theta: np.array) -> dict:

@@ -28,5 +28,5 @@ def generate_xor_balanced(dim, n_samples_dim=1000, shuffle=True, random_seed=42)
         perm = np.random.permutation(2 ** dim * n_samples_dim)
         samples = samples[perm]
         labels = labels[perm]
-    labels = np.where(labels < 0, 0, 1)
+    labels = (labels > 0).astype(int)
     return samples, labels
