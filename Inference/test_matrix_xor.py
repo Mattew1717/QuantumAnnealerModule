@@ -21,8 +21,8 @@ _repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if _repo_root not in sys.path:
     sys.path.insert(0, _repo_root)
 
-from Inference.logger import Logger
-from Inference.utils import generate_xor_balanced
+from Inference.utils.logger import Logger
+from Inference.utils.utils import generate_xor_balanced
 from ModularNetwork.Network_1L import MultiIsingNetwork
 from full_ising_model.annealers import AnnealingSettings, AnnealerType
 from torch.utils.data import DataLoader, TensorDataset

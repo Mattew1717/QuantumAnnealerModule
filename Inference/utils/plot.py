@@ -267,3 +267,181 @@ class Plot:
         plt.tight_layout()
         output_path = save_path if save_path else self.output_dir / f'{filename}.png'
         plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white', edgecolor='none')
+        plt.close()
+
+    def plot_metrics_bar_comparison(self, metrics1, metrics2, dataset_names,
+                                     errors1=None, errors2=None,
+                                     model_name1='Model 1', model_name2='Model 2',
+                                     filename='metrics_bar_comparison'):
+        """
+        Grouped bar chart (one subplot per metric) comparing two models across datasets.
+        metrics1/metrics2: dict {metric_name: [value_per_dataset]}
+        errors1/errors2:   dict {metric_name: [std_per_dataset]}  (optional)
+        """
+        metric_keys = ['accuracy', 'precision', 'recall', 'f1', 'auc']
+        metric_labels = ['Accuracy', 'Precision', 'Recall', 'F1 Score', 'AUC-ROC']
+
+        fig, axes = plt.subplots(2, 3, figsize=(15, 9))
+        axes = axes.flatten()
+
+        x = np.arange(len(dataset_names))
+        width = 0.35
+
+        for i, (key, label) in enumerate(zip(metric_keys, metric_labels)):
+            ax = axes[i]
+            v1 = metrics1[key]
+            v2 = metrics2[key]
+            e1 = errors1[key] if errors1 else None
+            e2 = errors2[key] if errors2 else None
+
+            ax.bar(x - width / 2, v1, width, label=model_name1,
+                   color=self.colors['primary'], alpha=0.85, edgecolor='black', linewidth=1.0,
+                   yerr=e1, capsize=3, error_kw={'elinewidth': 1.5})
+            ax.bar(x + width / 2, v2, width, label=model_name2,
+                   color=self.colors['secondary'], alpha=0.85, edgecolor='black', linewidth=1.0,
+                   yerr=e2, capsize=3, error_kw={'elinewidth': 1.5})
+
+            ax.set_title(f'({chr(97 + i)}) {label}', loc='left', fontweight='bold')
+            ax.set_xticks(x)
+            ax.set_xticklabels(dataset_names, rotation=45, ha='right', fontsize=8)
+            ax.set_ylim(0, 1.15)
+            ax.set_ylabel(label, fontweight='bold')
+            ax.legend(fontsize=8, loc='lower right', frameon=True)
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+
+        axes[5].set_visible(False)
+        fig.suptitle(f'Metrics Comparison: {model_name1} vs {model_name2}',
+                     fontweight='bold', y=1.01)
+        plt.tight_layout()
+        output_path = self.output_dir / f'{filename}.png'
+        plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
+        plt.close()
+
+    def plot_metrics_heatmap(self, df1, df2,
+                              model_name1='Model 1', model_name2='Model 2',
+                              filename='metrics_heatmap'):
+        """
+        Side-by-side heatmaps (dataset × metric) for two models.
+        df1/df2: pandas DataFrame, index=dataset names, columns=metric names.
+        """
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, max(4, len(df1) * 0.7 + 2)))
+
+        for ax, df, title in [(ax1, df1, model_name1), (ax2, df2, model_name2)]:
+            sns.heatmap(df, ax=ax, annot=True, fmt='.3f', cmap='YlOrRd',
+                        vmin=0, vmax=1, linewidths=0.5, linecolor='lightgray',
+                        cbar_kws={'shrink': 0.8, 'label': 'Score'})
+            ax.set_title(title, fontweight='bold', pad=10)
+            ax.set_xlabel('Metric', fontweight='bold')
+            ax.set_ylabel('Dataset', fontweight='bold')
+            ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right')
+            ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
+
+        fig.suptitle('Performance Heatmap Across Datasets', fontweight='bold', y=1.02)
+        plt.tight_layout()
+        output_path = self.output_dir / f'{filename}.png'
+        plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
+        plt.close()
+
+    def plot_radar_chart(self, means1, means2,
+                          model_name1='Model 1', model_name2='Model 2',
+                          filename='radar_chart'):
+        """
+        Radar/spider chart comparing two models on 5 average metrics.
+        means1/means2: dict {metric_key: scalar_value} for keys
+                       'accuracy','precision','recall','f1','auc'.
+        """
+        keys = ['accuracy', 'precision', 'recall', 'f1', 'auc']
+        labels = ['Accuracy', 'Precision', 'Recall', 'F1', 'AUC']
+        N = len(keys)
+
+        angles = [n / N * 2 * np.pi for n in range(N)]
+        angles += angles[:1]
+
+        v1 = [means1[k] for k in keys] + [means1[keys[0]]]
+        v2 = [means2[k] for k in keys] + [means2[keys[0]]]
+
+        fig, ax = plt.subplots(figsize=(7, 7), subplot_kw=dict(polar=True))
+
+        ax.plot(angles, v1, 'o-', linewidth=2.5, color=self.colors['primary'], label=model_name1)
+        ax.fill(angles, v1, alpha=0.2, color=self.colors['primary'])
+        ax.plot(angles, v2, 's-', linewidth=2.5, color=self.colors['secondary'], label=model_name2)
+        ax.fill(angles, v2, alpha=0.2, color=self.colors['secondary'])
+
+        ax.set_xticks(angles[:-1])
+        ax.set_xticklabels(labels, fontsize=12, fontweight='bold')
+        ax.set_ylim(0, 1)
+        ax.set_yticks([0.2, 0.4, 0.6, 0.8, 1.0])
+        ax.set_yticklabels(['0.2', '0.4', '0.6', '0.8', '1.0'], fontsize=8, color='gray')
+        ax.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.6)
+        ax.set_title('Average Performance Radar Chart\n(mean across datasets)',
+                     fontweight='bold', pad=20)
+        ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1), frameon=True, shadow=True)
+
+        plt.tight_layout()
+        output_path = self.output_dir / f'{filename}.png'
+        plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
+        plt.close()
+
+    def plot_combined_boxplot(self, data1, data2, dataset_names,
+                               model_name1='Model 1', model_name2='Model 2',
+                               filename='combined_boxplot'):
+        """
+        Side-by-side box plots for two models on the same axes.
+        data1/data2: list of lists, one inner list per dataset (K-fold accuracy values).
+        """
+        n = len(dataset_names)
+        fig, ax = plt.subplots(figsize=(max(10, n * 2.2), 6))
+
+        pos1 = np.arange(1, n + 1) * 3 - 0.7
+        pos2 = np.arange(1, n + 1) * 3 + 0.7
+
+        bp_kw = dict(patch_artist=True, showmeans=True, meanline=False,
+                     meanprops=dict(marker='D', markersize=6,
+                                    markerfacecolor=self.colors['quaternary'],
+                                    markeredgecolor='black'),
+                     medianprops=dict(color='black', linewidth=2.0),
+                     whiskerprops=dict(color='black', linewidth=1.2),
+                     capprops=dict(color='black', linewidth=1.2),
+                     flierprops=dict(marker='o', markersize=5,
+                                     markeredgecolor='black', alpha=0.6))
+
+        bp1 = ax.boxplot(data1, positions=pos1, widths=1.0,
+                         boxprops=dict(facecolor=self.colors['primary'], alpha=0.75,
+                                       edgecolor='black', linewidth=1.2),
+                         flierprops={**bp_kw['flierprops'],
+                                     'markerfacecolor': self.colors['primary']},
+                         **{k: v for k, v in bp_kw.items()
+                            if k not in ('boxprops', 'flierprops')})
+
+        bp2 = ax.boxplot(data2, positions=pos2, widths=1.0,
+                         boxprops=dict(facecolor=self.colors['secondary'], alpha=0.75,
+                                       edgecolor='black', linewidth=1.2),
+                         flierprops={**bp_kw['flierprops'],
+                                     'markerfacecolor': self.colors['secondary']},
+                         **{k: v for k, v in bp_kw.items()
+                            if k not in ('boxprops', 'flierprops')})
+
+        ax.set_xticks(np.arange(1, n + 1) * 3)
+        ax.set_xticklabels(dataset_names, rotation=45, ha='right')
+        ax.set_ylabel('Test Accuracy', fontweight='bold')
+        ax.set_xlabel('Dataset', fontweight='bold')
+        ax.set_title(f'K-Fold Accuracy Distribution: {model_name1} vs {model_name2}',
+                     fontweight='bold', pad=15)
+        ax.set_ylim(0, 1.08)
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+
+        legend_elements = [
+            Patch(facecolor=self.colors['primary'], alpha=0.75, edgecolor='black', label=model_name1),
+            Patch(facecolor=self.colors['secondary'], alpha=0.75, edgecolor='black', label=model_name2),
+            plt.Line2D([0], [0], color='black', linewidth=2, label='Median'),
+            plt.Line2D([0], [0], marker='D', color='w', markerfacecolor=self.colors['quaternary'],
+                       markersize=6, markeredgecolor='black', label='Mean'),
+        ]
+        ax.legend(handles=legend_elements, loc='lower left', frameon=True, shadow=True)
+
+        plt.tight_layout()
+        output_path = self.output_dir / f'{filename}.png'
+        plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
+        plt.close()

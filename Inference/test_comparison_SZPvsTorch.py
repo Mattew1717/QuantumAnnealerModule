@@ -17,9 +17,9 @@ if _repo_root not in sys.path:
 _env_path = os.path.join(os.path.dirname(__file__), '.env')
 dotenv.load_dotenv(_env_path)
 
-from Inference.logger import Logger
-from Inference.dataset_manager import DatasetManager
-from Inference.plot import Plot
+from Inference.utils.logger import Logger
+from Inference.utils.dataset_manager import DatasetManager
+from Inference.utils.plot import Plot
 from SZP_Model.sim_anneal_model import SimAnnealModel, AnnealingSettings as SZP_AnnealingSettings
 from SZP_Model.data import SimpleDataset as SZP_SimpleDataset, HiddenNodesInitialization
 from SZP_Model.utils import GammaInitialization

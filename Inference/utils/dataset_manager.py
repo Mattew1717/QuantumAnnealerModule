@@ -1,4 +1,4 @@
-from Inference.logger import Logger
+from Inference.utils.logger import Logger
 from sklearn.model_selection import StratifiedKFold
 import pandas as pd
 import numpy as np

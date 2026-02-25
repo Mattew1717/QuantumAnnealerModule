@@ -1,0 +1,8 @@
+
+[RUN 20260224_133722]
+Device: cuda | Batch: 32 | Epochs: 100 | K-Folds: 5
+Model: size=50, perceptrons=5, partition=False
+LR: gamma=0.0010, lambda=0.0010, offset=0.0010, combiner=0.0010
+SA: beta=[1, 10], reads=1, sweeps=1000
+Init: lambda=-0.1000, offset=0.0000
+

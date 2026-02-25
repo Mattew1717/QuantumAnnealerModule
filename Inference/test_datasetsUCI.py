@@ -5,7 +5,8 @@ import time
 import numpy as np
 import torch
 from datetime import datetime
-from sklearn.metrics import accuracy_score
+import pandas as pd
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 import dotenv
 from scipy.stats import wilcoxon
 
@@ -17,14 +18,48 @@ _repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if _repo_root not in sys.path:
     sys.path.insert(0, _repo_root)
 
-from Inference.logger import Logger
-from Inference.dataset_manager import DatasetManager
-from Inference.plot import Plot
+from Inference.utils.logger import Logger
+from Inference.utils.dataset_manager import DatasetManager
+from Inference.utils.plot import Plot
 from full_ising_model.full_ising_module import FullIsingModule
-from ModularNetwork.network_1L import MultiIsingNetwork
+from ModularNetwork.Network_1L import MultiIsingNetwork
 from full_ising_model.annealers import AnnealingSettings, AnnealerType
 
 logger = Logger()
+
+METRICS = ['accuracy', 'precision', 'recall', 'f1', 'auc']
+
+
+def compute_metrics(y_true, probs):
+    """Compute accuracy, precision, recall, F1, AUC from predicted probabilities."""
+    preds = (probs >= 0.5).astype(int)
+    acc = accuracy_score(y_true, preds)
+    prec = precision_score(y_true, preds, zero_division=0)
+    rec = recall_score(y_true, preds, zero_division=0)
+    f1 = f1_score(y_true, preds, zero_division=0)
+    try:
+        auc = roc_auc_score(y_true, probs)
+    except ValueError:
+        auc = float('nan')
+    return {'accuracy': acc, 'precision': prec, 'recall': rec, 'f1': f1, 'auc': auc}
+
+
+def _save_metrics_csv(dataset_names, all_single_metrics, all_neural_metrics, output_dir):
+    """Save mean ± std K-fold metrics for both models to CSV."""
+    rows = []
+    for i, ds_name in enumerate(dataset_names):
+        for model_name, model_metrics in [('FullIsingModule', all_single_metrics[i]),
+                                           ('NeuralNet', all_neural_metrics[i])]:
+            row = {'dataset': ds_name, 'model': model_name}
+            for m in METRICS:
+                vals = model_metrics[m]
+                row[f'{m}_mean'] = np.nanmean(vals)
+                row[f'{m}_std'] = np.nanstd(vals)
+            rows.append(row)
+    df = pd.DataFrame(rows)
+    csv_path = os.path.join(str(output_dir), 'metrics_summary.csv')
+    df.to_csv(csv_path, index=False, float_format='%.4f')
+    return csv_path
 
 
 def get_env_params():
@@ -44,7 +79,7 @@ def get_env_params():
         'lr_offset': float(os.getenv('LEARNING_RATE_OFFSET')),
         'lr_combiner': float(os.getenv('LEARNING_RATE_COMBINER')),
         'sa_beta_range': [int(os.getenv('SA_BETA_MIN')), int(os.getenv('SA_BETA_MAX'))],
-        'sa_num_reads': int(os.getenv('SA_NUM_READS')),
+        'sa_num_reads': int(os.getenv('NUM_READS')),
         'sa_num_sweeps': int(os.getenv('SA_NUM_SWEEPS')),
         'sa_sweeps_per_beta': int(os.getenv('SA_SWEEPS_PER_BETA')),
         'k_folds': int(os.getenv('K_FOLDS')),
@@ -73,7 +108,7 @@ def train_single_model(X_train, y_train, X_test, y_test, params):
     X_test = (X_test - mean) / std
 
     # Create datasets without manual resize (FullIsingModule handles it)
-    from Inference.dataset_manager import SimpleDataset
+    from Inference.utils.dataset_manager import SimpleDataset
     train_set = SimpleDataset()
     train_set.x = torch.tensor(X_train, dtype=torch.float32)
     train_set.y = torch.tensor(y_train, dtype=torch.float32)
@@ -160,10 +195,15 @@ def train_single_model(X_train, y_train, X_test, y_test, params):
 
     training_time = time.time() - start_time
 
-    # Final accuracy is the last one
+    # Final evaluation on test set
+    model.eval()
+    with torch.no_grad():
+        preds_tensor = model(test_set.x.to(params['device'])).view(-1)
+        final_probs = torch.sigmoid(preds_tensor).cpu().numpy()
+
     final_accuracy = validation_accuracies[-1]
 
-    return final_accuracy, training_losses, validation_accuracies
+    return final_accuracy, final_probs, training_losses, validation_accuracies
 
 
 def train_neural_net(X_train, y_train, X_test, y_test, params):
@@ -177,7 +217,7 @@ def train_neural_net(X_train, y_train, X_test, y_test, params):
     X_test = (X_test - mean) / std
 
     # Create datasets without manual resize (FullIsingModule handles it)
-    from Inference.dataset_manager import SimpleDataset
+    from Inference.utils.dataset_manager import SimpleDataset
     train_set = SimpleDataset()
     train_set.x = torch.tensor(X_train, dtype=torch.float32)
     train_set.y = torch.tensor(y_train, dtype=torch.float32)
@@ -203,7 +243,7 @@ def train_neural_net(X_train, y_train, X_test, y_test, params):
         target_size = size * params['num_ising_perceptrons']
 
         # Resize for partitioning
-        from Inference.dataset_manager import HiddenNodesInitialization
+        from Inference.utils.dataset_manager import HiddenNodesInitialization
         hn = HiddenNodesInitialization('function')
         hn.function = SimpleDataset.offset
         hn.fun_args = [-0.02]
@@ -297,10 +337,15 @@ def train_neural_net(X_train, y_train, X_test, y_test, params):
 
     training_time = time.time() - start_time
 
-    # Final accuracy is the last one
+    # Final evaluation on test set
+    model.eval()
+    with torch.no_grad():
+        preds_tensor = model(test_set.x.to(params['device'])).view(-1)
+        final_probs = torch.sigmoid(preds_tensor).cpu().numpy()
+
     final_accuracy = validation_accuracies[-1]
 
-    return final_accuracy, training_losses, validation_accuracies
+    return final_accuracy, final_probs, training_losses, validation_accuracies
 
 
 def compare_models():
@@ -320,7 +365,7 @@ def compare_models():
     dataset_manager = DatasetManager()
 
     # Find all datasets
-    datasets_dir = os.path.join(os.path.dirname(__file__), 'datasets')
+    datasets_dir = os.path.join(os.path.dirname(__file__), 'Datasets')
     csv_files = sorted(glob.glob(os.path.join(datasets_dir, '*.csv')))
 
     if not csv_files:
@@ -333,6 +378,8 @@ def compare_models():
     neural_accuracies_all = []
     single_losses_all = []
     neural_losses_all = []
+    all_single_metrics = []  # [{metric: [fold_values]} per dataset]
+    all_neural_metrics = []
 
     total_start = time.time()
 
@@ -354,22 +401,30 @@ def compare_models():
             neural_losses = []
             single_val_accs_all = []
             neural_val_accs_all = []
+            single_fold_metrics = {m: [] for m in METRICS}
+            neural_fold_metrics = {m: [] for m in METRICS}
 
             for fold_idx, (X_train, y_train, X_test, y_test) in enumerate(folds, 1):
                 logger.info(f"Fold {fold_idx}/{params['k_folds']}")
 
                 # Train Single Model
                 logger.info("  Training Single Model...")
-                acc_s, loss_s, val_accs_s = train_single_model(X_train, y_train, X_test, y_test, params)
-                logger.info(f"  Single Model Accuracy: {acc_s:.4f}")
+                acc_s, probs_s, loss_s, val_accs_s = train_single_model(X_train, y_train, X_test, y_test, params)
+                ms = compute_metrics(y_test, probs_s)
+                logger.info(f"  Single | acc={ms['accuracy']:.4f} prec={ms['precision']:.4f} rec={ms['recall']:.4f} f1={ms['f1']:.4f} auc={ms['auc']:.4f}")
 
                 # Train Neural Network
                 logger.info("  Training Neural Network...")
-                acc_n, loss_n, val_accs_n = train_neural_net(X_train, y_train, X_test, y_test, params)
-                logger.info(f"  Neural Network Accuracy: {acc_n:.4f}")
+                acc_n, probs_n, loss_n, val_accs_n = train_neural_net(X_train, y_train, X_test, y_test, params)
+                mn = compute_metrics(y_test, probs_n)
+                logger.info(f"  Neural | acc={mn['accuracy']:.4f} prec={mn['precision']:.4f} rec={mn['recall']:.4f} f1={mn['f1']:.4f} auc={mn['auc']:.4f}")
 
-                single_accs.append(acc_s)
-                neural_accs.append(acc_n)
+                for k in METRICS:
+                    single_fold_metrics[k].append(ms[k])
+                    neural_fold_metrics[k].append(mn[k])
+
+                single_accs.append(ms['accuracy'])
+                neural_accs.append(mn['accuracy'])
                 single_losses.append(loss_s)
                 neural_losses.append(loss_n)
                 single_val_accs_all.append(val_accs_s)
@@ -381,6 +436,8 @@ def compare_models():
             neural_accuracies_all.append(neural_accs)
             single_losses_all.append(single_losses)
             neural_losses_all.append(neural_losses)
+            all_single_metrics.append(single_fold_metrics)
+            all_neural_metrics.append(neural_fold_metrics)
 
             # Calculate mean accuracies for this dataset
             mean_acc_s = np.mean(single_accs)
@@ -441,6 +498,46 @@ def compare_models():
         box_color='secondary'
     )
 
+    # === Save metrics CSV ===
+    if dataset_names:
+        csv_path = _save_metrics_csv(dataset_names, all_single_metrics, all_neural_metrics, plotter.output_dir)
+        logger.info(f"Metrics CSV saved to: {csv_path}")
+
+        # Prepare per-metric aggregated arrays
+        m1 = {m: [np.nanmean(all_single_metrics[i][m]) for i in range(len(dataset_names))] for m in METRICS}
+        m2 = {m: [np.nanmean(all_neural_metrics[i][m]) for i in range(len(dataset_names))] for m in METRICS}
+        e1 = {m: [np.nanstd(all_single_metrics[i][m]) for i in range(len(dataset_names))] for m in METRICS}
+        e2 = {m: [np.nanstd(all_neural_metrics[i][m]) for i in range(len(dataset_names))] for m in METRICS}
+
+        # DataFrames for heatmap (rename keys to readable labels)
+        col_map = {'accuracy': 'Accuracy', 'precision': 'Precision', 'recall': 'Recall', 'f1': 'F1', 'auc': 'AUC'}
+        df_single = pd.DataFrame({col_map[m]: m1[m] for m in METRICS}, index=dataset_names)
+        df_neural = pd.DataFrame({col_map[m]: m2[m] for m in METRICS}, index=dataset_names)
+
+        # Means across datasets for radar chart
+        means1_radar = {m: np.nanmean(m1[m]) for m in METRICS}
+        means2_radar = {m: np.nanmean(m2[m]) for m in METRICS}
+
+        # New summary plots
+        plotter.plot_metrics_bar_comparison(
+            m1, m2, dataset_names, errors1=e1, errors2=e2,
+            model_name1='FullIsingModule', model_name2='NeuralNet'
+        )
+        plotter.plot_metrics_heatmap(
+            df_single, df_neural,
+            model_name1='FullIsingModule', model_name2='NeuralNet'
+        )
+        plotter.plot_radar_chart(
+            means1_radar, means2_radar,
+            model_name1='FullIsingModule', model_name2='NeuralNet'
+        )
+        plotter.plot_combined_boxplot(
+            [all_single_metrics[i]['accuracy'] for i in range(len(dataset_names))],
+            [all_neural_metrics[i]['accuracy'] for i in range(len(dataset_names))],
+            dataset_names,
+            model_name1='FullIsingModule', model_name2='NeuralNet'
+        )
+
     logger.info(f"All plots saved to {plotter.output_dir}")
 
 
@@ -457,4 +554,4 @@ if __name__ == '__main__':
     #test_xor_all_dimensions_1L()
 
     # Compare Single vs Multi Ising on all datasets
-    # compare_models()
+    compare_models()
