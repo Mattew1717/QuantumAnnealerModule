@@ -6,7 +6,7 @@ This work starts from the Ising-based machine learning model introduced in [Schm
 
 1. Port the SZP model to **PyTorch** with a differentiable forward/backward pass.
 2. Optimize it with **multithreading** for batch processing.
-3. Empirically test it — standalone and inside **hybrid classical-quantum networks** — studying performance, limits, and trade-offs.
+3. Empirically test it, standalone and inside **hybrid classical-quantum networks**; studying performance, limits, and trade-offs.
 
 ---
 
@@ -118,7 +118,7 @@ Plots, CSVs and logs are saved in timestamped directories in the working directo
 
 ## Notes
 
-- Training is slow: the annealer is the bottleneck — each forward call invokes a sampler per sample.
+- Training is slow: the annealer is the bottleneck. Each forward call invokes a sampler per sample.
 - `ExactAnnealing` is only tractable for small N (≲ 20 spins).
 - QPU access requires a D-Wave Leap subscription and introduces network latency.
 - When the input dimension is smaller than the annealer size, `θ` is extended by tiling it cyclically and adding a small constant offset at each repetition: `θ[i] = x[i % d] + (i // d) · ε`. This fills the extra nodes with slightly shifted copies of the input, preserving structure while avoiding exact duplicates.
