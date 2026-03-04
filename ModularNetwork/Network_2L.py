@@ -36,7 +36,7 @@ class TwoLayerIsingNetwork(nn.Module):
 
         # ---- Second Ising ----
         # input = [mixed Ising outputs | original x]
-        second_input_dim = input_dim
+        second_input_dim = num_ising_1 + input_dim
 
         self.ising2 = nn.ModuleList([
             FullIsingModule(

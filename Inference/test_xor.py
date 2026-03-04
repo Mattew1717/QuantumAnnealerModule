@@ -196,7 +196,7 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
     SA_settings.beta_range = params['sa_beta_range']
     SA_settings.num_reads = params['num_reads']
     SA_settings.num_sweeps = params['sa_num_sweeps']
-    SA_settings.sweeps_per_beta = params['sa_sweeps_per_beta']
+    SA_settings.num_sweeps_per_beta = params['sa_sweeps_per_beta']
 
     # Create Network_2L
     model = TwoLayerIsingNetwork(
@@ -357,7 +357,7 @@ def train_network_1L(dim, X_train, y_train, X_test, y_test, params, plotter):
     SA_settings.beta_range = params['sa_beta_range']
     SA_settings.num_reads = params['num_reads']
     SA_settings.num_sweeps = params['sa_num_sweeps']
-    SA_settings.sweeps_per_beta = params['sa_sweeps_per_beta']
+    SA_settings.num_sweeps_per_beta = params['sa_sweeps_per_beta']
 
     # Create Network_1L (MultiIsingNetwork)
     model = MultiIsingNetwork(
@@ -499,7 +499,7 @@ def train_full_ising_model(dim, X_train, y_train, X_test, y_test, params, plotte
     SA_settings.beta_range = params['sa_beta_range']
     SA_settings.num_reads = params['num_reads']
     SA_settings.num_sweeps = params['sa_num_sweeps']
-    SA_settings.sweeps_per_beta = params['sa_sweeps_per_beta']
+    SA_settings.num_sweeps_per_beta = params['sa_sweeps_per_beta']
 
     model = FullIsingModule(
         size_annealer=model_size,
@@ -801,7 +801,7 @@ def test_xor_2d_full_ising_module(params=None, plotter=None):
     SA_settings.beta_range = params['sa_beta_range']
     SA_settings.num_reads = params['num_reads']
     SA_settings.num_sweeps = params['sa_num_sweeps']
-    SA_settings.sweeps_per_beta = params['sa_sweeps_per_beta']
+    SA_settings.num_sweeps_per_beta = params['sa_sweeps_per_beta']
 
     # Create FullIsingModule
     model = FullIsingModule(

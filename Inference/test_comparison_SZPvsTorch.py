@@ -107,7 +107,7 @@ def train_szp(X_train, y_train, X_test, y_test, model_size, params):
     szp_annealing.beta_range = params['sa_beta_range']
     szp_annealing.num_reads = params['num_reads']
     szp_annealing.num_sweeps = params['sa_num_sweeps']
-    szp_annealing.sweeps_per_beta = params['sa_sweeps_per_beta']
+    szp_annealing.num_sweeps_per_beta = params['sa_sweeps_per_beta']
 
     model = SimAnnealModel(size=model_size, settings=szp_annealing)
     model.lmd_init_value = params['lambda_init']
@@ -161,7 +161,7 @@ def train_pytorch(X_train, y_train, X_test, y_test, model_size, params):
     SA_settings.beta_range = params['sa_beta_range']
     SA_settings.num_reads = params['num_reads']
     SA_settings.num_sweeps = params['sa_num_sweeps']
-    SA_settings.sweeps_per_beta = params['sa_sweeps_per_beta']
+    SA_settings.num_sweeps_per_beta = params['sa_sweeps_per_beta']
 
     model = FullIsingModule(
         size_annealer=model_size,

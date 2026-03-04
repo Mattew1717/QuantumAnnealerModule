@@ -48,7 +48,7 @@ class MultiIsingNetwork(nn.Module):
             perceptron_outputs = []
             for i, perceptron in enumerate(self.ising_perceptrons_layer):
                 start = i * chunk_size
-                end = (i + 1) * chunk_size
+                end = (i + 1) * chunk_size if i < self.num_ising_perceptrons - 1 else total_size
                 chunk = thetas[:, start:end]
                 perceptron_outputs.append(perceptron(chunk))
         else:

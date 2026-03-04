@@ -133,7 +133,7 @@ def train_single_model(X_train, y_train, X_test, y_test, params):
     SA_settings.beta_range = params['sa_beta_range']
     SA_settings.num_reads = params['sa_num_reads']
     SA_settings.num_sweeps = params['sa_num_sweeps']
-    SA_settings.sweeps_per_beta = params['sa_sweeps_per_beta']
+    SA_settings.num_sweeps_per_beta = params['sa_sweeps_per_beta']
 
     if params['model_size'] == -1:
         size = X_train.shape[1] if X_train.shape[1] > params['minimum_model_size'] else params['minimum_model_size']
@@ -265,7 +265,7 @@ def train_neural_net(X_train, y_train, X_test, y_test, params):
     SA_settings.beta_range = params['sa_beta_range']
     SA_settings.num_reads = params['sa_num_reads']
     SA_settings.num_sweeps = params['sa_num_sweeps']
-    SA_settings.sweeps_per_beta = params['sa_sweeps_per_beta']
+    SA_settings.num_sweeps_per_beta = params['sa_sweeps_per_beta']
     # Create model
     model = MultiIsingNetwork(
         num_ising_perceptrons=params['num_ising_perceptrons'],

@@ -84,7 +84,7 @@ class IsingEnergyFunction(Function):
         outer_prod = z_i * z_j
 
         grad_gamma_per_sample = grad_energies_bulk.view(batch_size, 1, 1) * outer_prod
-        grad_gamma = torch.mean(grad_gamma_per_sample, dim=0)
+        grad_gamma = torch.sum(grad_gamma_per_sample, dim=0)
         grad_gamma = utils.make_upper_triangular_torch(grad_gamma)
 
         # No gradient for thetas and annealer

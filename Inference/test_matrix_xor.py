@@ -11,7 +11,7 @@ import seaborn as sns
 from datetime import datetime
 from time import perf_counter
 from pathlib import Path
-from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
+from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, roc_curve
 from sklearn.model_selection import train_test_split
 import dotenv
 
@@ -31,10 +31,6 @@ from torch.utils.data import DataLoader, TensorDataset
 NUM_NODI_LIST    = [2, 3, 5, 8, 10, 15]   # num_ising_perceptrons
 MULTIPLIERS      = [1, 2, 3, 4]            # proportional node sizes (× num_features)
 FIXED_SIZES      = [10, 20, 30, 40, 50]    # fixed node sizes
-
-# ─── metric thresholds ────────────────────────────────────────────────────────
-CONV_THRESHOLD   = 0.85   # val accuracy considered "converged"
-STABILITY_WINDOW = 10     # last N epochs for loss-stability std
 
 # ─── global run directory (shared across all 6 calls in main) ─────────────────
 _RUN_TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -181,7 +177,6 @@ def _train_one(
     training_losses   = []
     val_accuracies    = []
     best_val_acc      = 0.0
-    convergence_epoch = None
     val_interval      = params['val_interval']
 
     for epoch in range(params['epochs']):
@@ -215,8 +210,6 @@ def _train_one(
             val_accuracies.append(val_acc)
             if val_acc > best_val_acc:
                 best_val_acc = val_acc
-            if convergence_epoch is None and val_acc >= CONV_THRESHOLD:
-                convergence_epoch = epoch + 1
         else:
             # repeat last known value to keep list length == epochs
             val_accuracies.append(val_accuracies[-1] if val_accuracies else 0.0)
@@ -234,13 +227,19 @@ def _train_one(
     except Exception:
         auc = float('nan')
 
+    # ── log primi 10 risultati vs label ───────────────────────────────────────
+    log = _GLOBAL_LOGGER
+    n_show = min(10, len(y_test))
+    log.info(f"    --- Primi {n_show} risultati (test set) ---")
+    log.info(f"    {'idx':>4}  {'prob':>8}  {'pred':>6}  {'label':>6}  {'match':>6}")
+    for k in range(n_show):
+        match = "OK" if preds[k] == int(y_test[k]) else "MISS"
+        log.info(
+            f"    {k:>4}  {probs[k]:>8.4f}  {preds[k]:>6}  {int(y_test[k]):>6}  {match:>6}"
+        )
+
     final_loss = training_losses[-1] if training_losses else float('nan')
     min_loss   = min(training_losses) if training_losses else float('nan')
-    # stability: std of loss in the last STABILITY_WINDOW epochs
-    if len(training_losses) >= STABILITY_WINDOW:
-        stability = float(np.std(training_losses[-STABILITY_WINDOW:]))
-    else:
-        stability = float(np.std(training_losses)) if training_losses else float('nan')
 
     elapsed = perf_counter() - t0
 
@@ -252,10 +251,11 @@ def _train_one(
         'best_val_acc':       best_val_acc,
         'final_loss':         final_loss,
         'min_loss':           min_loss,
-        'loss_stability':     stability,
-        'convergence_epoch':  convergence_epoch,
         'training_time_s':    elapsed,
         'n_params':           n_params,
+        # data for ROC curve plot
+        'probs':              probs,
+        'y_test':             y_test,
         # epoch histories (kept for potential further analysis)
         'training_losses':    training_losses,
         'val_accuracies':     val_accuracies,
@@ -340,6 +340,28 @@ def _timing_heatmap(
     plt.close()
 
 
+def _plot_roc_curve(
+    y_true, probs, auc_value,
+    title: str, filepath: Path,
+):
+    """Plot ROC curve for a single configuration."""
+    fpr, tpr, _ = roc_curve(y_true, probs)
+    fig, ax = plt.subplots(figsize=(6, 6))
+    ax.plot(fpr, tpr, color='#2563eb', lw=2,
+            label=f'ROC curve (AUC = {auc_value:.4f})')
+    ax.plot([0, 1], [0, 1], 'k--', lw=1, alpha=0.5)
+    ax.set_xlim([0.0, 1.0])
+    ax.set_ylim([0.0, 1.05])
+    ax.set_xlabel('False Positive Rate', fontweight='bold')
+    ax.set_ylabel('True Positive Rate', fontweight='bold')
+    ax.set_title(title, fontweight='bold')
+    ax.legend(loc='lower right')
+    ax.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(filepath, dpi=300, bbox_inches='tight', facecolor='white')
+    plt.close()
+
+
 # ─── public API ───────────────────────────────────────────────────────────────
 
 def run_matrix_experiment(xor_dim: int) -> dict:
@@ -381,9 +403,7 @@ def run_matrix_experiment(xor_dim: int) -> dict:
     f1_matrix        = np.full((n_rows, n_cols), np.nan)
     auc_matrix       = np.full((n_rows, n_cols), np.nan)
     time_matrix      = np.full((n_rows, n_cols), np.nan)
-    stability_matrix = np.full((n_rows, n_cols), np.nan)
     best_val_matrix  = np.full((n_rows, n_cols), np.nan)
-    conv_ep_matrix   = np.full((n_rows, n_cols), np.nan)
 
     detailed_records = []
     total_configs    = n_rows * n_cols
@@ -409,18 +429,22 @@ def run_matrix_experiment(xor_dim: int) -> dict:
                 f1_matrix[i, j]        = m['f1']
                 auc_matrix[i, j]       = m['auc_roc']
                 time_matrix[i, j]      = m['training_time_s']
-                stability_matrix[i, j] = m['loss_stability']
                 best_val_matrix[i, j]  = m['best_val_acc']
-                conv_ep_matrix[i, j]   = m['convergence_epoch'] if m['convergence_epoch'] else np.nan
 
                 log.info(
                     f"    acc={m['accuracy']:.4f}  f1={m['f1']:.4f}  "
                     f"auc={m['auc_roc']:.4f}  best_val={m['best_val_acc']:.4f}\n"
                     f"    min_loss={m['min_loss']:.4f}  final_loss={m['final_loss']:.4f}  "
-                    f"stability={m['loss_stability']:.4f}  "
-                    f"conv_epoch={m['convergence_epoch']}  "
                     f"time={m['training_time_s']:.1f}s  params={m['n_params']}"
                 )
+
+                # ROC curve plot
+                if not np.isnan(m['auc_roc']):
+                    _plot_roc_curve(
+                        m['y_test'], m['probs'], m['auc_roc'],
+                        f'ROC — nodi={num_nodi} size={node_size} (XOR {xor_dim}D)',
+                        dim_dir / f'roc_nodi{num_nodi}_size{node_label}.png',
+                    )
 
                 detailed_records.append({
                     'xor_dim':           xor_dim,
@@ -433,8 +457,6 @@ def run_matrix_experiment(xor_dim: int) -> dict:
                     'best_val_acc':      m['best_val_acc'],
                     'final_loss':        m['final_loss'],
                     'min_loss':          m['min_loss'],
-                    'loss_stability':    m['loss_stability'],
-                    'convergence_epoch': m['convergence_epoch'],
                     'training_time_s':   m['training_time_s'],
                     'n_params':          m['n_params'],
                     'error':             '',
@@ -448,8 +470,7 @@ def run_matrix_experiment(xor_dim: int) -> dict:
                     'node_size': node_size, 'node_size_label': node_label,
                     'accuracy': np.nan, 'f1': np.nan, 'auc_roc': np.nan,
                     'best_val_acc': np.nan, 'final_loss': np.nan,
-                    'min_loss': np.nan, 'loss_stability': np.nan,
-                    'convergence_epoch': np.nan, 'training_time_s': np.nan,
+                    'min_loss': np.nan, 'training_time_s': np.nan,
                     'n_params': np.nan, 'error': str(e),
                 })
 
@@ -468,9 +489,7 @@ def run_matrix_experiment(xor_dim: int) -> dict:
     df_f1    = _save_matrix(f1_matrix,        'f1_matrix')
     df_auc   = _save_matrix(auc_matrix,       'auc_matrix')
     df_time  = _save_matrix(time_matrix,      'timing_matrix')
-    df_stab  = _save_matrix(stability_matrix, 'stability_matrix')
     df_bval  = _save_matrix(best_val_matrix,  'best_val_matrix')
-    df_conv  = _save_matrix(conv_ep_matrix,   'convergence_epoch_matrix')
 
     # detailed per-combination log
     pd.DataFrame(detailed_records).to_csv(
@@ -514,9 +533,7 @@ def run_matrix_experiment(xor_dim: int) -> dict:
         'f1_matrix':         f1_matrix,
         'auc_matrix':        auc_matrix,
         'time_matrix':       time_matrix,
-        'stability_matrix':  stability_matrix,
         'best_val_matrix':   best_val_matrix,
-        'conv_epoch_matrix': conv_ep_matrix,
         'row_labels':        row_labels,
         'col_labels':        col_labels,
         'detailed_records':  detailed_records,
@@ -619,8 +636,8 @@ def save_global_summary(all_results: list[dict]) -> None:
 if __name__ == '__main__':
     all_results = []
 
-    for dim in range(1, 7):
-        result = run_matrix_experiment(dim)
-        all_results.append(result)
-
+    # for dim in range(1, 7):
+    #     result = run_matrix_experiment(dim)
+    #     all_results.append(result)
+    run_matrix_experiment(2)  # test rapido per debug
     save_global_summary(all_results)
