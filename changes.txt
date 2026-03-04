@@ -1,0 +1,517 @@
+================================================================================
+  ANALISI CODEBASE — QuantumAnnealerModule
+  Documento di modifiche proposte
+  Generato: 2026-03-04
+================================================================================
+
+
+##############################################################################
+#  SEZIONE 1 — BUG CRITICI (impattano la correttezza dei risultati)
+##############################################################################
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BUG 1  [CRITICO]  —  Gradient aggregation: mean → sum
+File: src/full_ising_model/full_ising_module.py, riga 87
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROBLEMA:
+  Nella backward di IsingEnergyFunction, il gradiente di gamma rispetto al
+  batch viene aggregato con torch.mean() anziché torch.sum().
+
+  Riga attuale:
+      grad_gamma = torch.mean(grad_gamma_per_sample, dim=0)
+
+  Secondo il paper (Eq. 12, Theorem 3), la derivata è:
+      dL/dΓ_ij = Σ_a (dL/dE0_a · z*_a_i · z*_a_j)
+
+  In PyTorch, quando la loss usa reduction='mean', il grad_output ricevuto
+  dal backward contiene già il fattore 1/N dalla loss. Quindi il backward
+  del custom Function deve fare SUM delle gradient-per-sample, non MEAN.
+  Usare mean introduce un fattore extra 1/batch_size che:
+    - Scala i gradienti di gamma in modo inversamente proporzionale al batch size
+    - Rende il learning rate effettivo per gamma dipendente dal batch size
+    - Produce gradienti sottostimati → training più lento/instabile
+
+IMPATTO: ALTO. Tutti i risultati sperimentali sono affetti da questo bug.
+  Il training funziona ugualmente (compensato dal lr) ma i gradienti sono
+  matematicamente sbagliati.
+
+MODIFICA:
+  In full_ising_module.py, riga 87, cambiare:
+
+  PRIMA:
+      grad_gamma = torch.mean(grad_gamma_per_sample, dim=0)
+
+  DOPO:
+      grad_gamma = torch.sum(grad_gamma_per_sample, dim=0)
+
+NOTA: Dopo questa correzione, probabilmente sarà necessario ridurre
+  lr_gamma di un fattore ~batch_size per mantenere lo stesso comportamento.
+  Se batch_size=256, il lr_gamma effettivo attuale è circa lr_gamma/256.
+  Dopo il fix, lr_gamma diventerà il valore reale.
+  Suggerimento: testare con lr_gamma attuale / batch_size come punto di partenza.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BUG 2  [CRITICO]  —  Network_2L: dimensione errata secondo layer Ising
+File: ModularNetwork/Network_2L.py, riga 39
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROBLEMA:
+  Nel __init__ di TwoLayerIsingNetwork, il secondo layer Ising viene
+  creato con size_annealer = input_dim, ma nel forward riceve come input
+  z = cat([E1_lin, x]) che ha dimensione num_ising_1 + input_dim.
+
+  Riga attuale:
+      second_input_dim = input_dim    # SBAGLIATO
+
+  Il resize interno di FullIsingModule tronca z a input_dim, perdendo
+  completamente le informazioni dal primo Ising layer (E1_lin).
+  In pratica il secondo layer rielabora solo x originale (o una sua porzione),
+  vanificando l'architettura a due stadi.
+
+IMPATTO: ALTO. Il Network_2L non funziona come progettato.
+
+MODIFICA:
+  In Network_2L.py, cambiare:
+
+  PRIMA (riga 39):
+      second_input_dim = input_dim
+
+  DOPO:
+      second_input_dim = num_ising_1 + input_dim
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BUG 3  [MEDIO]  —  AnnealingSettings: attributo sbagliato 'sweeps_per_beta'
+File: Inference/test_xor.py, righe 199, 360, 502, 804
+File: Inference/test_datasetsUCI.py, righe 136, 268
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROBLEMA:
+  In diversi punti del codice si assegna:
+      SA_settings.sweeps_per_beta = params['sa_sweeps_per_beta']
+
+  Ma la classe AnnealingSettings definisce l'attributo come:
+      num_sweeps_per_beta    (con il prefisso 'num_')
+
+  Python non dà errore perché crea un nuovo attributo dinamico, ma il valore
+  non viene mai usato dall'annealer. Il SimulatedAnnealing usa
+  self._settings.num_sweeps_per_beta, che rimane al default (1).
+
+IMPATTO: MEDIO. Il parametro num_sweeps_per_beta viene ignorato silenziosamente
+  in test_xor.py e test_datasetsUCI.py. In test_matrix_xor.py è corretto.
+
+MODIFICA:
+  In TUTTI i file dove appare `SA_settings.sweeps_per_beta`, sostituire con:
+      SA_settings.num_sweeps_per_beta = params['sa_sweeps_per_beta']
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BUG 4  [MEDIO]  —  Network_1L: partition_input non gestisce il resto
+File: ModularNetwork/Network_1L.py, righe 44-52
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROBLEMA:
+  Quando partition_input=True, il codice divide l'input in chunk di
+  dimensione total_size // num_ising_perceptrons. Se total_size non è
+  divisibile, le ultime feature vengono silenziosamente ignorate.
+
+  Esempio: total_size=10, num_perceptrons=3 → chunk_size=3
+  chunk 0: [0:3], chunk 1: [3:6], chunk 2: [6:9] → feature 9 persa.
+
+IMPATTO: MEDIO (solo quando partition_input=True, attualmente non usato nei test).
+
+MODIFICA:
+  Aggiungere gestione del resto. Distribuire le feature rimanenti agli
+  ultimi perceptron oppure aggiungere un assert che total_size sia divisibile.
+
+  Opzione semplice (assert):
+      if self.partition_input:
+          assert total_size % self.num_ising_perceptrons == 0, \
+              f"Input size {total_size} non divisibile per {self.num_ising_perceptrons}"
+
+  Opzione completa: dare le feature rimanenti all'ultimo chunk:
+      for i, perceptron in enumerate(self.ising_perceptrons_layer):
+          start = i * chunk_size
+          end = (i + 1) * chunk_size if i < self.num_ising_perceptrons - 1 else total_size
+          ...
+
+
+##############################################################################
+#  SEZIONE 2 — full_ising_module.py : verifica coerenza col paper
+##############################################################################
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VERIFICA 1  —  Modello F(θ|Γ,λ,ε) = λ·E0(θ,Γ) + ε  [Eq. 9 del paper]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STATO: OK
+  Il forward di FullIsingModule (riga 170-171) implementa:
+      E0 = self.ising_layer(thetas, self.gamma)
+      return self.lmd * E0 + self.offset
+  Corrisponde a F = λ·E0 + ε del paper.
+
+NOTA: Nel paper, λ e ε possono essere tenuti fissi o aggiornati (Eq. 13-14).
+  Nel codice sono nn.Parameter (trainabili). Questo è più generale del paper
+  originale (dove nell'empirical evaluation erano fissati come iperparametri)
+  ma è comunque corretto e una scelta valida.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VERIFICA 2  —  Energia Ising E(θ,Γ,z) = θ·z + z^T·Γ·z  [Eq. 4 del paper]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STATO: OK
+  Il calcolo dell'energia è delegato all'annealer (neal/dimod) che riceve
+  biases h e couplings J. La conversione da gamma matrix a J dict
+  (utils.gamma_to_couplings) estrae correttamente solo i termini i<j
+  (triangolo superiore), coerente con Γ_ij per (i,j) distinti.
+  I biases sono la conversione diretta del vettore theta.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VERIFICA 3  —  Derivata ∂F/∂Γ_ij = λ·z*_i·z*_j  [Eq. 15 del paper]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STATO: CORRETTO (a parte il BUG 1 del mean→sum)
+  Il backward di IsingEnergyFunction calcola:
+      outer_prod = z_i * z_j    (= z*_i · z*_j per ogni sample)
+      grad_gamma_per_sample = grad_energies · outer_prod
+
+  Il grad_energies contiene dL/dE0 che include il fattore λ dal chain rule
+  (tramite autograd di lmd * E0). Quindi la derivata è correttamente
+  λ·z*_i·z*_j per sample, solo l'aggregazione (mean vs sum) è sbagliata.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VERIFICA 4  —  Hidden spins / preprocessing h_pre  [Eq. 22 del paper]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STATO: OK
+  Il paper definisce h_offset(θ) come ripetizione di θ con offset crescente d.
+  Nel codice, la funzione offset() in utils.py implementa:
+      theta[index_new % len] + index_new // len * offset_value
+  Che è esattamente θ_i + k·d dove k è il numero di ripetizione.
+  La HiddenNodesInitialization con mode="function" e function=offset
+  è coerente con l'Eq. 22 del paper.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VERIFICA 5  —  Gamma inizializzato e vincolato a triangolare superiore
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STATO: PARZIALMENTE OK (warning)
+  Il gamma viene inizializzato come upper triangular (riga 157):
+      initial_gamma = torch.triu(initial_gamma, diagonal=1)
+
+  E nel backward il gradiente viene mascherato:
+      grad_gamma = utils.make_upper_triangular_torch(grad_gamma)
+
+  Questo è corretto. TUTTAVIA, nel paper i couplings Γ_ij sono definiti
+  per tutte le coppie (i,j)∈E contando ogni coppia una sola volta.
+  Il vincolo triangolare superiore è il modo corretto di implementarlo.
+
+  ATTENZIONE: dopo optimizer.step(), il parametro gamma potrebbe NON
+  rimanere strettamente upper triangular perché Adam modifica tutti gli
+  elementi. Il gradiente è zero per gli elementi non-upper-triangular, ma
+  Adam mantiene momenti per tutti gli elementi, e la combinazione potrebbe
+  causare piccole derive.
+
+MODIFICA SUGGERITA (non critica, ma più pulita):
+  Dopo optimizer.step(), applicare il mask:
+      with torch.no_grad():
+          for module in model.ising_perceptrons_layer:  # o direttamente
+              module.gamma.data = torch.triu(module.gamma.data, diagonal=1)
+
+  Oppure usare un hook post-step per l'optimizer.
+  Questo assicura che gamma resti strictly upper triangular.
+
+
+##############################################################################
+#  SEZIONE 3 — Network_1L.py : verifica coerenza
+##############################################################################
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VERIFICA  —  Architettura Network_1L
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STATO: OK
+  Network_1L (MultiIsingNetwork) è un'estensione naturale del modello del
+  paper: N moduli FullIsingModule in parallelo i cui output vengono
+  combinati da un layer lineare. Questo è coerente con l'approccio del paper
+  di usare il modello Ising come "neurone" base.
+
+  Il combiner_layer (Linear(num_perceptrons, 1)) è un'aggiunta standard
+  che non viola la teoria del paper — aggiunge solo un layer classico
+  dopo i moduli Ising.
+
+  L'inizializzazione con noise (±0.1) sui parametri lambda e offset di
+  ciascun perceptron è una buona pratica per rompere la simmetria.
+
+
+##############################################################################
+#  SEZIONE 4 — test_matrix_xor.py : analisi dettagliata + modifiche richieste
+##############################################################################
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MODIFICA A  —  Rimuovere CONV_THRESHOLD e STABILITY_WINDOW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DOVE:
+  1. Rimuovere le costanti globali (righe 36-37):
+       CONV_THRESHOLD   = 0.85
+       STABILITY_WINDOW = 10
+
+  2. In _train_one(), rimuovere:
+     - La variabile convergence_epoch e il suo tracking (righe 184, 218-219)
+     - Il calcolo di stability (righe 240-243)
+     - Dai return dict: 'loss_stability' e 'convergence_epoch' (righe 255-256)
+
+  3. In run_matrix_experiment(), rimuovere:
+     - stability_matrix e conv_ep_matrix (righe 384, 386)
+     - I riferimenti a stability e convergence_epoch nel logging (righe 419-421)
+     - Le righe che salvano stability e convergence nei record (righe 412, 437)
+     - I CSV e heatmap per stability e convergence (righe 471, 473)
+     - I return dict: 'stability_matrix' e 'conv_epoch_matrix' (righe 517-518)
+
+  4. Dai detailed_records, rimuovere 'loss_stability' e 'convergence_epoch'
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MODIFICA B  —  Aggiungere stampa primi 10 risultati vs label
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DOVE: In _train_one(), dopo la final evaluation (riga 229), aggiungere:
+
+  # Log primi 10 risultati comparati con le label
+  n_show = min(10, len(y_test))
+  log_lines = [
+      f"    {'idx':>4}  {'prob':>8}  {'pred':>6}  {'label':>6}  {'match':>6}"
+  ]
+  for k in range(n_show):
+      match = "OK" if preds[k] == y_test[k] else "MISS"
+      log_lines.append(
+          f"    {k:>4}  {probs[k]:>8.4f}  {preds[k]:>6}  {int(y_test[k]):>6}  {match:>6}"
+      )
+  # (da stampare con il logger passato come parametro o _GLOBAL_LOGGER)
+
+  NOTA: _train_one non ha accesso diretto al logger. Aggiungere
+  _GLOBAL_LOGGER come riferimento oppure passarlo come parametro.
+  Suggerimento: usare _GLOBAL_LOGGER direttamente (è globale nel modulo).
+
+  Esempio di output atteso:
+    --- Primi 10 risultati (test set) ---
+     idx      prob    pred   label  match
+       0    0.7234       1       1     OK
+       1    0.3112       0       0     OK
+       2    0.4891       0       1   MISS
+       ...
+
+  Aggiungere anche nel log di run_matrix_experiment (dopo la riga 422):
+      log.info(f"    Primi 10: pred vs label (vedi log dettagliato)")
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MODIFICA C  —  Aggiungere plot della curva AUC-ROC
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DOVE: In _train_one(), dopo il calcolo dell'AUC (riga 233), aggiungere
+il salvataggio dei dati per la curva ROC. Poi nel run_matrix_experiment,
+generare il plot.
+
+IMPLEMENTAZIONE:
+
+  1. In _train_one(), aggiungere ai return:
+       'probs': probs,
+       'y_test': y_test,
+
+  2. Creare una nuova funzione helper:
+
+     def _plot_roc_curve(
+         y_true, probs, auc_value,
+         title: str, filepath: Path
+     ):
+         """Plot ROC curve per una singola configurazione."""
+         from sklearn.metrics import roc_curve
+         fpr, tpr, _ = roc_curve(y_true, probs)
+         fig, ax = plt.subplots(figsize=(6, 6))
+         ax.plot(fpr, tpr, color='#2563eb', lw=2,
+                 label=f'ROC curve (AUC = {auc_value:.4f})')
+         ax.plot([0, 1], [0, 1], 'k--', lw=1, alpha=0.5)
+         ax.set_xlim([0.0, 1.0])
+         ax.set_ylim([0.0, 1.05])
+         ax.set_xlabel('False Positive Rate', fontweight='bold')
+         ax.set_ylabel('True Positive Rate', fontweight='bold')
+         ax.set_title(title, fontweight='bold')
+         ax.legend(loc='lower right')
+         ax.grid(True, alpha=0.3)
+         plt.tight_layout()
+         plt.savefig(filepath, dpi=300, bbox_inches='tight', facecolor='white')
+         plt.close()
+
+  3. In run_matrix_experiment, dopo aver ottenuto m da _train_one (riga ~407),
+     per la best configuration (o per tutte), generare:
+
+       if not np.isnan(m['auc_roc']) and 'probs' in m:
+           _plot_roc_curve(
+               m['y_test'], m['probs'], m['auc_roc'],
+               f'ROC — nodi={num_nodi} size={node_size}',
+               dim_dir / f'roc_nodi{num_nodi}_size{node_label}.png'
+           )
+
+  4. Opzionalmente, alla fine di run_matrix_experiment, generare un plot
+     ROC aggregato con la migliore configurazione per ogni dimensione.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ERRORE D  —  val_accuracies padding crea metriche fuorvianti
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROBLEMA:
+  Quando do_val è False, val_accuracies viene riempito con l'ultimo valore
+  noto (riga 222). Questo crea una lista dove la maggior parte dei valori
+  sono ripetizioni. Non è un bug ma può essere fuorviante per l'analisi.
+
+SUGGERIMENTO:
+  Tenere due liste separate:
+    - val_accuracies_epochs: [(epoch, accuracy)] per i punti effettivi
+    - val_accuracies: lista piena per il plot (come ora)
+  Oppure semplicemente non salvare val_accuracies nel return dict ma
+  solo gli indici dove è stato effettivamente calcolato.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ERRORE E  —  Nessun seed per il worker threading (non-determinismo)
+File: src/full_ising_model/full_ising_module.py, riga 37-45
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROBLEMA:
+  Il SimulatedAnnealingSampler di neal usa random internamente. Quando
+  si usano più thread worker, i risultati possono non essere riproducibili
+  perché i thread condividono lo stato random o usano seed imprevedibili.
+
+IMPATTO: BASSO. Non causa risultati sbagliati ma rende il debugging difficile.
+
+SUGGERIMENTO: Non critico, ma documentare che con num_workers > 1
+  la riproducibilità non è garantita.
+
+
+##############################################################################
+#  SEZIONE 5 — Problemi minori / inconsistenze
+##############################################################################
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MINOR 1  —  test_xor.py: FullIsingModule passa num_reads come kwarg
+File: Inference/test_xor.py, riga 811
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROBLEMA:
+  In test_xor_2d_full_ising_module():
+      model = FullIsingModule(
+          ...
+          num_reads=params['num_reads'],   # kwarg inatteso
+          ...
+      )
+  FullIsingModule non ha un parametro 'num_reads'. Viene assorbito da
+  **annealer_kwargs e passato ad AnnealerFactory.create(), dove per il
+  tipo SIMULATED viene ignorato (SimulatedAnnealing prende solo settings).
+  Il num_reads è già dentro SA_settings.num_reads.
+
+MODIFICA: Rimuovere `num_reads=params['num_reads']` dalla creazione del modello.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MINOR 2  —  generate_xor_balanced: global seed side effect
+File: Inference/utils/utils.py, riga 20-21
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROBLEMA:
+  np.random.seed(random_seed) modifica lo stato globale di numpy random.
+  Questo può causare effetti collaterali se chiamato da più punti.
+  Non è un bug vero e proprio ma è bad practice.
+
+SUGGERIMENTO: Usare np.random.default_rng(random_seed) per un generatore
+  locale:
+      rng = np.random.default_rng(random_seed)
+      samples = rng.random(size=(...))
+      perm = rng.permutation(...)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MINOR 3  —  Network_1L.py: import numpy non usato come dipendenza diretta
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROBLEMA: numpy viene importato solo per np.random.uniform nell'init.
+  Questo è ok ma è un uso del random globale di numpy.
+
+SUGGERIMENTO: Non prioritario, ma np.random.uniform potrebbe essere
+  sostituito con torch.empty(1).uniform_(-0.1, 0.1).item() per
+  consistenza con l'ecosistema PyTorch.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MINOR 4  —  HiddenNodesInitialization: confronto con == per funzioni
+File: src/full_ising_model/utils.py, righe 42 e 118
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROBLEMA:
+  Il codice usa `self.function == offset` per confrontare oggetti funzione.
+  Questo funziona in Python (le funzioni sono singleton nello stesso modulo)
+  ma è fragile. Se qualcuno riassegna la funzione o la importa diversamente,
+  il confronto potrebbe fallire.
+
+SUGGERIMENTO: Usare `self.function is offset` (identity check) anziché
+  `==` (equality check). È più robusto e semanticamente corretto per
+  confronti di identità di oggetti.
+
+
+##############################################################################
+#  SEZIONE 6 — Riepilogo priorità delle modifiche
+##############################################################################
+
+
+PRIORITÀ ALTA (da fare subito):
+  1. BUG 1: mean → sum in IsingEnergyFunction.backward
+  2. BUG 2: second_input_dim in Network_2L
+  3. BUG 3: sweeps_per_beta → num_sweeps_per_beta
+
+PRIORITÀ MEDIA (migliora qualità):
+  4. MODIFICA A: Rimuovere CONV_THRESHOLD / STABILITY_WINDOW
+  5. MODIFICA B: Aggiungere stampa primi 10 pred vs label
+  6. MODIFICA C: Aggiungere plot curva AUC-ROC
+  7. BUG 4: partition_input remainder handling
+
+PRIORITÀ BASSA (cleanup):
+  8. MINOR 1: num_reads kwarg ridondante
+  9. MINOR 2: global seed → local rng
+  10. MINOR 3: np.random → torch.random
+  11. MINOR 4: == → is per function identity
+  12. VERIFICA 5: gamma triangular enforcement post-step
+
+
+##############################################################################
+#  SEZIONE 7 — Checklist di verifica post-modifiche
+##############################################################################
+
+
+Dopo aver applicato le modifiche:
+
+[ ] 1. Eseguire test_matrix_xor.py su XOR 2D per verificare che il training
+       converga (con lr_gamma aggiustato dopo il fix mean→sum)
+[ ] 2. Verificare che la stampa dei 10 risultati appaia nei log
+[ ] 3. Verificare che il plot ROC venga generato nella directory output
+[ ] 4. Confrontare le accuracy prima/dopo il fix mean→sum su un caso noto
+[ ] 5. Verificare che Network_2L con il fix second_input_dim dia risultati
+       migliori rispetto a prima
+[ ] 6. Controllare che non ci siano più riferimenti a CONV_THRESHOLD o
+       STABILITY_WINDOW nel codice
+
+================================================================================
+  Fine documento
+================================================================================
