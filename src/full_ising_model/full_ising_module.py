@@ -132,7 +132,7 @@ class FullIsingModule(nn.Module):
         offset_init: float = 0.0,
         gamma_init: torch.Tensor | None = None,
         num_workers: int = 1,
-        hidden_nodes_offset_value: float = 0.1,
+        hidden_nodes_offset_value: float = -0.02,
         **annealer_kwargs,
     ):
         super().__init__()

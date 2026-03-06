@@ -636,8 +636,7 @@ def save_global_summary(all_results: list[dict]) -> None:
 if __name__ == '__main__':
     all_results = []
 
-    # for dim in range(1, 7):
-    #     result = run_matrix_experiment(dim)
-    #     all_results.append(result)
-    run_matrix_experiment(2)  # test rapido per debug
+    for dim in range(1, 7):
+        result = run_matrix_experiment(dim)
+        all_results.append(result)
     save_global_summary(all_results)

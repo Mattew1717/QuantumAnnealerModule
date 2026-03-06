@@ -37,6 +37,15 @@ logger = Logger()
 METRICS = ['accuracy', 'precision', 'recall', 'f1', 'auc']
 
 
+def _flatten_logits(logits: torch.Tensor) -> torch.Tensor:
+    """Safely flatten model output to 1D per-sample logits."""
+    if logits.ndim == 1:
+        return logits
+    if logits.ndim == 2 and logits.shape[1] == 1:
+        return logits.squeeze(1)
+    raise ValueError(f"Unexpected model output shape: {logits.shape}")
+
+
 def compute_metrics(y_true, probs):
     """Compute accuracy, precision, recall, F1, AUC from predicted probabilities."""
     preds = (probs >= 0.5).astype(int)
@@ -269,7 +278,7 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
             y_batch = y_batch.to(params['device']).float()
 
             optimizer.zero_grad()
-            pred = model(x_batch).view(-1)
+            pred = _flatten_logits(model(x_batch))
             loss = loss_fn(pred, y_batch)
             loss.backward()
             optimizer.step()
@@ -283,7 +292,7 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
         if (epoch + 1) % val_interval == 0 or epoch == 0 or epoch == params['epochs'] - 1:
             model.eval()
             with torch.no_grad():
-                preds_tensor = model(test_dataset.x.to(params['device'])).view(-1)
+                preds_tensor = _flatten_logits(model(test_dataset.x.to(params['device'])))
                 probs = torch.sigmoid(preds_tensor).cpu().numpy()
                 predictions = np.where(probs < 0.5, 0, 1)
                 epoch_accuracy = accuracy_score(y_test, predictions)
@@ -306,7 +315,7 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
 
     model.eval()
     with torch.no_grad():
-        preds_tensor = model(test_dataset.x.to(params['device'])).view(-1)
+        preds_tensor = _flatten_logits(model(test_dataset.x.to(params['device'])))
         probs = torch.sigmoid(preds_tensor).cpu().numpy()
         predictions = np.where(probs < 0.5, 0, 1)
 
@@ -414,7 +423,7 @@ def train_network_1L(dim, X_train, y_train, X_test, y_test, params, plotter):
             y_batch = y_batch.to(params['device']).float()
 
             optimizer.zero_grad()
-            pred = model(x_batch).view(-1)
+            pred = _flatten_logits(model(x_batch))
             loss = loss_fn(pred, y_batch)
             loss.backward()
             optimizer.step()
@@ -428,7 +437,7 @@ def train_network_1L(dim, X_train, y_train, X_test, y_test, params, plotter):
         if (epoch + 1) % val_interval == 0 or epoch == 0 or epoch == params['epochs'] - 1:
             model.eval()
             with torch.no_grad():
-                preds_tensor = model(test_dataset.x.to(params['device'])).view(-1)
+                preds_tensor = _flatten_logits(model(test_dataset.x.to(params['device'])))
                 probs = torch.sigmoid(preds_tensor).cpu().numpy()
                 predictions = np.where(probs < 0.5, 0, 1)
                 epoch_accuracy = accuracy_score(y_test, predictions)
@@ -451,7 +460,7 @@ def train_network_1L(dim, X_train, y_train, X_test, y_test, params, plotter):
 
     model.eval()
     with torch.no_grad():
-        preds_tensor = model(test_dataset.x.to(params['device'])).view(-1)
+        preds_tensor = _flatten_logits(model(test_dataset.x.to(params['device'])))
         probs = torch.sigmoid(preds_tensor).cpu().numpy()
         predictions = np.where(probs < 0.5, 0, 1)
 
@@ -533,7 +542,7 @@ def train_full_ising_model(dim, X_train, y_train, X_test, y_test, params, plotte
             y_batch = y_batch.to(params['device']).float()
 
             optimizer.zero_grad()
-            pred = model(x_batch).view(-1)
+            pred = _flatten_logits(model(x_batch))
             loss = loss_fn(pred, y_batch)
             loss.backward()
             optimizer.step()
@@ -546,7 +555,7 @@ def train_full_ising_model(dim, X_train, y_train, X_test, y_test, params, plotte
         if (epoch + 1) % val_interval == 0 or epoch == 0 or epoch == params['epochs'] - 1:
             model.eval()
             with torch.no_grad():
-                preds_tensor = model(test_dataset.x.to(params['device'])).view(-1)
+                preds_tensor = _flatten_logits(model(test_dataset.x.to(params['device'])))
                 probs = torch.sigmoid(preds_tensor).cpu().numpy()
                 predictions = np.where(probs < 0.5, 0, 1)
                 epoch_accuracy = accuracy_score(y_test, predictions)
@@ -567,7 +576,7 @@ def train_full_ising_model(dim, X_train, y_train, X_test, y_test, params, plotte
 
     model.eval()
     with torch.no_grad():
-        preds_tensor = model(test_dataset.x.to(params['device'])).view(-1)
+        preds_tensor = _flatten_logits(model(test_dataset.x.to(params['device'])))
         probs = torch.sigmoid(preds_tensor).cpu().numpy()
         predictions = np.where(probs < 0.5, 0, 1)
 
@@ -838,7 +847,7 @@ def test_xor_2d_full_ising_module(params=None, plotter=None):
             y_batch = y_batch.to(params['device']).float()
 
             optimizer.zero_grad()
-            pred = model(x_batch).view(-1)
+            pred = _flatten_logits(model(x_batch))
             loss = loss_fn(pred, y_batch)
             loss.backward()
             optimizer.step()
@@ -851,7 +860,7 @@ def test_xor_2d_full_ising_module(params=None, plotter=None):
         # Validation at each epoch (small datasets)
         model.eval()
         with torch.no_grad():
-            preds_tensor = model(test_dataset.x.to(params['device'])).view(-1)
+            preds_tensor = _flatten_logits(model(test_dataset.x.to(params['device'])))
             probs = torch.sigmoid(preds_tensor).cpu().numpy()
             predictions = np.where(probs < 0.5, 0, 1)
             epoch_accuracy = accuracy_score(y_test, predictions)
@@ -867,7 +876,7 @@ def test_xor_2d_full_ising_module(params=None, plotter=None):
 
     model.eval()
     with torch.no_grad():
-        preds_tensor = model(test_dataset.x.to(params['device'])).view(-1)
+        preds_tensor = _flatten_logits(model(test_dataset.x.to(params['device'])))
         probs = torch.sigmoid(preds_tensor).cpu().numpy()
         predictions = np.where(probs < 0.5, 0, 1)
 
