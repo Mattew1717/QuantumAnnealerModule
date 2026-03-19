@@ -25,10 +25,11 @@ from Inference.utils.logger import Logger
 from Inference.utils.utils import generate_xor_balanced
 from ModularNetwork.Network_1L import MultiIsingNetwork
 from full_ising_model.annealers import AnnealingSettings, AnnealerType
+from full_ising_model.full_ising_module import FullIsingModule
 from torch.utils.data import DataLoader, TensorDataset
 
 # ─── grid configuration ───────────────────────────────────────────────────────
-NUM_NODI_LIST    = [2, 3, 5, 8, 10, 15]   # num_ising_perceptrons
+NUM_NODI_LIST    = [1, 2, 3, 5, 8, 10, 15]   # num_ising_perceptrons
 MULTIPLIERS      = [1, 2, 3, 4]            # proportional node sizes (× num_features)
 FIXED_SIZES      = [10, 20, 30, 40, 50]    # fixed node sizes
 
@@ -275,6 +276,8 @@ def _heatmap(
     vmin: float = 0.0,
     vmax: float = 1.0,
     cbar_label: str = '',
+    xlabel: str = 'Node size  (size_annealer)',
+    ylabel: str = 'Num perceptrons  (num_nodi)',
 ):
     """Generic heatmap saver."""
     fig, ax = plt.subplots(
@@ -297,8 +300,8 @@ def _heatmap(
         annot_kws={'size': 9},
         cbar_kws={'label': cbar_label} if cbar_label else {},
     )
-    ax.set_xlabel('Node size  (size_annealer)', fontweight='bold')
-    ax.set_ylabel('Num perceptrons  (num_nodi)', fontweight='bold')
+    ax.set_xlabel(xlabel, fontweight='bold')
+    ax.set_ylabel(ylabel, fontweight='bold')
     ax.set_title(title, fontweight='bold', pad=12)
     plt.tight_layout()
     plt.savefig(filepath, dpi=300, bbox_inches='tight', facecolor='white')
@@ -311,6 +314,8 @@ def _timing_heatmap(
     col_labels: list,
     title: str,
     filepath: Path,
+    xlabel: str = 'Node size  (size_annealer)',
+    ylabel: str = 'Num perceptrons  (num_nodi)',
 ):
     """Heatmap for training time (seconds), with string annotations."""
     annot = np.vectorize(
@@ -332,8 +337,8 @@ def _timing_heatmap(
         annot_kws={'size': 9},
         cbar_kws={'label': 'seconds'},
     )
-    ax.set_xlabel('Node size  (size_annealer)', fontweight='bold')
-    ax.set_ylabel('Num perceptrons  (num_nodi)', fontweight='bold')
+    ax.set_xlabel(xlabel, fontweight='bold')
+    ax.set_ylabel(ylabel, fontweight='bold')
     ax.set_title(title, fontweight='bold', pad=12)
     plt.tight_layout()
     plt.savefig(filepath, dpi=300, bbox_inches='tight', facecolor='white')
@@ -394,6 +399,10 @@ def run_matrix_experiment(xor_dim: int) -> dict:
              f"= {len(NUM_NODI_LIST) * len(node_configs)} configurations")
 
     col_labels  = [lbl for _, lbl in node_configs]
+    plot_col_labels = [
+        f"{lbl}\n({size} nodes)" if lbl.endswith('F') else lbl
+        for size, lbl in node_configs
+    ]
     row_labels  = [str(n) for n in NUM_NODI_LIST]
     n_rows      = len(NUM_NODI_LIST)
     n_cols      = len(node_configs)
@@ -497,19 +506,19 @@ def run_matrix_experiment(xor_dim: int) -> dict:
     )
 
     # ── heatmaps ───────────────────────────────────────────────────────────────
-    _heatmap(acc_matrix,  row_labels, col_labels,
+    _heatmap(acc_matrix,  row_labels, plot_col_labels,
              f'Accuracy — XOR {xor_dim}D',        dim_dir / 'accuracy_heatmap.png',
              cmap='YlOrRd', cbar_label='Accuracy')
-    _heatmap(f1_matrix,   row_labels, col_labels,
+    _heatmap(f1_matrix,   row_labels, plot_col_labels,
              f'F1-Score — XOR {xor_dim}D',         dim_dir / 'f1_heatmap.png',
              cmap='Blues',  cbar_label='F1-Score')
-    _heatmap(auc_matrix,  row_labels, col_labels,
+    _heatmap(auc_matrix,  row_labels, plot_col_labels,
              f'AUC-ROC — XOR {xor_dim}D',          dim_dir / 'auc_heatmap.png',
              cmap='Greens', cbar_label='AUC-ROC')
-    _heatmap(best_val_matrix, row_labels, col_labels,
+    _heatmap(best_val_matrix, row_labels, plot_col_labels,
              f'Best Val Accuracy — XOR {xor_dim}D', dim_dir / 'best_val_heatmap.png',
              cmap='Purples', cbar_label='Best Val Acc')
-    _timing_heatmap(time_matrix, row_labels, col_labels,
+    _timing_heatmap(time_matrix, row_labels, plot_col_labels,
                     f'Training Time (s) — XOR {xor_dim}D', dim_dir / 'timing_heatmap.png')
 
     # ── console summary ────────────────────────────────────────────────────────
@@ -631,12 +640,344 @@ def save_global_summary(all_results: list[dict]) -> None:
     log.info(f"\n  All outputs in: {_OUTPUT_ROOT.resolve()}")
 
 
+# ─── FullIsingModule helpers & matrix experiment ──────────────────────────────
+
+def _train_one_fullIsing(
+    node_size: int,
+    X_train, y_train,
+    X_test,  y_test,
+    params: dict,
+) -> dict:
+    """
+    Train one FullIsingModule configuration (size_annealer = node_size).
+
+    Returns a dict with the same scalar metrics and epoch histories as
+    _train_one, so the two can be compared on equal footing.
+    """
+    t0  = perf_counter()
+    dev = params['device']
+
+    torch.manual_seed(params['random_seed'])
+    np.random.seed(params['random_seed'])
+
+    train_loader = _make_loader(X_train, y_train, params)
+    ex = torch.tensor(X_test, dtype=torch.float32)
+
+    SA_settings                     = AnnealingSettings()
+    SA_settings.beta_range          = params['sa_beta_range']
+    SA_settings.num_reads           = params['num_reads']
+    SA_settings.num_sweeps          = params['sa_num_sweeps']
+    SA_settings.num_sweeps_per_beta = params['sa_sweeps_per_beta']
+
+    model = FullIsingModule(
+        size_annealer=node_size,
+        annealer_type=AnnealerType.SIMULATED,
+        annealing_settings=SA_settings,
+        lambda_init=params['lambda_init'],
+        offset_init=params['offset_init'],
+    ).to(dev)
+
+    n_params = sum(p.numel() for p in model.parameters())
+
+    optimizer = torch.optim.Adam([
+        {'params': [model.gamma],  'lr': params['lr_gamma']},
+        {'params': [model.lmd],    'lr': params['lr_lambda']},
+        {'params': [model.offset], 'lr': params['lr_offset']},
+    ])
+    loss_fn = torch.nn.BCEWithLogitsLoss()
+
+    training_losses = []
+    val_accuracies  = []
+    best_val_acc    = 0.0
+    val_interval    = params['val_interval']
+
+    for epoch in range(params['epochs']):
+        model.train()
+        batch_losses = []
+        for xb, yb in train_loader:
+            xb = xb.to(dev)
+            yb = yb.to(dev).float()
+            optimizer.zero_grad()
+            logits = model(xb).view(-1)
+            loss   = loss_fn(logits, yb)
+            loss.backward()
+            optimizer.step()
+            batch_losses.append(loss.item())
+
+        avg_loss = float(np.mean(batch_losses)) if batch_losses else 0.0
+        training_losses.append(avg_loss)
+
+        do_val = (
+            (epoch + 1) % val_interval == 0
+            or epoch == 0
+            or epoch == params['epochs'] - 1
+        )
+        if do_val:
+            model.eval()
+            with torch.no_grad():
+                probs   = torch.sigmoid(model(ex.to(dev)).view(-1)).cpu().numpy()
+                preds   = (probs >= 0.5).astype(int)
+                val_acc = accuracy_score(y_test, preds)
+            val_accuracies.append(val_acc)
+            if val_acc > best_val_acc:
+                best_val_acc = val_acc
+        else:
+            val_accuracies.append(val_accuracies[-1] if val_accuracies else 0.0)
+
+    model.eval()
+    with torch.no_grad():
+        probs = torch.sigmoid(model(ex.to(dev)).view(-1)).cpu().numpy()
+    preds     = (probs >= 0.5).astype(int)
+    final_acc = accuracy_score(y_test, preds)
+    f1        = f1_score(y_test, preds, average='binary', zero_division=0)
+    try:
+        auc = roc_auc_score(y_test, probs)
+    except Exception:
+        auc = float('nan')
+
+    log    = _GLOBAL_LOGGER
+    n_show = min(10, len(y_test))
+    log.info(f"    --- Primi {n_show} risultati (test set) ---")
+    log.info(f"    {'idx':>4}  {'prob':>8}  {'pred':>6}  {'label':>6}  {'match':>6}")
+    for k in range(n_show):
+        match = "OK" if preds[k] == int(y_test[k]) else "MISS"
+        log.info(
+            f"    {k:>4}  {probs[k]:>8.4f}  {preds[k]:>6}  {int(y_test[k]):>6}  {match:>6}"
+        )
+
+    final_loss = training_losses[-1] if training_losses else float('nan')
+    min_loss   = min(training_losses) if training_losses else float('nan')
+    elapsed    = perf_counter() - t0
+
+    return {
+        'accuracy':        final_acc,
+        'f1':              f1,
+        'auc_roc':         auc,
+        'best_val_acc':    best_val_acc,
+        'final_loss':      final_loss,
+        'min_loss':        min_loss,
+        'training_time_s': elapsed,
+        'n_params':        n_params,
+        'probs':           probs,
+        'y_test':          y_test,
+        'training_losses': training_losses,
+        'val_accuracies':  val_accuracies,
+    }
+
+
+def test_matrix_fullIsing() -> dict:
+    """
+    Matrix experiment for FullIsingModule on XOR 1D–6D.
+
+    Grid:
+      rows → XOR dimension  (1D … 6D)
+      cols → node sizes: proportional to dim (x1F–x4F) + fixed (FIXED_SIZES)
+
+    For proportional columns (x1F–x4F) the actual size_annealer equals
+    multiplier × dim, so the same column label represents different absolute
+    sizes across rows.  This mirrors _node_size_configs() used in
+    run_matrix_experiment and keeps the comparison semantically consistent.
+
+    Output (under _OUTPUT_ROOT / "fullIsing_matrix"):
+      *.csv               – metric matrices + per-cell detailed metrics
+      *_heatmap.png       – accuracy / F1 / AUC-ROC / best-val / timing
+      roc_dim*_size*.png  – ROC curves (one per grid cell)
+    """
+    params  = _get_params()
+    log     = _GLOBAL_LOGGER
+    out_dir = _OUTPUT_ROOT / "fullIsing_matrix"
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    log.info(f"\n{'='*80}")
+    log.info(f"  FULLISING MATRIX EXPERIMENT  —  XOR 1D–6D"
+             f"    [{datetime.now().strftime('%H:%M:%S')}]")
+    log.info(f"{'='*80}")
+    log.info(f"  Device  : {params['device']}")
+    log.info(f"  Epochs  : {params['epochs']}")
+    log.info(f"  Batch   : {params['batch_size']}")
+    log.info(f"  LR      : γ={params['lr_gamma']}  λ={params['lr_lambda']}  "
+             f"off={params['lr_offset']}")
+    log.info(f"  SA      : β={params['sa_beta_range']}  reads={params['num_reads']}  "
+             f"sweeps={params['sa_num_sweeps']}")
+    log.info(f"  Samples : {params['n_samples_per_region']} / region  "
+             f"(test_size={params['test_size']})")
+
+    xor_dims   = list(range(1, 7))
+    row_labels = [f"{d}D" for d in xor_dims]
+
+    # Column labels are fixed; actual sizes for proportional cols vary per row.
+    prop_labels  = [f"x{m}F" for m in MULTIPLIERS]
+    fixed_labels = [str(s) for s in FIXED_SIZES]
+    col_labels   = prop_labels + fixed_labels
+
+    n_rows = len(xor_dims)
+    n_cols = len(col_labels)
+
+    log.info(f"  Grid    : {n_rows} dims × {n_cols} node-sizes"
+             f" = {n_rows * n_cols} configurations")
+
+    acc_matrix      = np.full((n_rows, n_cols), np.nan)
+    f1_matrix       = np.full((n_rows, n_cols), np.nan)
+    auc_matrix      = np.full((n_rows, n_cols), np.nan)
+    time_matrix     = np.full((n_rows, n_cols), np.nan)
+    best_val_matrix = np.full((n_rows, n_cols), np.nan)
+
+    detailed_records = []
+    total_configs    = n_rows * n_cols
+    done             = 0
+    exp_start        = perf_counter()
+
+    for i, dim in enumerate(xor_dims):
+        X_train, X_test, y_train, y_test = _prepare_data(dim, params)
+        num_features = X_train.shape[1]          # == dim
+        node_configs = _node_size_configs(num_features)
+
+        log.info(f"\n  --- XOR {dim}D  "
+                 f"(train={len(y_train)}  test={len(y_test)}) ---")
+
+        for j, (node_size, node_label) in enumerate(node_configs):
+            done += 1
+            log.info(
+                f"\n  [{done:3d}/{total_configs}]  "
+                f"xor_dim={dim}  node_size={node_size:3d} ({node_label:4s})"
+            )
+            try:
+                m = _train_one_fullIsing(
+                    node_size,
+                    X_train, y_train,
+                    X_test,  y_test,
+                    params,
+                )
+                acc_matrix[i, j]      = m['accuracy']
+                f1_matrix[i, j]       = m['f1']
+                auc_matrix[i, j]      = m['auc_roc']
+                time_matrix[i, j]     = m['training_time_s']
+                best_val_matrix[i, j] = m['best_val_acc']
+
+                log.info(
+                    f"    acc={m['accuracy']:.4f}  f1={m['f1']:.4f}  "
+                    f"auc={m['auc_roc']:.4f}  best_val={m['best_val_acc']:.4f}\n"
+                    f"    min_loss={m['min_loss']:.4f}  final_loss={m['final_loss']:.4f}  "
+                    f"time={m['training_time_s']:.1f}s  params={m['n_params']}"
+                )
+
+                if not np.isnan(m['auc_roc']):
+                    _plot_roc_curve(
+                        m['y_test'], m['probs'], m['auc_roc'],
+                        f'ROC — size={node_size} (XOR {dim}D) — FullIsingModule',
+                        out_dir / f'roc_dim{dim}_size{node_label}.png',
+                    )
+
+                detailed_records.append({
+                    'xor_dim':         dim,
+                    'node_size':       node_size,
+                    'node_size_label': node_label,
+                    'accuracy':        m['accuracy'],
+                    'f1':              m['f1'],
+                    'auc_roc':         m['auc_roc'],
+                    'best_val_acc':    m['best_val_acc'],
+                    'final_loss':      m['final_loss'],
+                    'min_loss':        m['min_loss'],
+                    'training_time_s': m['training_time_s'],
+                    'n_params':        m['n_params'],
+                    'error':           '',
+                })
+
+            except Exception as e:
+                log.error(f"    ERROR: {e}")
+                traceback.print_exc()
+                detailed_records.append({
+                    'xor_dim': dim, 'node_size': node_size,
+                    'node_size_label': node_label,
+                    'accuracy': np.nan, 'f1': np.nan, 'auc_roc': np.nan,
+                    'best_val_acc': np.nan, 'final_loss': np.nan,
+                    'min_loss': np.nan, 'training_time_s': np.nan,
+                    'n_params': np.nan, 'error': str(e),
+                })
+
+    exp_elapsed = perf_counter() - exp_start
+    log.info(
+        f"\n  FullIsingModule matrix completed in {exp_elapsed:.1f}s"
+        f" ({exp_elapsed/60:.1f} min)"
+    )
+
+    # ── save CSV matrices ──────────────────────────────────────────────────────
+    def _save_mat(mat, name):
+        df = pd.DataFrame(mat, index=row_labels, columns=col_labels)
+        df.index.name = 'xor_dim'
+        df.to_csv(out_dir / f"{name}.csv")
+        return df
+
+    df_acc  = _save_mat(acc_matrix,      'accuracy_matrix')
+    df_f1   = _save_mat(f1_matrix,       'f1_matrix')
+    df_auc  = _save_mat(auc_matrix,      'auc_matrix')
+    df_time = _save_mat(time_matrix,     'timing_matrix')
+    df_bval = _save_mat(best_val_matrix, 'best_val_matrix')
+
+    pd.DataFrame(detailed_records).to_csv(
+        out_dir / 'detailed_metrics.csv', index=False
+    )
+
+    # ── heatmaps ───────────────────────────────────────────────────────────────
+    _x = 'Node size  (size_annealer)'
+    _y = 'XOR dimension'
+
+    _heatmap(acc_matrix,  row_labels, col_labels,
+             'Accuracy — FullIsingModule — XOR 1D–6D',
+             out_dir / 'accuracy_heatmap.png',
+             cmap='YlOrRd', cbar_label='Accuracy', xlabel=_x, ylabel=_y)
+    _heatmap(f1_matrix,   row_labels, col_labels,
+             'F1-Score — FullIsingModule — XOR 1D–6D',
+             out_dir / 'f1_heatmap.png',
+             cmap='Blues',  cbar_label='F1-Score', xlabel=_x, ylabel=_y)
+    _heatmap(auc_matrix,  row_labels, col_labels,
+             'AUC-ROC — FullIsingModule — XOR 1D–6D',
+             out_dir / 'auc_heatmap.png',
+             cmap='Greens', cbar_label='AUC-ROC', xlabel=_x, ylabel=_y)
+    _heatmap(best_val_matrix, row_labels, col_labels,
+             'Best Val Accuracy — FullIsingModule — XOR 1D–6D',
+             out_dir / 'best_val_heatmap.png',
+             cmap='Purples', cbar_label='Best Val Acc', xlabel=_x, ylabel=_y)
+    _timing_heatmap(time_matrix, row_labels, col_labels,
+                    'Training Time (s) — FullIsingModule — XOR 1D–6D',
+                    out_dir / 'timing_heatmap.png',
+                    xlabel=_x, ylabel=_y)
+
+    # ── console summary ────────────────────────────────────────────────────────
+    log.info(f"\n{'─'*70}")
+    log.info("  ACCURACY MATRIX  (rows=xor_dim, cols=node_size)  FullIsingModule")
+    log.info(f"{'─'*70}")
+    log.info(df_acc.to_string())
+
+    if not np.all(np.isnan(acc_matrix)):
+        best_idx = np.unravel_index(np.nanargmax(acc_matrix), acc_matrix.shape)
+        log.info(
+            f"\n  BEST CONFIG:  xor_dim={xor_dims[best_idx[0]]}D  "
+            f"node_size={col_labels[best_idx[1]]}  "
+            f"→  acc={acc_matrix[best_idx]:.4f}"
+        )
+    log.info(f"  Output dir: {out_dir}")
+
+    return {
+        'accuracy_matrix':   acc_matrix,
+        'f1_matrix':         f1_matrix,
+        'auc_matrix':        auc_matrix,
+        'time_matrix':       time_matrix,
+        'best_val_matrix':   best_val_matrix,
+        'row_labels':        row_labels,
+        'col_labels':        col_labels,
+        'detailed_records':  detailed_records,
+    }
+
+
 # ─── entry point ──────────────────────────────────────────────────────────────
 
 if __name__ == '__main__':
     all_results = []
 
-    for dim in range(1, 7):
-        result = run_matrix_experiment(dim)
-        all_results.append(result)
-    save_global_summary(all_results)
+    # for dim in range(1, 7):
+    #     result = run_matrix_experiment(dim)
+    #     all_results.append(result)
+    # save_global_summary(all_results)
+
+    test_matrix_fullIsing()

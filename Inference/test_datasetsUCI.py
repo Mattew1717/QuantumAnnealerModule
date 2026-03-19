@@ -8,7 +8,7 @@ from datetime import datetime
 import pandas as pd
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 import dotenv
-from scipy.stats import wilcoxon
+from scipy.stats import wilcoxon, ttest_rel
 
 # Load environment variables
 dotenv.load_dotenv()
@@ -182,7 +182,7 @@ def train_single_model(X_train, y_train, X_test, y_test, params):
 
         avg_loss = float(np.mean(epoch_losses)) if epoch_losses else 0.0
         training_losses.append(avg_loss)
-        if epoch % 1 == 0:
+        if epoch % 10 == 0:
                 logger.info(f"Epoch {epoch+1}/{params['epochs']} | Loss: {avg_loss:.4f}")
         # Evaluate on validation set
         model.eval()
@@ -348,6 +348,44 @@ def train_neural_net(X_train, y_train, X_test, y_test, params):
     return final_accuracy, final_probs, training_losses, validation_accuracies
 
 
+def paired_ttest_kfold(single_fold_metrics, neural_fold_metrics, dataset_name):
+    """
+    Paired t-test (ttest_rel) between FullIsingModel and IsingNet across the same K folds.
+
+    Args:
+        single_fold_metrics: dict {metric: [fold_0_val, ..., fold_k_val]} for FullIsingModule
+        neural_fold_metrics:  dict {metric: [fold_0_val, ..., fold_k_val]} for MultiIsingNetwork
+        dataset_name:         str, used for logging
+
+    Returns:
+        results: dict {metric: {'statistic': float, 'p_value': float, 'significant': bool}}
+    """
+    results = {}
+    logger.info(f"\n[Paired t-test] Dataset: {dataset_name}")
+    logger.info(f"  {'Metric':<12} {'t-stat':>10} {'p-value':>10} {'Significant':>12}")
+    logger.info(f"  {'-'*46}")
+
+    for metric in METRICS:
+        a = np.array(single_fold_metrics[metric], dtype=float)
+        b = np.array(neural_fold_metrics[metric], dtype=float)
+
+        # Skip if any NaN or fewer than 2 folds
+        valid = ~(np.isnan(a) | np.isnan(b))
+        if valid.sum() < 2:
+            logger.info(f"  {metric:<12} {'N/A':>10} {'N/A':>10} {'insufficient data':>12}")
+            results[metric] = {'statistic': float('nan'), 'p_value': float('nan'), 'significant': False}
+            continue
+
+        stat, p_value = ttest_rel(a[valid], b[valid])
+        significant = p_value < 0.05
+        results[metric] = {'statistic': stat, 'p_value': p_value, 'significant': significant}
+
+        sig_marker = '* (p<0.05)' if significant else 'ns'
+        logger.info(f"  {metric:<12} {stat:>10.4f} {p_value:>10.4f} {sig_marker:>12}")
+
+    return results
+
+
 def compare_models():
     """Compare Single Ising Model vs Neural Ising Network on all datasets using K-Fold CV."""
 
@@ -447,6 +485,9 @@ def compare_models():
 
             logger.info(f"\nResults | Single: {mean_acc_s:.4f}±{std_acc_s:.4f} | Neural: {mean_acc_n:.4f}±{std_acc_n:.4f} | Diff: {mean_acc_n - mean_acc_s:+.4f}\n")
 
+            # Paired t-test on same folds
+            paired_ttest_kfold(single_fold_metrics, neural_fold_metrics, name)
+
             # Plot loss/accuracy for this dataset (using first fold)
             plotter.plot_loss_accuracy(single_losses[0], single_val_accs_all[0], f"{name}_single")
             plotter.plot_loss_accuracy(neural_losses[0], neural_val_accs_all[0], f"{name}_neural")
@@ -541,17 +582,291 @@ def compare_models():
     logger.info(f"All plots saved to {plotter.output_dir}")
 
 
+def iris_matrix():
+    """
+    Matrix experiment on Iris (versicolor vs virginica):
+      rows = num_ising_perceptrons  (NUM_NODI_LIST)
+      cols = size_annealer          (_node_size_configs)
+    Single train/test split, no K-fold.
+    """
+    import traceback
+    import matplotlib
+    matplotlib.use("Agg")
+    from pathlib import Path
+    from time import perf_counter
+    from sklearn.model_selection import train_test_split
+    from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
+    from torch.utils.data import DataLoader, TensorDataset
+    from Inference.test_matrix_xor import (
+        NUM_NODI_LIST, _node_size_configs,
+        _heatmap, _timing_heatmap, _plot_roc_curve,
+    )
+
+    params = get_env_params()
+    run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_dir = Path(f"plots_iris_matrix_{run_timestamp}")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    local_logger = Logger(log_dir=str(output_dir))
+
+    # ── load iris ──────────────────────────────────────────────────────────────
+    iris_path = os.path.join(os.path.dirname(__file__), 'Datasets', '00_iris_versicolor_virginica.csv')
+    X, y = DatasetManager().load_csv_dataset(iris_path)
+
+    # ── single train/test split ───────────────────────────────────────────────
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y,
+        test_size=0.2,
+        random_state=params['random_seed'],
+        stratify=y,
+    )
+    # standardize (fit on train only)
+    mean = X_train.mean(axis=0)
+    std  = X_train.std(axis=0)
+    std[std == 0] = 1e-8
+    X_train = (X_train - mean) / std
+    X_test  = (X_test  - mean) / std
+
+    num_features = X_train.shape[1]
+    node_configs = _node_size_configs(num_features)
+    col_labels   = [lbl for _, lbl in node_configs]
+    plot_col_labels = [
+        f"{lbl}\n({size} nodes)" if lbl.endswith('F') else lbl
+        for size, lbl in node_configs
+    ]
+    row_labels   = [str(n) for n in NUM_NODI_LIST]
+    n_rows       = len(NUM_NODI_LIST)
+    n_cols       = len(node_configs)
+
+    local_logger.info(f"\n{'='*80}")
+    local_logger.info(f"  IRIS MATRIX EXPERIMENT  [{datetime.now().strftime('%H:%M:%S')}]")
+    local_logger.info(f"{'='*80}")
+    local_logger.info(f"  Train: {len(y_train)} samples  |  Test: {len(y_test)} samples")
+    local_logger.info(f"  Grid : {n_rows} × {n_cols} = {n_rows * n_cols} configurations")
+
+    # ── result matrices ───────────────────────────────────────────────────────
+    acc_matrix       = np.full((n_rows, n_cols), np.nan)
+    f1_matrix        = np.full((n_rows, n_cols), np.nan)
+    auc_matrix       = np.full((n_rows, n_cols), np.nan)
+    time_matrix      = np.full((n_rows, n_cols), np.nan)
+    best_val_matrix  = np.full((n_rows, n_cols), np.nan)
+    detailed_records = []
+    total_configs    = n_rows * n_cols
+    done             = 0
+
+    # ── annealing settings (shared across all configs) ────────────────────────
+    SA_settings                     = AnnealingSettings()
+    SA_settings.beta_range          = params['sa_beta_range']
+    SA_settings.num_reads           = params['sa_num_reads']
+    SA_settings.num_sweeps          = params['sa_num_sweeps']
+    SA_settings.num_sweeps_per_beta = params['sa_sweeps_per_beta']
+
+    val_interval = int(os.getenv('VALIDATION_INTERVAL', 5))
+    exp_start    = perf_counter()
+
+    for i, num_nodi in enumerate(NUM_NODI_LIST):
+        for j, (node_size, node_label) in enumerate(node_configs):
+            done += 1
+            local_logger.info(
+                f"\n  [{done:3d}/{total_configs}]  "
+                f"num_nodi={num_nodi:3d}  node_size={node_size:3d} ({node_label:4s})"
+            )
+            try:
+                t0  = perf_counter()
+                dev = params['device']
+                torch.manual_seed(params['random_seed'])
+                np.random.seed(params['random_seed'])
+
+                # data tensors
+                tx = torch.tensor(X_train, dtype=torch.float32)
+                ty = torch.tensor(y_train, dtype=torch.float32)
+                train_loader = DataLoader(
+                    TensorDataset(tx, ty),
+                    batch_size=params['batch_size'],
+                    shuffle=True,
+                )
+                ex = torch.tensor(X_test, dtype=torch.float32)
+
+                # model
+                model = MultiIsingNetwork(
+                    num_ising_perceptrons=num_nodi,
+                    size_annealer=node_size,
+                    annealing_settings=SA_settings,
+                    annealer_type=AnnealerType.SIMULATED,
+                    lambda_init=params['lambda_init'],
+                    offset_init=params['offset_init'],
+                    partition_input=False,
+                ).to(dev)
+
+                n_params = sum(p.numel() for p in model.parameters())
+
+                # grouped optimizer
+                optim_groups = []
+                for module in model.ising_perceptrons_layer:
+                    optim_groups += [
+                        {'params': [module.gamma],  'lr': params['lr_gamma']},
+                        {'params': [module.lmd],    'lr': params['lr_lambda']},
+                        {'params': [module.offset], 'lr': params['lr_offset']},
+                    ]
+                optim_groups.append({
+                    'params': model.combiner_layer.parameters(),
+                    'lr': params['lr_combiner'],
+                })
+                optimizer = torch.optim.Adam(optim_groups)
+                loss_fn   = torch.nn.BCEWithLogitsLoss()
+
+                # training loop
+                training_losses = []
+                val_accuracies  = []
+                best_val_acc    = 0.0
+
+                for epoch in range(params['epochs']):
+                    model.train()
+                    batch_losses = []
+                    for xb, yb in train_loader:
+                        xb = xb.to(dev)
+                        yb = yb.to(dev).float()
+                        optimizer.zero_grad()
+                        loss = loss_fn(model(xb).view(-1), yb)
+                        loss.backward()
+                        optimizer.step()
+                        batch_losses.append(loss.item())
+
+                    avg_loss = float(np.mean(batch_losses)) if batch_losses else 0.0
+                    training_losses.append(avg_loss)
+
+                    do_val = (
+                        (epoch + 1) % val_interval == 0
+                        or epoch == 0
+                        or epoch == params['epochs'] - 1
+                    )
+                    if do_val:
+                        model.eval()
+                        with torch.no_grad():
+                            logits    = model(ex.to(dev)).view(-1)
+                            probs_val = torch.sigmoid(logits).cpu().numpy()
+                            val_acc   = accuracy_score(y_test, (probs_val >= 0.5).astype(int))
+                        val_accuracies.append(val_acc)
+                        if val_acc > best_val_acc:
+                            best_val_acc = val_acc
+                    else:
+                        val_accuracies.append(val_accuracies[-1] if val_accuracies else 0.0)
+
+                # final evaluation
+                model.eval()
+                with torch.no_grad():
+                    logits = model(ex.to(dev)).view(-1)
+                    probs  = torch.sigmoid(logits).cpu().numpy()
+                preds     = (probs >= 0.5).astype(int)
+                final_acc = accuracy_score(y_test, preds)
+                f1        = f1_score(y_test, preds, average='binary', zero_division=0)
+                try:
+                    auc = roc_auc_score(y_test, probs)
+                except Exception:
+                    auc = float('nan')
+
+                final_loss = training_losses[-1] if training_losses else float('nan')
+                min_loss   = min(training_losses)  if training_losses else float('nan')
+                elapsed    = perf_counter() - t0
+
+                acc_matrix[i, j]      = final_acc
+                f1_matrix[i, j]       = f1
+                auc_matrix[i, j]      = auc
+                time_matrix[i, j]     = elapsed
+                best_val_matrix[i, j] = best_val_acc
+
+                local_logger.info(
+                    f"    acc={final_acc:.4f}  f1={f1:.4f}  auc={auc:.4f}  "
+                    f"best_val={best_val_acc:.4f}  min_loss={min_loss:.4f}  "
+                    f"final_loss={final_loss:.4f}  time={elapsed:.1f}s  params={n_params}"
+                )
+
+                if not np.isnan(auc):
+                    _plot_roc_curve(
+                        y_test, probs, auc,
+                        f'ROC — nodi={num_nodi} size={node_size} (Iris)',
+                        output_dir / f'roc_nodi{num_nodi}_size{node_label}.png',
+                    )
+
+                detailed_records.append({
+                    'num_nodi':         num_nodi,
+                    'node_size':        node_size,
+                    'node_size_label':  node_label,
+                    'accuracy':         final_acc,
+                    'f1':               f1,
+                    'auc_roc':          auc,
+                    'best_val_acc':     best_val_acc,
+                    'final_loss':       final_loss,
+                    'min_loss':         min_loss,
+                    'training_time_s':  elapsed,
+                    'n_params':         n_params,
+                    'error':            '',
+                })
+
+            except Exception as e:
+                local_logger.error(f"    ERROR: {e}")
+                traceback.print_exc()
+                detailed_records.append({
+                    'num_nodi': num_nodi, 'node_size': node_size,
+                    'node_size_label': node_label,
+                    'accuracy': np.nan, 'f1': np.nan, 'auc_roc': np.nan,
+                    'best_val_acc': np.nan, 'final_loss': np.nan,
+                    'min_loss': np.nan, 'training_time_s': np.nan,
+                    'n_params': np.nan, 'error': str(e),
+                })
+
+    exp_elapsed = perf_counter() - exp_start
+    local_logger.info(f"\n  Iris grid completed in {exp_elapsed:.1f}s ({exp_elapsed/60:.1f} min)")
+
+    # ── save CSV matrices ──────────────────────────────────────────────────────
+    def _save_mat(mat, name):
+        df = pd.DataFrame(mat, index=row_labels, columns=col_labels)
+        df.index.name = 'num_nodi'
+        df.to_csv(output_dir / f"{name}.csv")
+        return df
+
+    df_acc  = _save_mat(acc_matrix,      'accuracy_matrix')
+    _save_mat(f1_matrix,       'f1_matrix')
+    _save_mat(auc_matrix,      'auc_matrix')
+    _save_mat(time_matrix,     'timing_matrix')
+    _save_mat(best_val_matrix, 'best_val_matrix')
+    pd.DataFrame(detailed_records).to_csv(output_dir / 'detailed_metrics.csv', index=False)
+
+    # ── heatmaps ───────────────────────────────────────────────────────────────
+    _heatmap(acc_matrix,      row_labels, plot_col_labels,
+             'Accuracy — Iris',       output_dir / 'accuracy_heatmap.png',
+             cmap='YlOrRd', cbar_label='Accuracy')
+    _heatmap(f1_matrix,       row_labels, plot_col_labels,
+             'F1-Score — Iris',       output_dir / 'f1_heatmap.png',
+             cmap='Blues',  cbar_label='F1-Score')
+    _heatmap(auc_matrix,      row_labels, plot_col_labels,
+             'AUC-ROC — Iris',        output_dir / 'auc_heatmap.png',
+             cmap='Greens', cbar_label='AUC-ROC')
+    _heatmap(best_val_matrix, row_labels, plot_col_labels,
+             'Best Val Acc — Iris',   output_dir / 'best_val_heatmap.png',
+             cmap='Purples', cbar_label='Best Val Acc')
+    _timing_heatmap(time_matrix, row_labels, plot_col_labels,
+                    'Training Time (s) — Iris', output_dir / 'timing_heatmap.png')
+
+    # ── console summary ────────────────────────────────────────────────────────
+    local_logger.info(f"\n{'─'*70}")
+    local_logger.info("  ACCURACY MATRIX  (rows=num_nodi, cols=node_size)  IRIS")
+    local_logger.info(f"{'─'*70}")
+    local_logger.info(df_acc.to_string())
+
+    if not np.all(np.isnan(acc_matrix)):
+        best_idx = np.unravel_index(np.nanargmax(acc_matrix), acc_matrix.shape)
+        local_logger.info(
+            f"\n  BEST CONFIG:  num_nodi={NUM_NODI_LIST[best_idx[0]]}  "
+            f"node_size={col_labels[best_idx[1]]}  "
+            f"→  acc={acc_matrix[best_idx]:.4f}"
+        )
+    local_logger.info(f"  Output dir: {output_dir.resolve()}")
+
+
 if __name__ == '__main__':
-    # Import test functions
-    from Inference.test_xor import test_xor_all_dimensions, test_xor_all_dimensions_1L
-
-    # Uncomment the test you want to run:
-
-    # Test Network_2L (TwoLayerIsingNetwork) on XOR 1D-6D
-    #test_xor_all_dimensions()
-
-    # Test Network_1L (MultiIsingNetwork) on XOR 1D-6D
-    #test_xor_all_dimensions_1L()
 
     # Compare Single vs Multi Ising on all datasets
-    compare_models()
+    #compare_models()
+
+    # Iris matrix experiment (num_nodi × node_size), no K-fold
+    iris_matrix()

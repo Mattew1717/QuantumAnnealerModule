@@ -1,0 +1,360 @@
+
+================================================================================
+XOR Test Suite - FullIsingModule (1D to 6D)
+================================================================================
+Device: cuda
+Batch size: 32 | Epochs: 200 | Model size: 50
+Learning rates: gamma=0.001, lambda=0.005, offset=0.01
+Annealing: beta=[1, 10], reads=1, sweeps=1000
+Generating 1D XOR data...
+Total samples: 200, Features: 1
+Class distribution: [100 100]
+Train set: 160 samples - Class distribution: [80 80] ([50. 50.]%)
+Test set: 40 samples - Class distribution: [20 20] ([50. 50.]%)
+
+============================================================
+Training FullIsingModule on 1D XOR
+============================================================
+Model size: 50
+Model created with 2502 parameters
+
+Starting training...
+Epoch 10/200 | Loss: 0.6486 | Val Acc: 0.5000
+Epoch 20/200 | Loss: 0.5464 | Val Acc: 0.6000
+Epoch 30/200 | Loss: 0.4781 | Val Acc: 0.7500
+Epoch 40/200 | Loss: 0.4222 | Val Acc: 0.8500
+Epoch 50/200 | Loss: 0.3780 | Val Acc: 0.8500
+Epoch 60/200 | Loss: 0.3403 | Val Acc: 0.8250
+Epoch 70/200 | Loss: 0.3089 | Val Acc: 0.8250
+Epoch 80/200 | Loss: 0.2826 | Val Acc: 0.8250
+Epoch 90/200 | Loss: 0.2598 | Val Acc: 0.8500
+Epoch 100/200 | Loss: 0.2388 | Val Acc: 0.8750
+Epoch 110/200 | Loss: 0.2187 | Val Acc: 0.8750
+Epoch 120/200 | Loss: 0.2073 | Val Acc: 0.9250
+Epoch 130/200 | Loss: 0.1975 | Val Acc: 0.9500
+Epoch 140/200 | Loss: 0.1844 | Val Acc: 0.9000
+Epoch 150/200 | Loss: 0.1714 | Val Acc: 0.9000
+Epoch 160/200 | Loss: 0.1624 | Val Acc: 0.9250
+Epoch 170/200 | Loss: 0.1589 | Val Acc: 0.9500
+Epoch 180/200 | Loss: 0.1475 | Val Acc: 0.9750
+Epoch 190/200 | Loss: 0.1410 | Val Acc: 0.9250
+Epoch 200/200 | Loss: 0.1363 | Val Acc: 1.0000
+
+============================================================
+Final Evaluation
+============================================================
+Final Test Accuracy: 0.9750
+
+Classification Report:
+              precision    recall  f1-score   support
+
+     Class 0       1.00      0.95      0.97        20
+     Class 1       0.95      1.00      0.98        20
+
+    accuracy                           0.97        40
+   macro avg       0.98      0.97      0.97        40
+weighted avg       0.98      0.97      0.97        40
+
+
+Confusion Matrix:
+[[19  1]
+ [ 0 20]]
+
+1D XOR | acc=0.9750 prec=0.9524 rec=1.0000 f1=0.9756 auc=1.0000 | time=116.25s
+
+Generating 2D XOR data...
+Total samples: 400, Features: 2
+Class distribution: [200 200]
+Train set: 320 samples - Class distribution: [160 160] ([50. 50.]%)
+Test set: 80 samples - Class distribution: [40 40] ([50. 50.]%)
+
+============================================================
+Training FullIsingModule on 2D XOR
+============================================================
+Model size: 50
+Model created with 2502 parameters
+
+Starting training...
+Epoch 10/200 | Loss: 0.6443 | Val Acc: 0.5375
+Epoch 20/200 | Loss: 0.5970 | Val Acc: 0.6500
+Epoch 30/200 | Loss: 0.5630 | Val Acc: 0.6750
+Epoch 40/200 | Loss: 0.5406 | Val Acc: 0.6625
+Epoch 50/200 | Loss: 0.5219 | Val Acc: 0.6750
+Epoch 60/200 | Loss: 0.5058 | Val Acc: 0.6875
+Epoch 70/200 | Loss: 0.5006 | Val Acc: 0.6500
+Epoch 80/200 | Loss: 0.4941 | Val Acc: 0.6625
+Epoch 90/200 | Loss: 0.4928 | Val Acc: 0.6750
+Epoch 100/200 | Loss: 0.4839 | Val Acc: 0.6750
+Epoch 110/200 | Loss: 0.4838 | Val Acc: 0.6750
+Epoch 120/200 | Loss: 0.4809 | Val Acc: 0.6625
+Epoch 130/200 | Loss: 0.4774 | Val Acc: 0.6750
+Epoch 140/200 | Loss: 0.4818 | Val Acc: 0.6750
+Epoch 150/200 | Loss: 0.4771 | Val Acc: 0.6625
+Epoch 160/200 | Loss: 0.4810 | Val Acc: 0.6625
+Epoch 170/200 | Loss: 0.4745 | Val Acc: 0.6750
+Epoch 180/200 | Loss: 0.4799 | Val Acc: 0.6625
+Epoch 190/200 | Loss: 0.4787 | Val Acc: 0.6750
+Epoch 200/200 | Loss: 0.4761 | Val Acc: 0.6625
+
+============================================================
+Final Evaluation
+============================================================
+Final Test Accuracy: 0.6625
+
+Classification Report:
+              precision    recall  f1-score   support
+
+     Class 0       0.68      0.62      0.65        40
+     Class 1       0.65      0.70      0.67        40
+
+    accuracy                           0.66        80
+   macro avg       0.66      0.66      0.66        80
+weighted avg       0.66      0.66      0.66        80
+
+
+Confusion Matrix:
+[[25 15]
+ [12 28]]
+
+2D XOR | acc=0.6625 prec=0.6512 rec=0.7000 f1=0.6747 auc=0.7969 | time=196.92s
+
+Generating 3D XOR data...
+Total samples: 800, Features: 3
+Class distribution: [400 400]
+Train set: 640 samples - Class distribution: [320 320] ([50. 50.]%)
+Test set: 160 samples - Class distribution: [80 80] ([50. 50.]%)
+
+============================================================
+Training FullIsingModule on 3D XOR
+============================================================
+Model size: 50
+Model created with 2502 parameters
+
+Starting training...
+Epoch 10/200 | Loss: 0.6958 | Val Acc: 0.5000
+Epoch 20/200 | Loss: 0.6933 | Val Acc: 0.5062
+Epoch 30/200 | Loss: 0.6929 | Val Acc: 0.5188
+Epoch 40/200 | Loss: 0.6909 | Val Acc: 0.5312
+Epoch 50/200 | Loss: 0.6861 | Val Acc: 0.5813
+Epoch 60/200 | Loss: 0.6829 | Val Acc: 0.5375
+Epoch 70/200 | Loss: 0.6755 | Val Acc: 0.6062
+Epoch 80/200 | Loss: 0.6756 | Val Acc: 0.6000
+Epoch 90/200 | Loss: 0.6753 | Val Acc: 0.5875
+Epoch 100/200 | Loss: 0.6702 | Val Acc: 0.5625
+Epoch 110/200 | Loss: 0.6692 | Val Acc: 0.5938
+Epoch 120/200 | Loss: 0.6676 | Val Acc: 0.6000
+Epoch 130/200 | Loss: 0.6711 | Val Acc: 0.5500
+Epoch 140/200 | Loss: 0.6767 | Val Acc: 0.5750
+Epoch 150/200 | Loss: 0.6706 | Val Acc: 0.6000
+Epoch 160/200 | Loss: 0.6714 | Val Acc: 0.5938
+Epoch 170/200 | Loss: 0.6700 | Val Acc: 0.5813
+Epoch 180/200 | Loss: 0.6669 | Val Acc: 0.5687
+Epoch 190/200 | Loss: 0.6679 | Val Acc: 0.5938
+Epoch 200/200 | Loss: 0.6653 | Val Acc: 0.6125
+
+============================================================
+Final Evaluation
+============================================================
+Final Test Accuracy: 0.6125
+
+Classification Report:
+              precision    recall  f1-score   support
+
+     Class 0       0.65      0.49      0.56        80
+     Class 1       0.59      0.74      0.66        80
+
+    accuracy                           0.61       160
+   macro avg       0.62      0.61      0.61       160
+weighted avg       0.62      0.61      0.61       160
+
+
+Confusion Matrix:
+[[39 41]
+ [21 59]]
+
+3D XOR | acc=0.6125 prec=0.5900 rec=0.7375 f1=0.6556 auc=0.6555 | time=598.03s
+
+Generating 4D XOR data...
+Total samples: 1600, Features: 4
+Class distribution: [800 800]
+Train set: 1280 samples - Class distribution: [640 640] ([50. 50.]%)
+Test set: 320 samples - Class distribution: [160 160] ([50. 50.]%)
+
+============================================================
+Training FullIsingModule on 4D XOR
+============================================================
+Model size: 50
+Model created with 2502 parameters
+
+Starting training...
+Epoch 10/200 | Loss: 0.6961 | Val Acc: 0.5219
+Epoch 20/200 | Loss: 0.6954 | Val Acc: 0.5000
+Epoch 30/200 | Loss: 0.6979 | Val Acc: 0.5031
+Epoch 40/200 | Loss: 0.6815 | Val Acc: 0.5625
+Epoch 50/200 | Loss: 0.6602 | Val Acc: 0.6406
+Epoch 60/200 | Loss: 0.6512 | Val Acc: 0.6281
+Epoch 70/200 | Loss: 0.6528 | Val Acc: 0.6562
+Epoch 80/200 | Loss: 0.6425 | Val Acc: 0.6406
+Epoch 90/200 | Loss: 0.6449 | Val Acc: 0.6344
+Epoch 100/200 | Loss: 0.6399 | Val Acc: 0.6375
+Epoch 110/200 | Loss: 0.6409 | Val Acc: 0.6469
+Epoch 120/200 | Loss: 0.6329 | Val Acc: 0.6031
+Epoch 130/200 | Loss: 0.6339 | Val Acc: 0.6094
+Epoch 140/200 | Loss: 0.6376 | Val Acc: 0.6562
+Epoch 150/200 | Loss: 0.6446 | Val Acc: 0.6562
+Epoch 160/200 | Loss: 0.6372 | Val Acc: 0.6500
+Epoch 170/200 | Loss: 0.6353 | Val Acc: 0.6469
+Epoch 180/200 | Loss: 0.6461 | Val Acc: 0.6031
+Epoch 190/200 | Loss: 0.6407 | Val Acc: 0.6687
+Epoch 200/200 | Loss: 0.6346 | Val Acc: 0.6500
+
+============================================================
+Final Evaluation
+============================================================
+Final Test Accuracy: 0.6500
+
+Classification Report:
+              precision    recall  f1-score   support
+
+     Class 0       0.63      0.72      0.67       160
+     Class 1       0.67      0.58      0.62       160
+
+    accuracy                           0.65       320
+   macro avg       0.65      0.65      0.65       320
+weighted avg       0.65      0.65      0.65       320
+
+
+Confusion Matrix:
+[[115  45]
+ [ 67  93]]
+
+4D XOR | acc=0.6500 prec=0.6739 rec=0.5813 f1=0.6242 auc=0.6974 | time=883.89s
+
+Generating 5D XOR data...
+Total samples: 3200, Features: 5
+Class distribution: [1600 1600]
+Train set: 2560 samples - Class distribution: [1280 1280] ([50. 50.]%)
+Test set: 640 samples - Class distribution: [320 320] ([50. 50.]%)
+
+============================================================
+Training FullIsingModule on 5D XOR
+============================================================
+Model size: 50
+Model created with 2502 parameters
+
+Starting training...
+Epoch 10/200 | Loss: 0.6965 | Val Acc: 0.4781
+Epoch 20/200 | Loss: 0.6927 | Val Acc: 0.4906
+Epoch 30/200 | Loss: 0.6930 | Val Acc: 0.5016
+Epoch 40/200 | Loss: 0.6903 | Val Acc: 0.4953
+Epoch 50/200 | Loss: 0.6926 | Val Acc: 0.5047
+Epoch 60/200 | Loss: 0.6878 | Val Acc: 0.5141
+Epoch 70/200 | Loss: 0.6852 | Val Acc: 0.5047
+Epoch 80/200 | Loss: 0.6893 | Val Acc: 0.4969
+Epoch 90/200 | Loss: 0.6871 | Val Acc: 0.5156
+Epoch 100/200 | Loss: 0.6856 | Val Acc: 0.4953
+Epoch 110/200 | Loss: 0.6841 | Val Acc: 0.5125
+Epoch 120/200 | Loss: 0.6838 | Val Acc: 0.5031
+Epoch 130/200 | Loss: 0.6893 | Val Acc: 0.4969
+Epoch 140/200 | Loss: 0.6827 | Val Acc: 0.5109
+Epoch 150/200 | Loss: 0.6843 | Val Acc: 0.5109
+Epoch 160/200 | Loss: 0.6834 | Val Acc: 0.5062
+Epoch 170/200 | Loss: 0.6862 | Val Acc: 0.5156
+Epoch 180/200 | Loss: 0.6840 | Val Acc: 0.5016
+Epoch 190/200 | Loss: 0.6832 | Val Acc: 0.5203
+Epoch 200/200 | Loss: 0.6836 | Val Acc: 0.5078
+
+============================================================
+Final Evaluation
+============================================================
+Final Test Accuracy: 0.5078
+
+Classification Report:
+              precision    recall  f1-score   support
+
+     Class 0       0.50      0.79      0.62       320
+     Class 1       0.52      0.22      0.31       320
+
+    accuracy                           0.51       640
+   macro avg       0.51      0.51      0.46       640
+weighted avg       0.51      0.51      0.46       640
+
+
+Confusion Matrix:
+[[254  66]
+ [249  71]]
+
+5D XOR | acc=0.5078 prec=0.5182 rec=0.2219 f1=0.3107 auc=0.5131 | time=1500.93s
+
+Generating 6D XOR data...
+Total samples: 6400, Features: 6
+Class distribution: [3200 3200]
+Train set: 5120 samples - Class distribution: [2560 2560] ([50. 50.]%)
+Test set: 1280 samples - Class distribution: [640 640] ([50. 50.]%)
+
+============================================================
+Training FullIsingModule on 6D XOR
+============================================================
+Model size: 50
+Model created with 2502 parameters
+
+Starting training...
+Epoch 10/200 | Loss: 0.6948 | Val Acc: 0.4984
+Epoch 20/200 | Loss: 0.6954 | Val Acc: 0.5000
+Epoch 30/200 | Loss: 0.6961 | Val Acc: 0.5000
+Epoch 40/200 | Loss: 0.6977 | Val Acc: 0.5000
+Epoch 50/200 | Loss: 0.6945 | Val Acc: 0.5000
+Epoch 60/200 | Loss: 0.6950 | Val Acc: 0.5000
+Epoch 70/200 | Loss: 0.6944 | Val Acc: 0.5000
+Epoch 80/200 | Loss: 0.6946 | Val Acc: 0.5000
+Epoch 90/200 | Loss: 0.6945 | Val Acc: 0.4992
+Epoch 100/200 | Loss: 0.6957 | Val Acc: 0.5000
+Epoch 110/200 | Loss: 0.6948 | Val Acc: 0.4992
+Epoch 120/200 | Loss: 0.6971 | Val Acc: 0.5000
+Epoch 130/200 | Loss: 0.6955 | Val Acc: 0.5000
+Epoch 140/200 | Loss: 0.6969 | Val Acc: 0.5055
+Epoch 150/200 | Loss: 0.6957 | Val Acc: 0.5000
+Epoch 160/200 | Loss: 0.6957 | Val Acc: 0.5000
+Epoch 170/200 | Loss: 0.6966 | Val Acc: 0.4984
+Epoch 180/200 | Loss: 0.6958 | Val Acc: 0.5055
+Epoch 190/200 | Loss: 0.6965 | Val Acc: 0.4883
+Epoch 200/200 | Loss: 0.6941 | Val Acc: 0.5000
+
+============================================================
+Final Evaluation
+============================================================
+Final Test Accuracy: 0.5000
+
+Classification Report:
+              precision    recall  f1-score   support
+
+     Class 0       0.00      0.00      0.00       640
+     Class 1       0.50      1.00      0.67       640
+
+    accuracy                           0.50      1280
+   macro avg       0.25      0.50      0.33      1280
+weighted avg       0.25      0.50      0.33      1280
+
+
+Confusion Matrix:
+[[  0 640]
+ [  0 640]]
+
+6D XOR | acc=0.5000 prec=0.5000 rec=1.0000 f1=0.6667 auc=0.5093 | time=3316.32s
+
+
+================================================================================
+SUMMARY - FullIsingModule XOR Performance Across Dimensions
+================================================================================
+1D XOR: accuracy=0.9750 | time=116.25s
+2D XOR: accuracy=0.6625 | time=196.92s
+3D XOR: accuracy=0.6125 | time=598.03s
+4D XOR: accuracy=0.6500 | time=883.89s
+5D XOR: accuracy=0.5078 | time=1500.93s
+6D XOR: accuracy=0.5000 | time=3316.32s
+
+Total execution time: 6612.38s (110.21 minutes)
+Metrics CSV saved to: plots_xor_fullising_20260318_100539/metrics_summary.csv
+
+All plots saved to plots_xor_fullising_20260318_100539
+FullIsingModule XOR Test Suite Completed!
