@@ -22,7 +22,7 @@ if _repo_root not in sys.path:
     sys.path.insert(0, _repo_root)
 
 from Inference.utils.logger import Logger
-from Inference.utils.utils import generate_xor_balanced
+from Inference.utils.utils import generate_xor_balanced, flatten_logits
 from ModularNetwork.Network_1L import MultiIsingNetwork
 from full_ising_model.annealers import AnnealingSettings, AnnealerType
 from full_ising_model.full_ising_module import FullIsingModule
@@ -33,11 +33,21 @@ NUM_NODI_LIST    = [1, 2, 3, 5, 8, 10, 15]   # num_ising_perceptrons
 MULTIPLIERS      = [1, 2, 3, 4]            # proportional node sizes (× num_features)
 FIXED_SIZES      = [10, 20, 30, 40, 50]    # fixed node sizes
 
-# ─── global run directory (shared across all 6 calls in main) ─────────────────
-_RUN_TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
-_OUTPUT_ROOT   = Path(f"plots_matrix_xor_{_RUN_TIMESTAMP}")
-_OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
-_GLOBAL_LOGGER = Logger(log_dir=str(_OUTPUT_ROOT))
+# ─── global run directory (lazy-initialized to avoid side effects on import) ──
+_RUN_TIMESTAMP = None
+_OUTPUT_ROOT   = None
+_GLOBAL_LOGGER = None
+
+
+def _init_global_output():
+    """Initialize global output directory and logger on first use."""
+    global _RUN_TIMESTAMP, _OUTPUT_ROOT, _GLOBAL_LOGGER
+    if _OUTPUT_ROOT is not None:
+        return
+    _RUN_TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
+    _OUTPUT_ROOT   = Path(f"plots_matrix_xor_{_RUN_TIMESTAMP}")
+    _OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
+    _GLOBAL_LOGGER = Logger(log_dir=str(_OUTPUT_ROOT))
 
 
 # ─── helpers ──────────────────────────────────────────────────────────────────
@@ -137,8 +147,6 @@ def _train_one(
 
     train_loader = _make_loader(X_train, y_train, params)
     ex = torch.tensor(X_test, dtype=torch.float32)
-    ey = torch.tensor(y_test, dtype=torch.float32)
-
     # ── annealing settings ────────────────────────────────────────────────────
     SA_settings                  = AnnealingSettings()
     SA_settings.beta_range       = params['sa_beta_range']
@@ -187,7 +195,7 @@ def _train_one(
             xb = xb.to(dev)
             yb = yb.to(dev).float()
             optimizer.zero_grad()
-            loss = loss_fn(model(xb).view(-1), yb)
+            loss = loss_fn(flatten_logits(model(xb)), yb)
             loss.backward()
             optimizer.step()
             batch_losses.append(loss.item())
@@ -204,7 +212,7 @@ def _train_one(
         if do_val:
             model.eval()
             with torch.no_grad():
-                logits = model(ex.to(dev)).view(-1)
+                logits = flatten_logits(model(ex.to(dev)))
                 probs  = torch.sigmoid(logits).cpu().numpy()
                 preds  = (probs >= 0.5).astype(int)
                 val_acc = accuracy_score(y_test, preds)
@@ -218,7 +226,7 @@ def _train_one(
     # ── final evaluation ──────────────────────────────────────────────────────
     model.eval()
     with torch.no_grad():
-        logits = model(ex.to(dev)).view(-1)
+        logits = flatten_logits(model(ex.to(dev)))
         probs  = torch.sigmoid(logits).cpu().numpy()
     preds     = (probs >= 0.5).astype(int)
     final_acc = accuracy_score(y_test, preds)
@@ -370,7 +378,7 @@ def _plot_roc_curve(
 # ─── public API ───────────────────────────────────────────────────────────────
 
 def run_matrix_experiment(xor_dim: int) -> dict:
-    
+    _init_global_output()
     params    = _get_params()
     log       = _GLOBAL_LOGGER
     dim_dir   = _OUTPUT_ROOT / f"xor_{xor_dim}d"
@@ -558,6 +566,7 @@ def save_global_summary(all_results: list[dict]) -> None:
         summary_all_dims.csv        – una riga per ogni (dim, num_nodi, node_size)
         accuracy_grid_all_dims.png  – 2×3 pannelli, uno per dimensione XOR
     """
+    _init_global_output()
     log = _GLOBAL_LOGGER
     if not all_results:
         return
@@ -698,7 +707,7 @@ def _train_one_fullIsing(
             xb = xb.to(dev)
             yb = yb.to(dev).float()
             optimizer.zero_grad()
-            logits = model(xb).view(-1)
+            logits = flatten_logits(model(xb))
             loss   = loss_fn(logits, yb)
             loss.backward()
             optimizer.step()
@@ -715,7 +724,7 @@ def _train_one_fullIsing(
         if do_val:
             model.eval()
             with torch.no_grad():
-                probs   = torch.sigmoid(model(ex.to(dev)).view(-1)).cpu().numpy()
+                probs   = torch.sigmoid(flatten_logits(model(ex.to(dev)))).cpu().numpy()
                 preds   = (probs >= 0.5).astype(int)
                 val_acc = accuracy_score(y_test, preds)
             val_accuracies.append(val_acc)
@@ -726,7 +735,7 @@ def _train_one_fullIsing(
 
     model.eval()
     with torch.no_grad():
-        probs = torch.sigmoid(model(ex.to(dev)).view(-1)).cpu().numpy()
+        probs = torch.sigmoid(flatten_logits(model(ex.to(dev)))).cpu().numpy()
     preds     = (probs >= 0.5).astype(int)
     final_acc = accuracy_score(y_test, preds)
     f1        = f1_score(y_test, preds, average='binary', zero_division=0)
@@ -783,6 +792,7 @@ def test_matrix_fullIsing() -> dict:
       *_heatmap.png       – accuracy / F1 / AUC-ROC / best-val / timing
       roc_dim*_size*.png  – ROC curves (one per grid cell)
     """
+    _init_global_output()
     params  = _get_params()
     log     = _GLOBAL_LOGGER
     out_dir = _OUTPUT_ROOT / "fullIsing_matrix"

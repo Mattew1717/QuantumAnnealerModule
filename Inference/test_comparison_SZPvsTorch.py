@@ -6,6 +6,7 @@ import os
 import sys
 import numpy as np
 import torch
+from pathlib import Path
 from time import perf_counter
 from sklearn.metrics import accuracy_score
 import dotenv
@@ -14,12 +15,12 @@ _repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if _repo_root not in sys.path:
     sys.path.insert(0, _repo_root)
 
-_env_path = os.path.join(os.path.dirname(__file__), '.env')
-dotenv.load_dotenv(_env_path)
+dotenv.load_dotenv(dotenv_path=Path(__file__).parent / '.env')
 
 from Inference.utils.logger import Logger
 from Inference.utils.dataset_manager import DatasetManager
 from Inference.utils.plot import Plot
+from Inference.utils.utils import flatten_logits
 from SZP_Model.sim_anneal_model import SimAnnealModel, AnnealingSettings as SZP_AnnealingSettings
 from SZP_Model.data import SimpleDataset as SZP_SimpleDataset, HiddenNodesInitialization
 from SZP_Model.utils import GammaInitialization
@@ -29,6 +30,14 @@ from full_ising_model.annealers import AnnealingSettings, AnnealerType
 logger = Logger()
 
 
+def _standardize_train_test(X_train, X_test):
+    """Standardize test features using statistics fitted on the training split only."""
+    mean = X_train.mean(axis=0)
+    std = X_train.std(axis=0)
+    std[std == 0] = 1e-8
+    return (X_train - mean) / std, (X_test - mean) / std
+
+
 def print_params_table(params):
     """Print a formatted table of all comparison parameters."""
     rows = [
@@ -36,7 +45,7 @@ def print_params_table(params):
         ('k_folds',              params['k_folds']),
         ('epochs',               params['epochs']),
         ('batch_size',           params['batch_size']),
-        ('model_size',           'n_features + 5'),
+        ('model_size',           params['resolved_model_size']),
         ('lambda_init',          params['lambda_init']),
         ('offset_init',          params['offset_init']),
         ('learning_rate_gamma',  params['learning_rate_gamma']),
@@ -85,12 +94,14 @@ def get_params():
 
 
 def get_model_size(n_features, params):
-    # if params['model_size'] == -1:
-    #     return max(n_features, params['minimum_model_size'])
-    return n_features + 5
+    if params['model_size'] == -1:
+        return max(n_features, params['minimum_model_size'])
+    return params['model_size']
 
 
 def train_szp(X_train, y_train, X_test, y_test, model_size, params):
+    X_train, X_test = _standardize_train_test(X_train, X_test)
+
     train_ds = SZP_SimpleDataset()
     train_ds.x = torch.tensor(X_train, dtype=torch.float32)
     train_ds.y = torch.tensor(y_train, dtype=torch.float32)
@@ -152,6 +163,8 @@ def train_szp(X_train, y_train, X_test, y_test, model_size, params):
 
 
 def train_pytorch(X_train, y_train, X_test, y_test, model_size, params):
+    X_train, X_test = _standardize_train_test(X_train, X_test)
+
     X_tr = torch.tensor(X_train, dtype=torch.float32)
     y_tr = torch.tensor(y_train, dtype=torch.float32)
     X_te = torch.tensor(X_test, dtype=torch.float32)
@@ -174,11 +187,13 @@ def train_pytorch(X_train, y_train, X_test, y_test, model_size, params):
         gamma_init=torch.zeros((model_size, model_size), dtype=torch.float32)
     )
 
-    optimizer = torch.optim.SGD([
+    optimizer = torch.optim.Adam([
         {'params': [model.gamma], 'lr': params['learning_rate_gamma']},
         {'params': [model.lmd], 'lr': params['learning_rate_lambda']},
         {'params': [model.offset], 'lr': params['learning_rate_offset']},
     ])
+    # MSELoss matches the SZP model's training objective: both models predict
+    # lmd * E_ising + offset and classify with threshold 0.5 on raw energies.
     loss_fn = torch.nn.MSELoss()
     train_loader = torch.utils.data.DataLoader(
         torch.utils.data.TensorDataset(X_tr, y_tr),
@@ -190,7 +205,7 @@ def train_pytorch(X_train, y_train, X_test, y_test, model_size, params):
         model.train()
         for x_b, y_b in train_loader:
             optimizer.zero_grad()
-            pred = model(x_b).view(-1)
+            pred = flatten_logits(model(x_b))
             loss = loss_fn(pred, y_b)
             loss.backward()
             optimizer.step()
@@ -198,7 +213,7 @@ def train_pytorch(X_train, y_train, X_test, y_test, model_size, params):
 
     model.eval()
     with torch.no_grad():
-        preds = model(X_te).view(-1).cpu().numpy()
+        preds = flatten_logits(model(X_te)).cpu().numpy()
     pred_binary = (preds >= 0.5).astype(int)
     y_binary = (y_te.numpy() >= 0.5).astype(int)
     acc = accuracy_score(y_binary, pred_binary)
@@ -214,6 +229,7 @@ def run_comparison():
     X, y = dm.load_csv_dataset(iris_path)
     folds = dm.generate_k_folds(X, y, k)
     model_size = get_model_size(X.shape[1], params)
+    params['resolved_model_size'] = model_size
 
     logger.info(f"\n{'='*60}")
     logger.info(f"K-Fold ({k}) comparison on iris | model_size={model_size} | epochs={params['epochs']}")

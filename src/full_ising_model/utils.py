@@ -33,6 +33,12 @@ class HiddenNodesInitialization:
         if input_dim == target_size:
             return thetas
 
+        if input_dim > target_size:
+            raise ValueError(
+                f"Input dimension ({input_dim}) exceeds target_size ({target_size}). "
+                "size_annealer must be >= input dimension."
+            )
+
         cache_key = (input_dim, thetas.device, thetas.dtype)
 
         # Check cache
@@ -106,8 +112,13 @@ def resize_tensor(
     """
     batch_size, input_dim = thetas.shape
 
-    if target_size <= input_dim:
-        return thetas[:, :target_size]
+    if input_dim > target_size:
+        raise ValueError(
+            f"Input dimension ({input_dim}) exceeds target_size ({target_size}). "
+            "size_annealer must be >= input dimension."
+        )
+    if input_dim == target_size:
+        return thetas
 
     if hidden_nodes.mode == "function":
         if hidden_nodes.function is None:

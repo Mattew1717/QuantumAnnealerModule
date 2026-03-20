@@ -49,22 +49,26 @@ class TwoLayerIsingNetwork(nn.Module):
             for _ in range(num_ising_2)
         ])
 
-        self.lin2 = nn.Linear(num_ising_2, 1, bias=bias)
+        # lin2 takes both E1 and E2 so that the first Ising layer has a
+        # direct differentiable path to the loss (IsingEnergyFunction.backward
+        # returns None for thetas, blocking gradient flow through z).
+        self.lin2 = nn.Linear(num_ising_1 + num_ising_2, 1, bias=bias)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # ---- pass through first Ising ----
         E1 = torch.stack([ising(x) for ising in self.ising1], dim=1)
-        
+
         # ---- Linear Combination ----
         E1_lin = self.lin1(E1)
 
-        # ---- Combine Energies + Input. [E1, E2, ... En | x1, x2, xn] ----
-        z = torch.cat([E1_lin,x], dim=1)
+        # ---- Combine Energies + Input. [E1_lin | x] ----
+        z = torch.cat([E1_lin, x], dim=1)
 
         # ---- pass through second Ising ----
         E2 = torch.stack([ising(z) for ising in self.ising2], dim=1)
 
-        # ---- Final linear combination ----
-        E2_lin = self.lin2(E2).squeeze(-1)
-
-        return E2_lin
+        # ---- Final linear combination of both layers ----
+        # Concatenating E1 (not E1_lin) ensures the first layer parameters
+        # (gamma, lmd, offset) receive a direct gradient from the loss.
+        combined = torch.cat([E1, E2], dim=1)
+        return self.lin2(combined).squeeze(-1)

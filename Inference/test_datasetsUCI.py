@@ -5,13 +5,14 @@ import time
 import numpy as np
 import torch
 from datetime import datetime
+from pathlib import Path
 import pandas as pd
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.metrics import accuracy_score
 import dotenv
 from scipy.stats import wilcoxon, ttest_rel
 
 # Load environment variables
-dotenv.load_dotenv()
+dotenv.load_dotenv(dotenv_path=Path(__file__).parent / '.env')
 
 # Add repository root to sys.path
 _repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -21,45 +22,12 @@ if _repo_root not in sys.path:
 from Inference.utils.logger import Logger
 from Inference.utils.dataset_manager import DatasetManager
 from Inference.utils.plot import Plot
+from Inference.utils.utils import flatten_logits, compute_metrics, save_metrics_csv, METRICS
 from full_ising_model.full_ising_module import FullIsingModule
 from ModularNetwork.Network_1L import MultiIsingNetwork
 from full_ising_model.annealers import AnnealingSettings, AnnealerType
 
 logger = Logger()
-
-METRICS = ['accuracy', 'precision', 'recall', 'f1', 'auc']
-
-
-def compute_metrics(y_true, probs):
-    """Compute accuracy, precision, recall, F1, AUC from predicted probabilities."""
-    preds = (probs >= 0.5).astype(int)
-    acc = accuracy_score(y_true, preds)
-    prec = precision_score(y_true, preds, zero_division=0)
-    rec = recall_score(y_true, preds, zero_division=0)
-    f1 = f1_score(y_true, preds, zero_division=0)
-    try:
-        auc = roc_auc_score(y_true, probs)
-    except ValueError:
-        auc = float('nan')
-    return {'accuracy': acc, 'precision': prec, 'recall': rec, 'f1': f1, 'auc': auc}
-
-
-def _save_metrics_csv(dataset_names, all_single_metrics, all_neural_metrics, output_dir):
-    """Save mean ± std K-fold metrics for both models to CSV."""
-    rows = []
-    for i, ds_name in enumerate(dataset_names):
-        for model_name, model_metrics in [('FullIsingModule', all_single_metrics[i]),
-                                           ('NeuralNet', all_neural_metrics[i])]:
-            row = {'dataset': ds_name, 'model': model_name}
-            for m in METRICS:
-                vals = model_metrics[m]
-                row[f'{m}_mean'] = np.nanmean(vals)
-                row[f'{m}_std'] = np.nanstd(vals)
-            rows.append(row)
-    df = pd.DataFrame(rows)
-    csv_path = os.path.join(str(output_dir), 'metrics_summary.csv')
-    df.to_csv(csv_path, index=False, float_format='%.4f')
-    return csv_path
 
 
 def get_env_params():
@@ -173,7 +141,7 @@ def train_single_model(X_train, y_train, X_test, y_test, params):
             y_batch = y_batch.to(params['device']).float()
 
             optimizer.zero_grad()
-            pred = model(x_batch).view(-1)
+            pred = flatten_logits(model(x_batch))
             loss = loss_fn(pred, y_batch)
             loss.backward()
             optimizer.step()
@@ -187,7 +155,7 @@ def train_single_model(X_train, y_train, X_test, y_test, params):
         # Evaluate on validation set
         model.eval()
         with torch.no_grad():
-            preds_tensor = model(test_set.x.to(params['device'])).view(-1)
+            preds_tensor = flatten_logits(model(test_set.x.to(params['device'])))
             probs = torch.sigmoid(preds_tensor).cpu().numpy()
             predictions = np.where(probs < 0.5, 0, 1)
             epoch_accuracy = accuracy_score(y_test, predictions)
@@ -198,7 +166,7 @@ def train_single_model(X_train, y_train, X_test, y_test, params):
     # Final evaluation on test set
     model.eval()
     with torch.no_grad():
-        preds_tensor = model(test_set.x.to(params['device'])).view(-1)
+        preds_tensor = flatten_logits(model(test_set.x.to(params['device'])))
         final_probs = torch.sigmoid(preds_tensor).cpu().numpy()
 
     final_accuracy = validation_accuracies[-1]
@@ -314,7 +282,7 @@ def train_neural_net(X_train, y_train, X_test, y_test, params):
             y_batch = y_batch.to(params['device']).float()
 
             optimizer.zero_grad()
-            pred = model(x_batch).view(-1)
+            pred = flatten_logits(model(x_batch))
             loss = loss_fn(pred, y_batch)
             loss.backward()
             optimizer.step()
@@ -329,10 +297,10 @@ def train_neural_net(X_train, y_train, X_test, y_test, params):
         # Evaluate on validation set
         model.eval()
         with torch.no_grad():
-            preds_tensor = model(test_set.x.to(params['device'])).view(-1)
+            preds_tensor = flatten_logits(model(test_set.x.to(params['device'])))
             probs = torch.sigmoid(preds_tensor).cpu().numpy()
             predictions = np.where(probs < 0.5, 0, 1)
-            epoch_accuracy = accuracy_score(test_set.y.numpy(), predictions)
+            epoch_accuracy = accuracy_score(y_test, predictions)
             validation_accuracies.append(epoch_accuracy)
 
     training_time = time.time() - start_time
@@ -340,7 +308,7 @@ def train_neural_net(X_train, y_train, X_test, y_test, params):
     # Final evaluation on test set
     model.eval()
     with torch.no_grad():
-        preds_tensor = model(test_set.x.to(params['device'])).view(-1)
+        preds_tensor = flatten_logits(model(test_set.x.to(params['device'])))
         final_probs = torch.sigmoid(preds_tensor).cpu().numpy()
 
     final_accuracy = validation_accuracies[-1]
@@ -541,7 +509,8 @@ def compare_models():
 
     # === Save metrics CSV ===
     if dataset_names:
-        csv_path = _save_metrics_csv(dataset_names, all_single_metrics, all_neural_metrics, plotter.output_dir)
+        csv_path = save_metrics_csv(dataset_names, all_single_metrics, all_neural_metrics, plotter.output_dir,
+                                     model_name1='FullIsingModule', model_name2='NeuralNet')
         logger.info(f"Metrics CSV saved to: {csv_path}")
 
         # Prepare per-metric aggregated arrays
@@ -726,7 +695,7 @@ def iris_matrix():
                         xb = xb.to(dev)
                         yb = yb.to(dev).float()
                         optimizer.zero_grad()
-                        loss = loss_fn(model(xb).view(-1), yb)
+                        loss = loss_fn(flatten_logits(model(xb)), yb)
                         loss.backward()
                         optimizer.step()
                         batch_losses.append(loss.item())
@@ -742,7 +711,7 @@ def iris_matrix():
                     if do_val:
                         model.eval()
                         with torch.no_grad():
-                            logits    = model(ex.to(dev)).view(-1)
+                            logits    = flatten_logits(model(ex.to(dev)))
                             probs_val = torch.sigmoid(logits).cpu().numpy()
                             val_acc   = accuracy_score(y_test, (probs_val >= 0.5).astype(int))
                         val_accuracies.append(val_acc)
@@ -754,7 +723,7 @@ def iris_matrix():
                 # final evaluation
                 model.eval()
                 with torch.no_grad():
-                    logits = model(ex.to(dev)).view(-1)
+                    logits = flatten_logits(model(ex.to(dev)))
                     probs  = torch.sigmoid(logits).cpu().numpy()
                 preds     = (probs >= 0.5).astype(int)
                 final_acc = accuracy_score(y_test, preds)

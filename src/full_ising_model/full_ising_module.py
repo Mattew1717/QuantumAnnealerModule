@@ -164,7 +164,12 @@ class FullIsingModule(nn.Module):
         self.offset = nn.Parameter(torch.tensor(offset_init))
 
     def forward(self, thetas: torch.Tensor) -> torch.Tensor:
-        # Automatically resize if needed
+        if thetas.shape[1] > self.size_annealer:
+            raise ValueError(
+                f"Input dimension ({thetas.shape[1]}) exceeds size_annealer "
+                f"({self.size_annealer}). Increase size_annealer or reduce input dimension."
+            )
+        # Automatically resize if needed (padding only, never truncation)
         thetas = self.hidden_nodes_config.resize(thetas, self.size_annealer)
 
         E0 = self.ising_layer(thetas, self.gamma)

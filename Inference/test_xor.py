@@ -9,14 +9,15 @@ import numpy as np
 import torch
 import pandas as pd
 from datetime import datetime
+from pathlib import Path
 from time import perf_counter
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from sklearn.model_selection import train_test_split
 from scipy.stats import wilcoxon
 import dotenv
 
 # Load environment variables
-dotenv.load_dotenv()
+dotenv.load_dotenv(dotenv_path=Path(__file__).parent / '.env')
 
 # Add repository root to sys.path to enable absolute imports
 _repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -25,7 +26,7 @@ if _repo_root not in sys.path:
 
 from Inference.utils.logger import Logger
 from Inference.utils.plot import Plot
-from Inference.utils.utils import generate_xor_balanced
+from Inference.utils.utils import generate_xor_balanced, flatten_logits, compute_metrics, save_metrics_csv, METRICS
 from Inference.utils.dataset_manager import  HiddenNodesInitialization, SimpleDataset
 from ModularNetwork.Network_2L import TwoLayerIsingNetwork
 from ModularNetwork.Network_1L import MultiIsingNetwork
@@ -34,47 +35,6 @@ from full_ising_model.annealers import AnnealingSettings, AnnealerType
 from torch.utils.data import DataLoader, TensorDataset
 
 logger = Logger()
-METRICS = ['accuracy', 'precision', 'recall', 'f1', 'auc']
-
-
-def _flatten_logits(logits: torch.Tensor) -> torch.Tensor:
-    """Safely flatten model output to 1D per-sample logits."""
-    if logits.ndim == 1:
-        return logits
-    if logits.ndim == 2 and logits.shape[1] == 1:
-        return logits.squeeze(1)
-    raise ValueError(f"Unexpected model output shape: {logits.shape}")
-
-
-def compute_metrics(y_true, probs):
-    """Compute accuracy, precision, recall, F1, AUC from predicted probabilities."""
-    preds = (probs >= 0.5).astype(int)
-    acc = accuracy_score(y_true, preds)
-    prec = precision_score(y_true, preds, zero_division=0)
-    rec = recall_score(y_true, preds, zero_division=0)
-    f1 = f1_score(y_true, preds, zero_division=0)
-    try:
-        auc = roc_auc_score(y_true, probs)
-    except ValueError:
-        auc = float('nan')
-    return {'accuracy': acc, 'precision': prec, 'recall': rec, 'f1': f1, 'auc': auc}
-
-
-def _save_metrics_csv(dataset_names, all_single_metrics, all_neural_metrics, output_dir):
-    """Save per-dimension metrics summary to CSV (single split, no K-Fold)."""
-    rows = []
-    for i, ds_name in enumerate(dataset_names):
-        for model_name, model_metrics in [('FullIsingModule', all_single_metrics[i]), ('Network_1L', all_neural_metrics[i])]:
-            row = {'dataset': ds_name, 'model': model_name}
-            for m in METRICS:
-                vals = model_metrics[m]
-                row[f'{m}_mean'] = np.nanmean(vals)
-                row[f'{m}_std'] = np.nanstd(vals)
-            rows.append(row)
-    df = pd.DataFrame(rows)
-    csv_path = os.path.join(str(output_dir), 'metrics_summary.csv')
-    df.to_csv(csv_path, index=False, float_format='%.4f')
-    return csv_path
 
 
 def get_xor_params():
@@ -278,7 +238,7 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
             y_batch = y_batch.to(params['device']).float()
 
             optimizer.zero_grad()
-            pred = _flatten_logits(model(x_batch))
+            pred = flatten_logits(model(x_batch))
             loss = loss_fn(pred, y_batch)
             loss.backward()
             optimizer.step()
@@ -292,7 +252,7 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
         if (epoch + 1) % val_interval == 0 or epoch == 0 or epoch == params['epochs'] - 1:
             model.eval()
             with torch.no_grad():
-                preds_tensor = _flatten_logits(model(test_dataset.x.to(params['device'])))
+                preds_tensor = flatten_logits(model(test_dataset.x.to(params['device'])))
                 probs = torch.sigmoid(preds_tensor).cpu().numpy()
                 predictions = np.where(probs < 0.5, 0, 1)
                 epoch_accuracy = accuracy_score(y_test, predictions)
@@ -315,7 +275,7 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
 
     model.eval()
     with torch.no_grad():
-        preds_tensor = _flatten_logits(model(test_dataset.x.to(params['device'])))
+        preds_tensor = flatten_logits(model(test_dataset.x.to(params['device'])))
         probs = torch.sigmoid(preds_tensor).cpu().numpy()
         predictions = np.where(probs < 0.5, 0, 1)
 
@@ -423,7 +383,7 @@ def train_network_1L(dim, X_train, y_train, X_test, y_test, params, plotter):
             y_batch = y_batch.to(params['device']).float()
 
             optimizer.zero_grad()
-            pred = _flatten_logits(model(x_batch))
+            pred = flatten_logits(model(x_batch))
             loss = loss_fn(pred, y_batch)
             loss.backward()
             optimizer.step()
@@ -437,7 +397,7 @@ def train_network_1L(dim, X_train, y_train, X_test, y_test, params, plotter):
         if (epoch + 1) % val_interval == 0 or epoch == 0 or epoch == params['epochs'] - 1:
             model.eval()
             with torch.no_grad():
-                preds_tensor = _flatten_logits(model(test_dataset.x.to(params['device'])))
+                preds_tensor = flatten_logits(model(test_dataset.x.to(params['device'])))
                 probs = torch.sigmoid(preds_tensor).cpu().numpy()
                 predictions = np.where(probs < 0.5, 0, 1)
                 epoch_accuracy = accuracy_score(y_test, predictions)
@@ -460,7 +420,7 @@ def train_network_1L(dim, X_train, y_train, X_test, y_test, params, plotter):
 
     model.eval()
     with torch.no_grad():
-        preds_tensor = _flatten_logits(model(test_dataset.x.to(params['device'])))
+        preds_tensor = flatten_logits(model(test_dataset.x.to(params['device'])))
         probs = torch.sigmoid(preds_tensor).cpu().numpy()
         predictions = np.where(probs < 0.5, 0, 1)
 
@@ -542,7 +502,7 @@ def train_full_ising_model(dim, X_train, y_train, X_test, y_test, params, plotte
             y_batch = y_batch.to(params['device']).float()
 
             optimizer.zero_grad()
-            pred = _flatten_logits(model(x_batch))
+            pred = flatten_logits(model(x_batch))
             loss = loss_fn(pred, y_batch)
             loss.backward()
             optimizer.step()
@@ -555,7 +515,7 @@ def train_full_ising_model(dim, X_train, y_train, X_test, y_test, params, plotte
         if (epoch + 1) % val_interval == 0 or epoch == 0 or epoch == params['epochs'] - 1:
             model.eval()
             with torch.no_grad():
-                preds_tensor = _flatten_logits(model(test_dataset.x.to(params['device'])))
+                preds_tensor = flatten_logits(model(test_dataset.x.to(params['device'])))
                 probs = torch.sigmoid(preds_tensor).cpu().numpy()
                 predictions = np.where(probs < 0.5, 0, 1)
                 epoch_accuracy = accuracy_score(y_test, predictions)
@@ -576,7 +536,7 @@ def train_full_ising_model(dim, X_train, y_train, X_test, y_test, params, plotte
 
     model.eval()
     with torch.no_grad():
-        preds_tensor = _flatten_logits(model(test_dataset.x.to(params['device'])))
+        preds_tensor = flatten_logits(model(test_dataset.x.to(params['device'])))
         probs = torch.sigmoid(preds_tensor).cpu().numpy()
         predictions = np.where(probs < 0.5, 0, 1)
 
@@ -887,7 +847,8 @@ def compare_xor_models_all_dimensions():
         box_color='secondary'
     )
 
-    csv_path = _save_metrics_csv(dataset_names, all_single_metrics, all_1l_metrics, plotter.output_dir)
+    csv_path = save_metrics_csv(dataset_names, all_single_metrics, all_1l_metrics, plotter.output_dir,
+                                model_name1='FullIsingModule', model_name2='Network_1L')
     logger.info(f"Metrics CSV saved to: {csv_path}")
 
     ms = {m: [np.nanmean(all_single_metrics[i][m]) for i in range(len(dataset_names))] for m in METRICS}
@@ -1016,12 +977,13 @@ def fullIsing_xor_all_dim():
     df.to_csv(csv_path, index=False, float_format='%.4f')
     logger.info(f"Metrics CSV saved to: {csv_path}")
 
-    # Metrics bar chart (single model, one bar per metric per dataset)
+    # Metrics heatmap (single model)
+    col_map = {'accuracy': 'Accuracy', 'precision': 'Precision', 'recall': 'Recall', 'f1': 'F1', 'auc': 'AUC'}
     ms_by_metric = {m: [results['all_metrics'][i][m] for i in range(len(dataset_names))] for m in METRICS}
-    zeros = {m: [0.0] * len(dataset_names) for m in METRICS}
-    plotter.plot_metrics_bar_comparison(
-        ms_by_metric, zeros, dataset_names,
-        model_name1='FullIsingModule', model_name2=''
+    df_single = pd.DataFrame({col_map[m]: ms_by_metric[m] for m in METRICS}, index=dataset_names)
+    plotter.plot_metrics_heatmap(
+        df_single, df_single,
+        model_name1='FullIsingModule', model_name2='FullIsingModule'
     )
 
     logger.info(f"\nAll plots saved to {plotter.output_dir}")
