@@ -73,9 +73,17 @@ SIZE_FIXED = [10, 20, 30, 50]
 XOR_DIMS = [1, 2, 3]
 EXP2_VARIANTS = [
     "FullIsing_default",
-    "FullIsing_1/N",
+    "FullIsing_1_over_N",
+    "FullIsing_zero",
+    "FullIsing_small_neg",
+    "FullIsing_large_neg",
+    "FullIsing_large_pos",
     "Net1L_default",
-    "Net1L_1/N",
+    "Net1L_1_over_N",
+    "Net1L_zero",
+    "Net1L_small_neg",
+    "Net1L_large_neg",
+    "Net1L_large_pos",
 ]
 GAMMA_STRATEGIES = [
     "zeros",
@@ -91,13 +99,29 @@ PALETTE = {
     "staged": "#2E86AB",
     "baseline": "#A23B72",
     "FullIsing_default": "#2E86AB",
-    "FullIsing_1/N": "#6A994E",
+    "FullIsing_1_over_N": "#6A994E",
+    "FullIsing_zero": "#4ECDC4",
+    "FullIsing_small_neg": "#1A535C",
+    "FullIsing_large_neg": "#3D5A80",
+    "FullIsing_large_pos": "#98C1D9",
     "Net1L_default": "#A23B72",
-    "Net1L_1/N": "#F18F01",
+    "Net1L_1_over_N": "#F18F01",
+    "Net1L_zero": "#E76F51",
+    "Net1L_small_neg": "#9B2226",
+    "Net1L_large_neg": "#BB3E03",
+    "Net1L_large_pos": "#EE9B00",
     "staged_FullIsing": "#2E86AB",
     "baseline_FullIsing": "#7FB3D5",
     "staged_Net1L": "#A23B72",
     "baseline_Net1L": "#E598C0",
+    "Net1L_best": "#A23B72",
+    "F1": "#6A994E",
+    "Wins": "#F18F01",
+    "zeros": "#606060",
+    "small_randn": "#2E86AB",
+    "medium_randn": "#6A994E",
+    "large_randn": "#F18F01",
+    "theta_ratio": "#A23B72",
 }
 
 
@@ -1310,7 +1334,9 @@ def build_gamma_init(
             (indices // len(mean_theta)).float() * hidden_nodes_offset_value
         )
         eps = 1e-8
-        gamma_init = theta_padded.unsqueeze(0) / (theta_padded.unsqueeze(1) + eps)
+        diff = theta_padded.unsqueeze(0) - theta_padded.unsqueeze(1)
+        norm = theta_padded.unsqueeze(0).abs() + theta_padded.unsqueeze(1).abs() + eps
+        gamma_init = diff / norm
         return torch.triu(gamma_init, diagonal=1)
     raise ValueError(f"Unknown gamma initialization strategy: {strategy}")
 
@@ -1599,7 +1625,67 @@ def run_exp1(exp_dir: Path) -> None:
             right_ylabel="Num perceptrons",
         )
 
-    pd.DataFrame(summary_records).to_csv(exp_dir / "summary.csv", index=False)
+    summary_df = pd.DataFrame(summary_records)
+    summary_df.to_csv(exp_dir / "summary.csv", index=False)
+
+    # --- Global plots across all datasets ---
+    if not summary_df.empty:
+        # Global bar: best accuracy per dataset, FullIsing vs best Net1L
+        global_bar_data: dict[str, list[float]] = {"FullIsing": [], "Net1L_best": []}
+        global_bar_labels: list[str] = []
+        for ds_name in summary_df["dataset"].unique():
+            ds_rows = summary_df[summary_df["dataset"] == ds_name]
+            full_rows = ds_rows[ds_rows["model"] == "FullIsing"]
+            net_rows = ds_rows[ds_rows["model"] == "Net1L"]
+            best_full = float(np.nanmax(full_rows["accuracy"].values)) if not full_rows.empty else np.nan
+            best_net = float(np.nanmax(net_rows["accuracy"].values)) if not net_rows.empty else np.nan
+            global_bar_labels.append(ds_name)
+            global_bar_data["FullIsing"].append(best_full)
+            global_bar_data["Net1L_best"].append(best_net)
+        plot_grouped_bar(
+            global_bar_labels,
+            global_bar_data,
+            exp_dir / "global_best_accuracy.png",
+            "EXP1 Best Accuracy per Dataset",
+            "Accuracy",
+            ylim=(0, 1.0),
+        )
+
+        # Global heatmap: mean accuracy by num_nodi x size_label across all datasets
+        net_rows_all = summary_df[summary_df["model"] == "Net1L"]
+        if not net_rows_all.empty:
+            pivot = net_rows_all.pivot_table(
+                values="accuracy",
+                index="num_nodi",
+                columns="size_label",
+                aggfunc="mean",
+            )
+            pivot.index.name = "num_perceptrons"
+            pivot.columns.name = "size_annealer"
+            plot_heatmap_df(
+                pivot,
+                "EXP1 Net1L Mean Accuracy (all datasets)",
+                exp_dir / "global_net1l_accuracy_heatmap.png",
+                cmap="YlOrRd",
+                cbar_label="Accuracy",
+            )
+
+        # Global radar: FullIsing vs Net1L averaged across all datasets
+        radar_series: dict[str, dict[str, float]] = {}
+        for model_name in ["FullIsing", "Net1L"]:
+            model_rows = summary_df[summary_df["model"] == model_name]
+            radar_series[model_name] = {
+                "accuracy": nanmean_or_nan(model_rows["accuracy"].tolist()),
+                "precision": nanmean_or_nan(model_rows["precision"].tolist()),
+                "recall": nanmean_or_nan(model_rows["recall"].tolist()),
+                "f1": nanmean_or_nan(model_rows["f1"].tolist()),
+                "auc": nanmean_or_nan(model_rows["auc"].tolist()),
+            }
+        plot_multi_radar(
+            radar_series,
+            exp_dir / "global_radar.png",
+            "EXP1 Global Radar - FullIsing vs Net1L",
+        )
 
 
 def run_exp2(exp_dir: Path) -> None:
@@ -1674,8 +1760,16 @@ def run_exp2(exp_dir: Path) -> None:
 
             for variant in EXP2_VARIANTS:
                 hidden_offset = DEFAULT_HIDDEN_OFFSET
-                if variant.endswith("1/N"):
+                if variant.endswith("1_over_N"):
                     hidden_offset = 1.0 / params["size_annealer"]
+                elif variant.endswith("zero"):
+                    hidden_offset = 0.0
+                elif variant.endswith("small_neg"):
+                    hidden_offset = -0.001
+                elif variant.endswith("large_neg"):
+                    hidden_offset = -0.1
+                elif variant.endswith("large_pos"):
+                    hidden_offset = 0.1
                 try:
                     if variant.startswith("FullIsing"):
                         result = run_full_training(
@@ -1853,6 +1947,58 @@ def run_exp2(exp_dir: Path) -> None:
         pd.DataFrame(boxplot_rows),
         exp_dir / "boxplot_kfold_uci.png",
         "EXP2 UCI K-Fold Accuracy Distribution",
+    )
+
+    # --- Global bar chart: mean accuracy per offset variant across all datasets ---
+    global_means = []
+    global_stds = []
+    for variant in EXP2_VARIANTS:
+        global_means.append(nanmean_or_nan(metric_tables["accuracy"][variant]))
+        global_stds.append(nanstd_or_nan(metric_tables["accuracy"][variant]))
+    plot_grouped_bar(
+        EXP2_VARIANTS,
+        {"Accuracy": global_means},
+        exp_dir / "global_mean_accuracy.png",
+        "EXP2 Mean Accuracy Across All Datasets",
+        "Accuracy",
+        errors={"Accuracy": global_stds},
+        ylim=(0, 1.0),
+    )
+
+    # --- Global bar chart: mean F1 per offset variant ---
+    global_f1_means = []
+    global_f1_stds = []
+    for variant in EXP2_VARIANTS:
+        global_f1_means.append(nanmean_or_nan(metric_tables["f1"][variant]))
+        global_f1_stds.append(nanstd_or_nan(metric_tables["f1"][variant]))
+    plot_grouped_bar(
+        EXP2_VARIANTS,
+        {"F1": global_f1_means},
+        exp_dir / "global_mean_f1.png",
+        "EXP2 Mean F1 Across All Datasets",
+        "F1",
+        errors={"F1": global_f1_stds},
+        ylim=(0, 1.0),
+    )
+
+    # --- Ranking: how often each variant is best per dataset ---
+    win_counts: dict[str, int] = {variant: 0 for variant in EXP2_VARIANTS}
+    for ds_idx in range(len(dataset_order)):
+        best_acc = -1.0
+        best_variant = ""
+        for variant in EXP2_VARIANTS:
+            acc = metric_tables["accuracy"][variant][ds_idx]
+            if not np.isnan(acc) and acc > best_acc:
+                best_acc = acc
+                best_variant = variant
+        if best_variant:
+            win_counts[best_variant] += 1
+    plot_grouped_bar(
+        EXP2_VARIANTS,
+        {"Wins": [float(win_counts[v]) for v in EXP2_VARIANTS]},
+        exp_dir / "global_win_count.png",
+        "EXP2 Number of Datasets Won per Variant",
+        "Wins",
     )
 
 
@@ -2138,7 +2284,84 @@ def run_exp3(exp_dir: Path) -> None:
             "Epoch",
         )
 
-    pd.DataFrame(summary_rows).to_csv(exp_dir / "summary.csv", index=False)
+    summary_df = pd.DataFrame(summary_rows)
+    summary_df.to_csv(exp_dir / "summary.csv", index=False)
+
+    # --- Global plots across all XOR dimensions ---
+    if not summary_df.empty:
+        dataset_names = [f"xor_{d}d" for d in XOR_DIMS]
+
+        # Global heatmap: strategy × dataset for each model
+        for model_name in ["FullIsing", "Net1L"]:
+            model_rows = summary_df[summary_df["model"] == model_name]
+            if model_rows.empty:
+                continue
+            heat_data = {}
+            for strategy in GAMMA_STRATEGIES:
+                heat_data[strategy] = []
+                for ds in dataset_names:
+                    row = model_rows[(model_rows["strategy"] == strategy) & (model_rows["dataset"] == ds)]
+                    heat_data[strategy].append(float(row["accuracy"].iloc[0]) if not row.empty else np.nan)
+            heat_df = pd.DataFrame(heat_data, index=dataset_names).T
+            heat_df.index.name = "strategy"
+            heat_df.columns.name = "dataset"
+            plot_heatmap_df(
+                heat_df,
+                f"EXP3 {model_name} Accuracy by Strategy & Dataset",
+                exp_dir / f"global_heatmap_{model_name.lower()}.png",
+                cmap="YlOrRd",
+                cbar_label="Accuracy",
+            )
+
+        # Global bar: mean accuracy per strategy across all dims, FullIsing vs Net1L
+        global_full_means = []
+        global_net_means = []
+        for strategy in GAMMA_STRATEGIES:
+            full_vals = summary_df[(summary_df["model"] == "FullIsing") & (summary_df["strategy"] == strategy)]["accuracy"].tolist()
+            net_vals = summary_df[(summary_df["model"] == "Net1L") & (summary_df["strategy"] == strategy)]["accuracy"].tolist()
+            global_full_means.append(nanmean_or_nan(full_vals))
+            global_net_means.append(nanmean_or_nan(net_vals))
+        plot_grouped_bar(
+            GAMMA_STRATEGIES,
+            {"FullIsing": global_full_means, "Net1L": global_net_means},
+            exp_dir / "global_mean_accuracy.png",
+            "EXP3 Mean Accuracy per Gamma Strategy",
+            "Accuracy",
+            ylim=(0, 1.0),
+        )
+
+        # Global convergence bar
+        global_full_conv = []
+        global_net_conv = []
+        for strategy in GAMMA_STRATEGIES:
+            full_vals = summary_df[(summary_df["model"] == "FullIsing") & (summary_df["strategy"] == strategy)]["convergence_epoch_90pct"].tolist()
+            net_vals = summary_df[(summary_df["model"] == "Net1L") & (summary_df["strategy"] == strategy)]["convergence_epoch_90pct"].tolist()
+            global_full_conv.append(nanmean_or_nan(full_vals))
+            global_net_conv.append(nanmean_or_nan(net_vals))
+        plot_grouped_bar(
+            GAMMA_STRATEGIES,
+            {"FullIsing": global_full_conv, "Net1L": global_net_conv},
+            exp_dir / "global_convergence.png",
+            "EXP3 Mean Convergence Epoch (90% final acc)",
+            "Epoch",
+        )
+
+        # Global radar
+        radar_series: dict[str, dict[str, float]] = {}
+        for strategy in GAMMA_STRATEGIES:
+            strat_rows = summary_df[summary_df["strategy"] == strategy]
+            radar_series[strategy] = {
+                "accuracy": nanmean_or_nan(strat_rows["accuracy"].tolist()),
+                "precision": nanmean_or_nan(strat_rows["precision"].tolist()),
+                "recall": nanmean_or_nan(strat_rows["recall"].tolist()),
+                "f1": nanmean_or_nan(strat_rows["f1"].tolist()),
+                "auc": nanmean_or_nan(strat_rows["auc"].tolist()),
+            }
+        plot_multi_radar(
+            radar_series,
+            exp_dir / "global_radar.png",
+            "EXP3 Global Radar - Gamma Strategies",
+        )
 
 
 def run_exp4(exp_dir: Path) -> None:
@@ -2342,7 +2565,85 @@ def run_exp4(exp_dir: Path) -> None:
         )
         pd.DataFrame(dataset_rows).to_csv(dataset_dir / "metrics.csv", index=False)
 
-    pd.DataFrame(summary_rows).to_csv(exp_dir / "summary.csv", index=False)
+    summary_df = pd.DataFrame(summary_rows)
+    summary_df.to_csv(exp_dir / "summary.csv", index=False)
+
+    # --- Global plots across all XOR dimensions ---
+    if not summary_df.empty:
+        EXP4_VARIANTS = ["staged_FullIsing", "baseline_FullIsing", "staged_Net1L", "baseline_Net1L"]
+        dataset_names = [f"xor_{d}d" for d in XOR_DIMS]
+
+        # Global heatmap: variant × dataset
+        heat_data = {}
+        for variant in EXP4_VARIANTS:
+            heat_data[variant] = []
+            for ds in dataset_names:
+                row = summary_df[(summary_df["variant"] == variant) & (summary_df["dataset"] == ds)]
+                heat_data[variant].append(float(row["final_accuracy"].iloc[0]) if not row.empty else np.nan)
+        heat_df = pd.DataFrame(heat_data, index=dataset_names).T
+        heat_df.index.name = "variant"
+        heat_df.columns.name = "dataset"
+        plot_heatmap_df(
+            heat_df,
+            "EXP4 Final Accuracy - Staged vs Baseline",
+            exp_dir / "global_accuracy_heatmap.png",
+            cmap="YlOrRd",
+            cbar_label="Accuracy",
+        )
+
+        # Global bar: mean final accuracy per variant
+        global_means = []
+        global_stds = []
+        for variant in EXP4_VARIANTS:
+            vals = summary_df[summary_df["variant"] == variant]["final_accuracy"].tolist()
+            global_means.append(nanmean_or_nan(vals))
+            global_stds.append(nanstd_or_nan(vals))
+        plot_grouped_bar(
+            EXP4_VARIANTS,
+            {"Accuracy": global_means},
+            exp_dir / "global_mean_accuracy.png",
+            "EXP4 Mean Accuracy - Staged vs Baseline",
+            "Accuracy",
+            errors={"Accuracy": global_stds},
+            ylim=(0, 1.0),
+        )
+
+        # Global radar
+        radar_series: dict[str, dict[str, float]] = {}
+        for variant in EXP4_VARIANTS:
+            v_rows = summary_df[summary_df["variant"] == variant]
+            radar_series[variant] = {
+                "accuracy": nanmean_or_nan(v_rows["final_accuracy"].tolist()),
+                "precision": nanmean_or_nan(v_rows["final_precision"].tolist()),
+                "recall": nanmean_or_nan(v_rows["final_recall"].tolist()),
+                "f1": nanmean_or_nan(v_rows["final_f1"].tolist()),
+                "auc": nanmean_or_nan(v_rows["final_auc"].tolist()),
+            }
+        plot_multi_radar(
+            radar_series,
+            exp_dir / "global_radar.png",
+            "EXP4 Global Radar - Staged vs Baseline",
+        )
+
+        # Global improvement bar: staged gain over baseline
+        improvement = {
+            "FullIsing": [],
+            "Net1L": [],
+        }
+        for ds in dataset_names:
+            for model in ["FullIsing", "Net1L"]:
+                staged_row = summary_df[(summary_df["variant"] == f"staged_{model}") & (summary_df["dataset"] == ds)]
+                baseline_row = summary_df[(summary_df["variant"] == f"baseline_{model}") & (summary_df["dataset"] == ds)]
+                staged_acc = float(staged_row["final_accuracy"].iloc[0]) if not staged_row.empty else np.nan
+                baseline_acc = float(baseline_row["final_accuracy"].iloc[0]) if not baseline_row.empty else np.nan
+                improvement[model].append(staged_acc - baseline_acc if not (np.isnan(staged_acc) or np.isnan(baseline_acc)) else np.nan)
+        plot_grouped_bar(
+            dataset_names,
+            improvement,
+            exp_dir / "global_staged_improvement.png",
+            "EXP4 Staged vs Baseline Accuracy Gain",
+            "Accuracy Gain",
+        )
 
 
 if __name__ == "__main__":

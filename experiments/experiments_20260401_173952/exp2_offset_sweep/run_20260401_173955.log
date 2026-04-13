@@ -1,0 +1,47 @@
+=== EXP2: Offset Sweep ===
+
+[EXP2] Dataset: xor_1d
+[EXP2][xor_1d][FullIsing_default][fold=1] epoch 001/200 | loss=3.0122 | acc=0.5000
+[EXP2][xor_1d][FullIsing_default][fold=1] epoch 020/200 | loss=0.5533 | acc=0.5750
+[EXP2][xor_1d][FullIsing_default][fold=1] epoch 040/200 | loss=0.4231 | acc=0.8750
+[EXP2][xor_1d][FullIsing_default][fold=1] epoch 060/200 | loss=0.3404 | acc=0.8250
+[EXP2][xor_1d][FullIsing_default][fold=1] epoch 080/200 | loss=0.2815 | acc=0.8500
+[EXP2][xor_1d][FullIsing_default][fold=1] epoch 100/200 | loss=0.2388 | acc=0.8750
+[EXP2][xor_1d][FullIsing_default][fold=1] epoch 120/200 | loss=0.2079 | acc=0.9000
+[EXP2][xor_1d][FullIsing_default][fold=1] epoch 140/200 | loss=0.1828 | acc=0.9250
+[EXP2][xor_1d][FullIsing_default][fold=1] epoch 160/200 | loss=0.1660 | acc=0.9000
+[EXP2][xor_1d][FullIsing_default][fold=1] epoch 180/200 | loss=0.1516 | acc=0.9750
+[EXP2][xor_1d][FullIsing_default][fold=1] epoch 200/200 | loss=0.1359 | acc=0.9250
+[EXP2][xor_1d][FullIsing_1/N][fold=1] epoch 001/200 | loss=1.2866 | acc=0.5000
+[EXP2][xor_1d][FullIsing_1/N][fold=1] epoch 020/200 | loss=0.4852 | acc=0.8000
+[EXP2][xor_1d][FullIsing_1/N][fold=1] epoch 040/200 | loss=0.3714 | acc=0.8750
+[EXP2][xor_1d][FullIsing_1/N][fold=1] epoch 060/200 | loss=0.2896 | acc=0.9500
+[EXP2][xor_1d][FullIsing_1/N][fold=1] epoch 080/200 | loss=0.2325 | acc=0.9750
+[EXP2][xor_1d][FullIsing_1/N][fold=1] epoch 100/200 | loss=0.1974 | acc=1.0000
+[EXP2][xor_1d][FullIsing_1/N][fold=1] epoch 120/200 | loss=0.1678 | acc=1.0000
+[EXP2][xor_1d][FullIsing_1/N][fold=1] epoch 140/200 | loss=0.1479 | acc=1.0000
+[EXP2][xor_1d][FullIsing_1/N][fold=1] epoch 160/200 | loss=0.1342 | acc=1.0000
+[EXP2][xor_1d][FullIsing_1/N][fold=1] epoch 180/200 | loss=0.1200 | acc=1.0000
+[EXP2][xor_1d][FullIsing_1/N][fold=1] epoch 200/200 | loss=0.1114 | acc=1.0000
+[EXP2][xor_1d][Net1L_default][fold=1] epoch 001/200 | loss=3.5992 | acc=0.5000
+[EXP2][xor_1d][Net1L_default][fold=1] epoch 020/200 | loss=0.4801 | acc=0.8000
+[EXP2][xor_1d][Net1L_default][fold=1] epoch 040/200 | loss=0.1615 | acc=0.9500
+[EXP2][xor_1d][Net1L_default][fold=1] epoch 060/200 | loss=0.0821 | acc=1.0000
+[EXP2][xor_1d][Net1L_default][fold=1] epoch 080/200 | loss=0.0542 | acc=1.0000
+[EXP2][xor_1d][Net1L_default][fold=1] epoch 100/200 | loss=0.0458 | acc=1.0000
+[EXP2][xor_1d][Net1L_default][fold=1] epoch 120/200 | loss=0.0360 | acc=1.0000
+[EXP2][xor_1d][Net1L_default][fold=1] epoch 140/200 | loss=0.0437 | acc=0.9500
+[EXP2][xor_1d][Net1L_default][fold=1] epoch 160/200 | loss=0.0319 | acc=1.0000
+[EXP2][xor_1d][Net1L_default][fold=1] epoch 180/200 | loss=0.0305 | acc=0.9500
+[EXP2][xor_1d][Net1L_default][fold=1] epoch 200/200 | loss=0.0263 | acc=1.0000
+[EXP2][xor_1d][Net1L_1/N][fold=1] epoch 001/200 | loss=1.5861 | acc=0.5000
+[EXP2][xor_1d][Net1L_1/N][fold=1] epoch 020/200 | loss=0.2343 | acc=0.9500
+[EXP2][xor_1d][Net1L_1/N][fold=1] epoch 040/200 | loss=0.0580 | acc=0.9750
+[EXP2][xor_1d][Net1L_1/N][fold=1] epoch 060/200 | loss=0.0315 | acc=1.0000
+[EXP2][xor_1d][Net1L_1/N][fold=1] epoch 080/200 | loss=0.0259 | acc=1.0000
+[EXP2][xor_1d][Net1L_1/N][fold=1] epoch 100/200 | loss=0.0215 | acc=1.0000
+[EXP2][xor_1d][Net1L_1/N][fold=1] epoch 120/200 | loss=0.0191 | acc=1.0000
+[EXP2][xor_1d][Net1L_1/N][fold=1] epoch 140/200 | loss=0.0206 | acc=1.0000
+[EXP2][xor_1d][Net1L_1/N][fold=1] epoch 160/200 | loss=0.0151 | acc=1.0000
+[EXP2][xor_1d][Net1L_1/N][fold=1] epoch 180/200 | loss=0.0192 | acc=1.0000
+[EXP2][xor_1d][Net1L_1/N][fold=1] epoch 200/200 | loss=0.0170 | acc=1.0000
