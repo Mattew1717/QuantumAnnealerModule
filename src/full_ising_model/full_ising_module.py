@@ -106,11 +106,12 @@ class IsingLayer(nn.Module):
         self.size_annealer = size_annealer
         self.num_workers = num_workers
 
-        # Create annealer instance
+        # Create annealer instance (num_workers forwarded so QuantumAnnealing can size its pool)
         self.annealer = AnnealerFactory.create(
             annealer_type=annealer_type,
             size=size_annealer,
             settings=annealing_settings,
+            num_workers=num_workers,
             **annealer_kwargs,
         )
 

@@ -445,3 +445,268 @@ class Plot:
         output_path = self.output_dir / f'{filename}.png'
         plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
         plt.close()
+
+
+class PlotPaper:
+    """
+    Scientific-paper-ready figures as SVG.
+
+    Style choices follow common journal conventions: serif fonts, thin rules,
+    hollow/hatched fills so plots remain readable in black-and-white print,
+    column-width figure sizes, and no in-figure titles by default (captions
+    belong in the manuscript). Text is kept as text in the SVG via
+    `svg.fonttype='none'` so figures remain editable in Inkscape/Illustrator.
+    """
+
+    PAPER_RC = {
+        'font.family': 'serif',
+        'font.serif': ['Times New Roman', 'CMU Serif', 'DejaVu Serif'],
+        'mathtext.fontset': 'stix',
+        'font.size': 9,
+        'axes.labelsize': 9,
+        'axes.titlesize': 9,
+        'xtick.labelsize': 8,
+        'ytick.labelsize': 8,
+        'legend.fontsize': 8,
+        'axes.linewidth': 0.7,
+        'xtick.major.width': 0.7,
+        'ytick.major.width': 0.7,
+        'xtick.major.size': 3,
+        'ytick.major.size': 3,
+        'xtick.direction': 'in',
+        'ytick.direction': 'in',
+        'axes.grid': True,
+        'axes.grid.axis': 'y',
+        'grid.color': '#b0b0b0',
+        'grid.linestyle': ':',
+        'grid.linewidth': 0.5,
+        'grid.alpha': 0.6,
+        'axes.axisbelow': True,
+        'legend.frameon': False,
+        'legend.handlelength': 1.5,
+        'svg.fonttype': 'none',
+        'pdf.fonttype': 42,
+    }
+
+    COL_SINGLE = (3.5, 2.6)
+    COL_SINGLE_SQUARE = (3.5, 3.5)
+    COL_DOUBLE = (7.16, 3.2)
+    COL_DOUBLE_TALL = (7.16, 4.0)
+
+    PALETTE = {
+        'model1_face': '#4C72B0',   # steel blue
+        'model1_edge': '#1f3b73',
+        'model2_face': '#DD8452',   # muted orange
+        'model2_edge': '#8a3d1a',
+        'accent': '#1f3b73',
+        'neutral_gray': '#555555',
+        'light_gray': '#a0a0a0',
+        'alpha_fill': 0.75,
+    }
+
+    def __init__(self, output_dir='plots_paper'):
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+
+    def _new_fig(self, figsize):
+        return plt.subplots(figsize=figsize)
+
+    def _clean_spines(self, ax):
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['left'].set_linewidth(0.6)
+        ax.spines['bottom'].set_linewidth(0.6)
+
+    def _rotate_xticks(self, ax, labels, angle=30):
+        ax.set_xticklabels(labels, rotation=angle, ha='right')
+
+    def _save_svg(self, fig, filename):
+        output_path = self.output_dir / f'{filename}.svg'
+        fig.savefig(output_path, format='svg', bbox_inches='tight')
+        plt.close(fig)
+        return output_path
+
+    def _box_style(self, model_idx):
+        if model_idx == 0:
+            face = self.PALETTE['model1_face']
+            edge = self.PALETTE['model1_edge']
+        else:
+            face = self.PALETTE['model2_face']
+            edge = self.PALETTE['model2_edge']
+        return dict(
+            boxprops=dict(facecolor=face, edgecolor=edge,
+                          linewidth=0.9, alpha=self.PALETTE['alpha_fill']),
+            medianprops=dict(color='black', linewidth=1.1),
+            whiskerprops=dict(color=edge, linewidth=0.7),
+            capprops=dict(color=edge, linewidth=0.7),
+            flierprops=dict(marker='o', markersize=3,
+                            markerfacecolor=face,
+                            markeredgecolor=edge,
+                            markeredgewidth=0.5, linestyle='none',
+                            alpha=0.6),
+        )
+
+    def box_plot(self, accuracy_data, dataset_names, title=None,
+                 filename='box_plot_paper'):
+        """K-fold accuracy boxplot, single model."""
+        with plt.rc_context(self.PAPER_RC):
+            fig, ax = self._new_fig(self.COL_DOUBLE_TALL)
+            style = self._box_style(0)
+
+            ax.boxplot(accuracy_data, labels=dataset_names,
+                       patch_artist=True, widths=0.55,
+                       showmeans=False, **style)
+
+            ax.set_xlabel('Dataset')
+            ax.set_ylabel('Test accuracy')
+            if title:
+                ax.set_title(title)
+            self._rotate_xticks(ax, dataset_names, angle=30)
+            self._clean_spines(ax)
+
+            flat = [v for row in accuracy_data for v in row]
+            if flat:
+                lo = max(0.0, min(flat) - 0.02)
+                ax.set_ylim(lo, 1.0)
+
+            fig.tight_layout()
+            return self._save_svg(fig, filename)
+
+    def plot_combined_boxplot(self, data1, data2, dataset_names,
+                              model_name1='Model 1', model_name2='Model 2',
+                              filename='combined_boxplot_paper'):
+        """K-fold accuracy boxplot, two models side-by-side per dataset."""
+        with plt.rc_context(self.PAPER_RC):
+            n = len(dataset_names)
+            fig, ax = self._new_fig(self.COL_DOUBLE_TALL)
+
+            centers = np.arange(1, n + 1) * 3
+            pos1 = centers - 0.7
+            pos2 = centers + 0.7
+
+            s1 = self._box_style(0)
+            s2 = self._box_style(1)
+
+            ax.boxplot(data1, positions=pos1, widths=1.0,
+                       patch_artist=True, showmeans=False, **s1)
+            ax.boxplot(data2, positions=pos2, widths=1.0,
+                       patch_artist=True, showmeans=False, **s2)
+
+            ax.set_xticks(centers)
+            self._rotate_xticks(ax, dataset_names, angle=45)
+            ax.set_xlabel('Dataset')
+            ax.set_ylabel('Test accuracy')
+
+            flat = [v for row in (list(data1) + list(data2)) for v in row]
+            if flat:
+                lo = max(0.0, min(flat) - 0.02)
+                ax.set_ylim(lo, 1.0)
+
+            legend_elements = [
+                Patch(facecolor=self.PALETTE['model1_face'],
+                      edgecolor=self.PALETTE['model1_edge'],
+                      linewidth=0.9, alpha=self.PALETTE['alpha_fill'],
+                      label=model_name1),
+                Patch(facecolor=self.PALETTE['model2_face'],
+                      edgecolor=self.PALETTE['model2_edge'],
+                      linewidth=0.9, alpha=self.PALETTE['alpha_fill'],
+                      label=model_name2),
+            ]
+            ax.legend(handles=legend_elements,
+                      loc='lower center', bbox_to_anchor=(0.5, 1.02),
+                      ncol=2, frameon=False, borderaxespad=0.0)
+            self._clean_spines(ax)
+
+            fig.tight_layout()
+            return self._save_svg(fig, filename)
+
+    def plot_tot_accuracy(self, accuracy_list, labels,
+                          filename='tot_accuracy_paper'):
+        """Bar chart of mean accuracy per dataset, single model."""
+        with plt.rc_context(self.PAPER_RC):
+            fig, ax = self._new_fig(self.COL_DOUBLE)
+            x = np.arange(len(labels))
+
+            ax.bar(x, accuracy_list, width=0.65,
+                   facecolor=self.PALETTE['model1_face'],
+                   edgecolor=self.PALETTE['model1_edge'],
+                   linewidth=0.9, alpha=self.PALETTE['alpha_fill'])
+
+            ax.set_xticks(x)
+            self._rotate_xticks(ax, labels, angle=30)
+            ax.set_xlabel('Dataset')
+            ax.set_ylabel('Accuracy')
+            ax.set_ylim(0.0, 1.0)
+            self._clean_spines(ax)
+
+            fig.tight_layout()
+            return self._save_svg(fig, filename)
+
+    def plot_compare_accuracy(self, accuracy_list1, accuracy_list2, labels,
+                              model_name1='Model 1', model_name2='Model 2',
+                              filename='compare_accuracy_paper'):
+        """Grouped bar chart comparing two models' mean accuracy per dataset."""
+        with plt.rc_context(self.PAPER_RC):
+            fig, ax = self._new_fig(self.COL_DOUBLE)
+            x = np.arange(len(labels))
+            width = 0.38
+
+            ax.bar(x - width / 2, accuracy_list1, width,
+                   facecolor=self.PALETTE['model1_face'],
+                   edgecolor=self.PALETTE['model1_edge'],
+                   linewidth=0.9, alpha=self.PALETTE['alpha_fill'],
+                   label=model_name1)
+            ax.bar(x + width / 2, accuracy_list2, width,
+                   facecolor=self.PALETTE['model2_face'],
+                   edgecolor=self.PALETTE['model2_edge'],
+                   linewidth=0.9, alpha=self.PALETTE['alpha_fill'],
+                   label=model_name2)
+
+            ax.set_xticks(x)
+            self._rotate_xticks(ax, labels, angle=30)
+            ax.set_xlabel('Dataset')
+            ax.set_ylabel('Accuracy')
+            ax.set_ylim(0.0, 1.0)
+            ax.legend(loc='lower center', bbox_to_anchor=(0.5, 1.02),
+                      ncol=2, frameon=False, borderaxespad=0.0)
+            self._clean_spines(ax)
+
+            fig.tight_layout()
+            return self._save_svg(fig, filename)
+
+    def plot_parity_scatter(self, accuracy_list1, accuracy_list2,
+                            dataset_names,
+                            model_name1='Model 1', model_name2='Model 2',
+                            filename='parity_scatter_paper'):
+        """Parity plot: Model 1 accuracy vs Model 2 accuracy, one point per dataset."""
+        with plt.rc_context(self.PAPER_RC):
+            fig, ax = self._new_fig(self.COL_SINGLE_SQUARE)
+
+            lo = min(min(accuracy_list1), min(accuracy_list2))
+            hi = max(max(accuracy_list1), max(accuracy_list2))
+            pad = max((hi - lo) * 0.05, 0.01)
+            ax.plot([lo - pad, hi + pad], [lo - pad, hi + pad],
+                    color=self.PALETTE['light_gray'], linewidth=0.7,
+                    linestyle='--', label=r'$y = x$', zorder=2)
+
+            ax.scatter(accuracy_list1, accuracy_list2, s=42,
+                       facecolor=self.PALETTE['model1_face'],
+                       edgecolor=self.PALETTE['model1_edge'],
+                       alpha=self.PALETTE['alpha_fill'],
+                       linewidth=0.9, zorder=3)
+
+            for i, name in enumerate(dataset_names):
+                ax.annotate(name, (accuracy_list1[i], accuracy_list2[i]),
+                            xytext=(4, 4), textcoords='offset points',
+                            fontsize=7, color=self.PALETTE['neutral_gray'])
+
+            ax.set_xlabel(f'{model_name1} accuracy')
+            ax.set_ylabel(f'{model_name2} accuracy')
+            ax.set_xlim(lo - pad, hi + pad)
+            ax.set_ylim(lo - pad, hi + pad)
+            ax.set_aspect('equal', adjustable='box')
+            ax.legend(loc='upper left', frameon=False)
+            self._clean_spines(ax)
+
+            fig.tight_layout()
+            return self._save_svg(fig, filename)

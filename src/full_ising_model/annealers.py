@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Dict
+import queue as _queue
 
 
 from dimod import SampleSet, ExactSolver
@@ -87,6 +88,11 @@ class ExactAnnealing(Annealer):
 class QuantumAnnealing(Annealer):
     """
     Quantum annealing on D-Wave QPU with fixed embedding.
+
+    Computes the embedding once at init, then creates `num_workers` independent
+    FixedEmbeddingComposite instances (each with its own DWaveSampler connection)
+    stored in a thread-safe Queue.  Concurrent threads each check out their own
+    sampler, submit a job, resolve it, and return the sampler to the pool.
     """
 
     def __init__(
@@ -94,6 +100,7 @@ class QuantumAnnealing(Annealer):
         size: int,
         profile: str = "default",
         num_reads: int = 1,
+        num_workers: int = 1,
     ):
         super().__init__(size)
 
@@ -101,28 +108,35 @@ class QuantumAnnealing(Annealer):
         if DWaveSampler is None or EmbeddingComposite is None or FixedEmbeddingComposite is None:
             raise ImportError("dwave.system (D-Wave SDK) is required for QuantumAnnealing but is not installed.")
 
-        # Find embedding once and reuse it
+        # Find embedding once and reuse it across all samplers in the pool
         print("Searching QPU and computing embedding...")
-        base_sampler = EmbeddingComposite(DWaveSampler(profile=profile))
-        embedding = base_sampler.find_embedding(
+        probe = EmbeddingComposite(DWaveSampler(profile=profile))
+        embedding = probe.find_embedding(
             nx.complete_graph(size).edges(),
-            base_sampler.child.edgelist,
+            probe.child.edgelist,
         )
 
-        self._sampler = FixedEmbeddingComposite(
-            DWaveSampler(profile=profile),
-            embedding,
-        )
+        # Build a pool of num_workers independent samplers, all sharing the same embedding
+        self._pool: _queue.Queue = _queue.Queue()
+        for _ in range(num_workers):
+            self._pool.put(
+                FixedEmbeddingComposite(DWaveSampler(profile=profile), embedding)
+            )
         self._num_reads = num_reads
 
-        print(f"Using QPU: {self._sampler.child.solver.id}")
+        # Print QPU id (borrow and return the first sampler)
+        first = self._pool.get()
+        print(f"Using QPU: {first.child.solver.id}  (pool size: {num_workers})")
+        self._pool.put(first)
 
     def sample(self, h: dict, j: dict) -> SampleSet:
-        return self._sampler.sample_ising(
-            h,
-            j,
-            num_reads=self._num_reads,
-        )
+        sampler = self._pool.get()          # blocks only if all workers are busy
+        try:
+            ss = sampler.sample_ising(h, j, num_reads=self._num_reads)
+            ss.resolve()                    # wait for QPU result before returning
+            return ss
+        finally:
+            self._pool.put(sampler)         # always return to pool
 
 class AnnealerType(str, Enum):
     """
@@ -156,6 +170,7 @@ class AnnealerFactory:
                 size=size,
                 profile=kwargs.get("profile", "default"),
                 num_reads=kwargs.get("num_reads", 1),
+                num_workers=kwargs.get("num_workers", 1),
             )
 
         if annealer_type == AnnealerType.EXACT:
