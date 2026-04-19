@@ -220,7 +220,7 @@ Embedding the Full Ising Module in a neural network effectively creates a hybrid
     \label{fig:isingModel}
 \end{figure}
 
-\subsubsection{Single-Layer Ising Neural Network}
+\subsubsection{Single-Layer Ising Neural Network}\label{sec:singlelayer}
 In addition to a single \texttt{FullIsingModule}, we consider a shallow architecture composed of $M$ parallel Full Ising Modules whose outputs are linearly combined. This structure can be interpreted as a single-layer neural network where each unit is an independent Ising-based energy model.
 
 Given an input vector $\boldsymbol{\theta}$, the $m$-th \texttt{FullIsingModule} produces an output
@@ -244,12 +244,14 @@ Despite its shallow structure, this model increases expressive power compared to
 %  Section: Empirical Evaluation Single vs NN
 % ============================================================
 
-\section{Empirical Evaluation: FullIsingModule vs.\ Neural Network}
+\section{Empirical Evaluation: FullIsingModule vs.\ MultiIsingNetwork}
 
-In our experiments, the SZP model and the FullIsingModule (PyTorch
-implementation of SZP) achieve comparable results; however, the PyTorch
-version requires approximately three times less computation time than the
-original implementation.
+We compare the single \texttt{FullIsingModule} against the shallow
+\texttt{MultiIsingNetwork} (an ensemble of $M=5$ parallel
+\texttt{FullIsingModule}s combined through a linear readout, as introduced
+in Section~\ref{sec:singlelayer} and corresponding to the
+implementation in \texttt{ModularNetwork/Network\_1L.py}). Both architectures
+are evaluated on a common pool of UCI benchmarks and synthetic XOR problems.
 
 % ------------------------------------------------------------
 \subsection{Method}
@@ -288,22 +290,22 @@ datasets, including the number of features and the number of samples.
 \hline
 Dataset                       & \# Features & \# Samples & Balanced \\
 \hline
-00\_iris\_versicolor\_virginica & 4           & --          & Yes      \\
-01\_vertebral\_column           & 6           & --          & Yes      \\
-02\_banknote                    & 4           & --          & Yes      \\
-03\_breast\_cancer              & 30          & --          & Yes      \\
-04\_contraceptive\_method       & 9           & --          & Yes      \\
-05\_haberman\_survival          & 3           & --          & Yes      \\
-06\_heart\_failure              & 12          & --          & Yes      \\
-07\_ionosphere                  & 34          & --          & Yes      \\
-08\_SPECTF\_Heart               & 44          & --          & Yes      \\
+00\_iris\_versicolor\_virginica & 4           & 100         & Yes      \\
+01\_vertebral\_column           & 6           & 199         & Yes      \\
+02\_banknote                    & 4           & 1219        & Yes      \\
+03\_breast\_cancer              & 30          & 423         & Yes      \\
+04\_contraceptive\_method       & 9           & 665         & Yes      \\
+05\_haberman\_survival          & 3           & 161         & Yes      \\
+06\_heart\_failure              & 12          & 191         & Yes      \\
+07\_ionosphere                  & 34          & 251         & Yes      \\
+08\_SPECTF\_Heart               & 44          & 79          & Yes      \\
 \multicolumn{4}{c}{\textit{Synthetic XOR datasets}} \\
-XOR-1D                          & 1           & --          & Yes      \\
-XOR-2D                          & 2           & --          & Yes      \\
-XOR-3D                          & 3           & --          & Yes      \\
-XOR-4D                          & 4           & --          & Yes      \\
-XOR-5D                          & 5           & --          & Yes      \\
-XOR-6D                          & 6           & --          & Yes      \\
+XOR-1D                          & 1           & 200         & Yes      \\
+XOR-2D                          & 2           & 400         & Yes      \\
+XOR-3D                          & 3           & 800         & Yes      \\
+XOR-4D                          & 4           & 1600        & Yes      \\
+XOR-5D                          & 5           & 3200        & Yes      \\
+XOR-6D                          & 6           & 6400        & Yes      \\
 \hline
 \end{tabular}
 \end{table}
@@ -351,18 +353,46 @@ configuration.
 
 \begin{table}[h]
 \centering
-\caption{Hyperparameters used in all experiments.}
+\caption{Hyperparameters used in all experiments. Values are shared between
+the \texttt{FullIsingModule} and the \texttt{MultiIsingNetwork} unless
+otherwise noted; the combiner learning rate applies to the
+\texttt{MultiIsingNetwork} only, and the K-Fold cross-validation is used
+on UCI benchmarks only.}
 \label{tab:hyperparameters}
-\begin{tabular}{lc}
+\begin{tabular}{ll}
 \hline
-Hyperparameter     & Value \\
+Hyperparameter                                  & Value \\
 \hline
-Learning rate      & --    \\
-Batch size         & --    \\
-Number of epochs   & --    \\
-Weight decay       & --    \\
-Hidden units       & --    \\
-Initialization     & --    \\
+\multicolumn{2}{l}{\textit{Optimization}} \\
+Optimizer                                       & Adam \\
+Loss                                            & \texttt{BCEWithLogitsLoss} \\
+Number of epochs                                & 200 \\
+Batch size                                      & 32 \\
+K-Folds (UCI only)                              & 5 \\
+Random seed                                     & 42 \\
+\hline
+\multicolumn{2}{l}{\textit{Per-parameter learning rates}} \\
+$\eta_{\Gamma}$ (couplings)                     & $1\!\times\!10^{-3}$ \\
+$\eta_{\lambda}$ (energy scale)                 & $5\!\times\!10^{-3}$ \\
+$\eta_{\varepsilon}$ (offset)                   & $1\!\times\!10^{-2}$ \\
+$\eta_{\text{comb}}$ (linear combiner)          & $5\!\times\!10^{-3}$ \\
+\hline
+\multicolumn{2}{l}{\textit{Architecture}} \\
+Annealer size $n$                               & 50 spins \\
+Ising perceptrons $M$ (MultiIsingNetwork)       & 5 \\
+Partition input across perceptrons              & False (full input replicated) \\
+Hidden-nodes offset $\varepsilon_h$             & $-0.02$ \\
+$\Gamma$ initialization                         & $\mathrm{triu}\!\big(\mathcal{N}(0,0.01^2)\big)$ \\
+$\lambda$ initialization                        & $-0.1$ ($\pm 0.1$ per perceptron) \\
+$\varepsilon$ initialization                    & $0.0$ ($\pm 0.1$ per perceptron) \\
+\# trainable parameters (FullIsingModule)       & 2\,502 \\
+\# trainable parameters (MultiIsingNetwork)     & 12\,516 \\
+\hline
+\multicolumn{2}{l}{\textit{Simulated annealing}} \\
+Inverse temperature $\beta$ range               & $[1,\,10]$ \\
+Number of reads                                 & 1 \\
+Number of sweeps                                & 1\,000 \\
+Sweeps per $\beta$ step                         & 1 \\
 \hline
 \end{tabular}
 \end{table}
@@ -372,11 +402,12 @@ Initialization     & --    \\
 % ------------------------------------------------------------
 
 We report experimental results separately for the two model families under
-evaluation: the FullIsingModule and the Neural Network (NeuralNet) baseline.
-For each model, results are presented first on the UCI benchmark datasets and
-then on the synthetic XOR problems. Quantitative results are accompanied by
-box plots and bar charts that illustrate the distribution of performance
-across cross-validation folds.
+evaluation: the single \texttt{FullIsingModule} and the
+\texttt{MultiIsingNetwork} (an ensemble of $M=5$ FullIsingModules combined
+through a linear readout). For each model, results are presented first on
+the UCI benchmark datasets and then on the synthetic XOR problems.
+Quantitative results are accompanied by box plots and bar charts that
+illustrate the distribution of performance across cross-validation folds.
 
 % ============================================================
 \subsubsection{FullIsingModule --- UCI Benchmark Datasets}
@@ -388,46 +419,54 @@ benchmark datasets.
 
 \begin{figure}[h]
     \centering
-    % TODO: insert box-plot figure
-    % \includegraphics[width=\linewidth]{figures/boxplot_ising_uci.pdf}
-    \fbox{\rule{0pt}{4cm}\rule{\linewidth}{0pt}}  % placeholder
+    % NOTE: SVG sources live in plots_paper_svg/. For pdfLaTeX compile them
+    % to PDF (e.g. inkscape --export-type=pdf) or use \includesvg with the
+    % svg package. Filename is given without extension so LaTeX picks the
+    % first available format on its search path.
+    \includegraphics[width=\linewidth]{plots_paper_svg/uci_boxplot_fullising}
     \caption{Box plots of classification accuracy (5-fold CV) for the
              FullIsingModule on each UCI benchmark dataset.}
     \label{fig:boxplot_ising_uci}
 \end{figure}
 
 Table~\ref{tab:ising_uci} summarises the mean performance of the
-FullIsingModule across all UCI datasets. A consistent pattern is observable:
-the model tends to exhibit high recall coupled with low precision on several
-benchmarks, suggesting a systematic bias towards the positive class. This
-behaviour is particularly pronounced on the \texttt{00\_iris} and
-\texttt{01\_vertebral\_column} datasets, where precision collapses to 0.50
-and 0.00, respectively, while recall remains close to 1.0 — a hallmark of a
-degenerate classifier that predicts the majority label irrespective of the
-input. The AUC values confirm this interpretation: scores near 0.78--0.91
-for some datasets stand in apparent contrast with near-chance accuracy,
-reflecting the model's limited discriminative capability.
+FullIsingModule across all UCI datasets. The model performs strongly on
+benchmarks with well-separated, informative features: it reaches
+$\mathrm{AUC}=0.996$ and accuracy~$0.971$ on \texttt{02\_banknote}, and
+$\mathrm{AUC}=0.960$ with accuracy~$0.896$ on \texttt{07\_ionosphere}.
+Solid performance is also observed on \texttt{08\_SPECTF\_Heart}
+(AUC~$0.814$, recall~$0.925$) and \texttt{01\_vertebral\_column}
+(AUC~$0.785$, accuracy~$0.739$). On benchmarks with low feature
+separability or small sample size, however, the single Ising module
+struggles: accuracy drops to $0.520$ on \texttt{00\_iris\_versicolor\_virginica}
+(AUC~$0.570$) and to $0.578$ on \texttt{05\_haberman\_survival}, with
+correspondingly high standard deviations across folds. The relatively
+large dispersion observed on several datasets (e.g.\ recall std~$0.232$
+on \texttt{00\_iris}, $0.174$ on \texttt{05\_haberman\_survival}) reflects
+the known sensitivity of the model to the random initialisation of the
+couplings $\Gamma$ and to the sparse spin samples produced by the annealer
+with a single read per query.
 
 \begin{table}[h]
 \centering
 \caption{Mean classification performance of the FullIsingModule on UCI
          benchmark datasets (5-fold CV). Values are reported as mean
-         $\pm$ std. Best AUC per dataset is highlighted in \textbf{bold}.}
+         $\pm$ std.}
 \label{tab:ising_uci}
 \resizebox{\linewidth}{!}{%
-\begin{tabular}{lcccc}
+\begin{tabular}{lccccc}
 \hline
-Dataset                        & Accuracy          & Precision         & Recall            & AUC               \\
+Dataset                         & Accuracy          & Precision         & Recall            & $F_1$             & AUC               \\
 \hline
-00\_iris\_versicolor\_virginica & $0.500 \pm 0.000$ & $0.500 \pm 0.000$ & $1.000 \pm 0.000$ & $0.958 \pm 0.048$ \\
-01\_vertebral\_column           & $0.497 \pm 0.005$ & $0.000 \pm 0.000$ & $0.000 \pm 0.000$ & $0.776 \pm 0.060$ \\
-02\_banknote                    & $0.828 \pm 0.063$ & $0.764 \pm 0.058$ & $0.953 \pm 0.049$ & $0.910 \pm 0.053$ \\
-03\_breast\_cancer              & $0.586 \pm 0.040$ & $0.551 \pm 0.025$ & $0.963 \pm 0.024$ & $0.760 \pm 0.043$ \\
-04\_contraceptive\_method       & $0.552 \pm 0.020$ & $0.532 \pm 0.016$ & $0.877 \pm 0.056$ & $0.642 \pm 0.059$ \\
-05\_haberman\_survival          & $0.540 \pm 0.041$ & $0.526 \pm 0.029$ & $0.875 \pm 0.088$ & $0.651 \pm 0.062$ \\
-06\_heart\_failure              & $0.503 \pm 0.005$ & $0.503 \pm 0.005$ & $1.000 \pm 0.000$ & $0.626 \pm 0.097$ \\
-07\_ionosphere                  & $0.586 \pm 0.021$ & $0.547 \pm 0.012$ & $0.992 \pm 0.016$ & $0.914 \pm 0.063$ \\
-08\_SPECTF\_Heart               & $0.493 \pm 0.013$ & $0.493 \pm 0.013$ & $1.000 \pm 0.000$ & $0.792 \pm 0.049$ \\
+00\_iris\_versicolor\_virginica & $0.520 \pm 0.093$ & $0.506 \pm 0.073$ & $0.680 \pm 0.232$ & $0.569 \pm 0.133$ & $0.570 \pm 0.140$ \\
+01\_vertebral\_column           & $0.739 \pm 0.050$ & $0.722 \pm 0.063$ & $0.800 \pm 0.084$ & $0.755 \pm 0.046$ & $0.785 \pm 0.061$ \\
+02\_banknote                    & $0.971 \pm 0.015$ & $0.958 \pm 0.027$ & $0.985 \pm 0.008$ & $0.971 \pm 0.014$ & $0.996 \pm 0.002$ \\
+03\_breast\_cancer              & $0.690 \pm 0.036$ & $0.718 \pm 0.028$ & $0.628 \pm 0.068$ & $0.669 \pm 0.047$ & $0.751 \pm 0.056$ \\
+04\_contraceptive\_method       & $0.645 \pm 0.054$ & $0.632 \pm 0.045$ & $0.696 \pm 0.101$ & $0.660 \pm 0.060$ & $0.704 \pm 0.049$ \\
+05\_haberman\_survival          & $0.578 \pm 0.081$ & $0.625 \pm 0.170$ & $0.325 \pm 0.174$ & $0.411 \pm 0.179$ & $0.614 \pm 0.061$ \\
+06\_heart\_failure              & $0.618 \pm 0.094$ & $0.619 \pm 0.101$ & $0.646 \pm 0.096$ & $0.630 \pm 0.091$ & $0.639 \pm 0.098$ \\
+07\_ionosphere                  & $0.896 \pm 0.060$ & $0.923 \pm 0.049$ & $0.864 \pm 0.097$ & $0.890 \pm 0.069$ & $0.960 \pm 0.047$ \\
+08\_SPECTF\_Heart               & $0.720 \pm 0.091$ & $0.665 \pm 0.090$ & $0.925 \pm 0.061$ & $0.769 \pm 0.060$ & $0.814 \pm 0.052$ \\
 \hline
 \end{tabular}}
 \end{table}
@@ -441,9 +480,7 @@ the FullIsingModule as a function of the XOR dimensionality (1-D to 6-D).
 
 \begin{figure}[h]
     \centering
-    % TODO: insert bar-chart figure
-    % \includegraphics[width=0.85\linewidth]{figures/bar_ising_xor.pdf}
-    \fbox{\rule{0pt}{4cm}\rule{0.85\linewidth}{0pt}}  % placeholder
+    \includegraphics[width=0.85\linewidth]{plots_paper_svg/xor_accuracy_fullising}
     \caption{Mean classification accuracy of the FullIsingModule on
              synthetic XOR datasets of increasing dimensionality (1-D to
              6-D).}
@@ -452,15 +489,16 @@ the FullIsingModule as a function of the XOR dimensionality (1-D to 6-D).
 
 Table~\ref{tab:ising_xor} reports the full set of performance metrics on the
 XOR benchmarks. The model achieves near-perfect classification on the 1-D
-XOR task (accuracy $= 0.975$, AUC $= 1.000$), demonstrating that it can
-learn simple non-linear decision boundaries. However, performance degrades
-rapidly with increasing dimensionality: starting from 2-D, all metrics
-decline monotonically, and at 6-D the model collapses to a degenerate
-solution (accuracy $= 0.500$, recall $= 1.000$, AUC $\approx 0.509$),
-analogous to the degenerate behaviour observed on several UCI datasets.
-These results indicate that the FullIsingModule has limited capacity to
-model high-order interaction terms that are intrinsic to multidimensional
-XOR problems.
+XOR task (accuracy~$0.975$, AUC~$1.000$), confirming that a single Ising
+module can learn simple non-linear decision boundaries. Performance,
+however, degrades rapidly with the number of dimensions: from 2-D onwards
+accuracy drops below $0.70$, and at 6-D the model collapses to a
+degenerate solution (accuracy~$0.500$, recall~$1.000$, AUC~$\approx 0.509$).
+This behaviour is consistent with the limited expressive capacity of a
+single energy-based learner: encoding the $2^d$ disjoint quadrants of a
+$d$-dimensional XOR with only quadratic spin--spin couplings becomes
+increasingly hard, and a single annealing read per query is insufficient
+to disambiguate near-degenerate ground states.
 
 \begin{table}[h]
 \centering
@@ -482,130 +520,161 @@ XOR-6D  & 0.5000   & 0.5000    & 1.0000 & 0.6667 & 0.5093 \\
 \end{table}
 
 % ============================================================
-\subsubsection{NeuralNet --- UCI Benchmark Datasets}
+\subsubsection{MultiIsingNetwork --- UCI Benchmark Datasets}
 % ============================================================
 
 Figure~\ref{fig:boxplot_nn_uci} reports the distribution of classification
-accuracy across the 5-fold cross-validation runs for the NeuralNet baseline
-on each UCI benchmark dataset.
+accuracy across the 5-fold cross-validation runs for the MultiIsingNetwork
+($M=5$ parallel Ising perceptrons combined through a linear readout) on
+each UCI benchmark dataset.
 
 \begin{figure}[h]
     \centering
-    % TODO: insert box-plot figure
-    % \includegraphics[width=\linewidth]{figures/boxplot_nn_uci.pdf}
-    \fbox{\rule{0pt}{4cm}\rule{\linewidth}{0pt}}  % placeholder
+    \includegraphics[width=\linewidth]{plots_paper_svg/uci_boxplot_multiising}
     \caption{Box plots of classification accuracy (5-fold CV) for the
-             NeuralNet baseline on each UCI benchmark dataset.}
+             MultiIsingNetwork on each UCI benchmark dataset.}
     \label{fig:boxplot_nn_uci}
 \end{figure}
 
-Table~\ref{tab:nn_uci} summarises the mean performance of the NeuralNet
-across all UCI datasets. In contrast to the FullIsingModule, the NeuralNet
-exhibits well-calibrated precision--recall trade-offs across all benchmarks,
-with no evidence of degenerate class-bias behaviour. The model achieves
-accuracy consistently above 0.63 across all datasets, reaching values above
-0.97 on \texttt{00\_iris} and \texttt{02\_banknote}. AUC scores are
-uniformly high (above 0.69 on all benchmarks), further confirming the
-discriminative quality of the learned representations.
+Table~\ref{tab:nn_uci} summarises the mean performance of the
+MultiIsingNetwork across all UCI datasets. The ensemble structure broadens
+the range of problems on which the model is competitive: accuracy spans
+from $0.521$ on the small and weakly separable \texttt{05\_haberman\_survival}
+benchmark to $0.989$ on \texttt{02\_banknote}, with AUC scores between
+$0.573$ and $0.999$. Compared to the single FullIsingModule
+(Table~\ref{tab:ising_uci}), the MultiIsingNetwork delivers consistent
+gains on the more separable benchmarks --- \texttt{00\_iris} ($+0.36$ in
+accuracy), \texttt{03\_breast\_cancer} ($+0.10$) and
+\texttt{04\_contraceptive\_method} ($+0.04$) --- and a smaller but clear
+improvement on \texttt{07\_ionosphere} ($+0.04$ accuracy, $+0.01$ AUC).
+Conversely, on the smaller and noisier benchmarks
+(\texttt{05\_haberman\_survival}, \texttt{06\_heart\_failure},
+\texttt{08\_SPECTF\_Heart}) the single Ising module remains competitive
+with, or slightly above, the ensemble in accuracy and AUC, suggesting
+that the additional capacity of the linear combiner is not always
+exploitable when the training signal is weak.
 
 \begin{table}[h]
 \centering
-\caption{Mean classification performance of the NeuralNet on UCI
+\caption{Mean classification performance of the MultiIsingNetwork on UCI
          benchmark datasets (5-fold CV). Values are reported as mean
          $\pm$ std.}
 \label{tab:nn_uci}
 \resizebox{\linewidth}{!}{%
-\begin{tabular}{lcccc}
+\begin{tabular}{lccccc}
 \hline
-Dataset                        & Accuracy          & Precision         & Recall            & AUC               \\
+Dataset                         & Accuracy          & Precision         & Recall            & $F_1$             & AUC               \\
 \hline
-00\_iris\_versicolor\_virginica & $0.970 \pm 0.025$ & $0.964 \pm 0.045$ & $0.980 \pm 0.040$ & $0.994 \pm 0.008$ \\
-01\_vertebral\_column           & $0.829 \pm 0.037$ & $0.823 \pm 0.068$ & $0.860 \pm 0.111$ & $0.914 \pm 0.019$ \\
-02\_banknote                    & $0.988 \pm 0.006$ & $0.989 \pm 0.012$ & $0.987 \pm 0.004$ & $0.999 \pm 0.000$ \\
-03\_breast\_cancer              & $0.849 \pm 0.052$ & $0.865 \pm 0.031$ & $0.826 \pm 0.081$ & $0.927 \pm 0.035$ \\
-04\_contraceptive\_method       & $0.692 \pm 0.033$ & $0.686 \pm 0.030$ & $0.708 \pm 0.077$ & $0.758 \pm 0.043$ \\
-05\_haberman\_survival          & $0.670 \pm 0.111$ & $0.776 \pm 0.160$ & $0.475 \pm 0.179$ & $0.722 \pm 0.053$ \\
-06\_heart\_failure              & $0.649 \pm 0.073$ & $0.645 \pm 0.074$ & $0.666 \pm 0.100$ & $0.668 \pm 0.068$ \\
-07\_ionosphere                  & $0.924 \pm 0.053$ & $0.965 \pm 0.044$ & $0.880 \pm 0.084$ & $0.973 \pm 0.036$ \\
-08\_SPECTF\_Heart               & $0.634 \pm 0.172$ & $0.620 \pm 0.186$ & $0.646 \pm 0.211$ & $0.692 \pm 0.193$ \\
+00\_iris\_versicolor\_virginica & $0.880 \pm 0.040$ & $0.869 \pm 0.089$ & $0.920 \pm 0.117$ & $0.883 \pm 0.042$ & $0.934 \pm 0.030$ \\
+01\_vertebral\_column           & $0.733 \pm 0.076$ & $0.728 \pm 0.088$ & $0.780 \pm 0.087$ & $0.748 \pm 0.056$ & $0.825 \pm 0.060$ \\
+02\_banknote                    & $0.989 \pm 0.004$ & $0.986 \pm 0.012$ & $0.992 \pm 0.009$ & $0.989 \pm 0.004$ & $0.999 \pm 0.001$ \\
+03\_breast\_cancer              & $0.785 \pm 0.016$ & $0.782 \pm 0.045$ & $0.802 \pm 0.056$ & $0.789 \pm 0.012$ & $0.869 \pm 0.027$ \\
+04\_contraceptive\_method       & $0.680 \pm 0.070$ & $0.670 \pm 0.063$ & $0.702 \pm 0.117$ & $0.683 \pm 0.085$ & $0.742 \pm 0.057$ \\
+05\_haberman\_survival          & $0.521 \pm 0.074$ & $0.519 \pm 0.087$ & $0.450 \pm 0.207$ & $0.459 \pm 0.147$ & $0.573 \pm 0.090$ \\
+06\_heart\_failure              & $0.586 \pm 0.060$ & $0.594 \pm 0.069$ & $0.583 \pm 0.052$ & $0.587 \pm 0.051$ & $0.627 \pm 0.053$ \\
+07\_ionosphere                  & $0.936 \pm 0.041$ & $0.959 \pm 0.025$ & $0.912 \pm 0.085$ & $0.932 \pm 0.047$ & $0.973 \pm 0.039$ \\
+08\_SPECTF\_Heart               & $0.658 \pm 0.049$ & $0.661 \pm 0.083$ & $0.693 \pm 0.097$ & $0.665 \pm 0.037$ & $0.757 \pm 0.107$ \\
 \hline
 \end{tabular}}
 \end{table}
 
 % ============================================================
-\subsubsection{NeuralNet --- Synthetic XOR Datasets}
+\subsubsection{MultiIsingNetwork --- Synthetic XOR Datasets}
 % ============================================================
 
 Figure~\ref{fig:bar_nn_xor} shows the mean classification accuracy of the
-NeuralNet as a function of XOR dimensionality.
+MultiIsingNetwork as a function of XOR dimensionality.
 
 \begin{figure}[h]
     \centering
-    % TODO: insert bar-chart figure
-    % \includegraphics[width=0.85\linewidth]{figures/bar_nn_xor.pdf}
-    \fbox{\rule{0pt}{4cm}\rule{0.85\linewidth}{0pt}}  % placeholder
-    \caption{Mean classification accuracy of the NeuralNet on synthetic
-             XOR datasets of increasing dimensionality (1-D to 6-D).}
+    \includegraphics[width=0.85\linewidth]{plots_paper_svg/xor_accuracy_1l}
+    \caption{Mean classification accuracy of the MultiIsingNetwork on
+             synthetic XOR datasets of increasing dimensionality (1-D to
+             6-D).}
     \label{fig:bar_nn_xor}
 \end{figure}
 
 \begin{table}[h]
 \centering
-\caption{Classification performance of the NeuralNet on synthetic XOR
-         datasets of increasing dimensionality (placeholder values ---
-         to be replaced with experimental results).}
+\caption{Classification performance of the MultiIsingNetwork on synthetic
+         XOR datasets of increasing dimensionality. The last column reports
+         the wall-clock training time on a single CPU (200 epochs,
+         $M=5$ Ising perceptrons of size~50).}
 \label{tab:nn_xor}
-\begin{tabular}{lccccc}
+\begin{tabular}{lcccccc}
 \hline
-Dataset & Accuracy & Precision & Recall & $F_1$ & AUC    \\
+Dataset & Accuracy & Precision & Recall & $F_1$  & AUC    & Time [s] \\
 \hline
-XOR-1D  & --       & --        & --     & --    & --     \\
-XOR-2D  & --       & --        & --     & --    & --     \\
-XOR-3D  & --       & --        & --     & --    & --     \\
-XOR-4D  & --       & --        & --     & --    & --     \\
-XOR-5D  & --       & --        & --     & --    & --     \\
-XOR-6D  & --       & --        & --     & --    & --     \\
+XOR-1D  & 1.0000   & 1.0000    & 1.0000 & 1.0000 & 1.0000 & 136      \\
+XOR-2D  & 0.8750   & 0.8750    & 0.8750 & 0.8750 & 0.9637 & 270      \\
+XOR-3D  & 0.8688   & 0.8315    & 0.9250 & 0.8757 & 0.9483 & 537      \\
+XOR-4D  & 0.8969   & 0.8896    & 0.9062 & 0.8978 & 0.9735 & 1\,074   \\
+XOR-5D  & 0.8469   & 0.9081    & 0.7719 & 0.8345 & 0.9289 & 2\,136   \\
+XOR-6D  & 0.8414   & 0.8813    & 0.7891 & 0.8326 & 0.9332 & 4\,243   \\
 \hline
 \end{tabular}
 \end{table}
+
+In contrast to the single FullIsingModule, the MultiIsingNetwork attains
+perfect classification on the 1-D problem and remains well above chance
+across all higher dimensionalities, with accuracy in the range $0.84$--$0.90$
+and AUC always above~$0.92$. The ensemble of $M=5$ Ising perceptrons,
+combined linearly, therefore exhibits a markedly larger effective
+capacity than a single module on this family of strictly non-linear
+tasks. Training time, on the other hand, scales roughly as $2^{d}$:
+from~$136\text{\,s}$ at 1-D to~$4\,243\text{\,s}$ at 6-D, dominated by
+the cost of the $|D|$ annealing queries per epoch.
 
 % ============================================================
 \subsubsection{Comparative Discussion}
 % ============================================================
 
-The experimental results reveal a clear performance gap between the two
-architectures across both evaluation scenarios.
+Across UCI and XOR benchmarks the two architectures exhibit complementary
+behaviours rather than a uniform dominance of one over the other.
 
-On the UCI benchmarks, the NeuralNet consistently outperforms the
-FullIsingModule in terms of accuracy, $F_1$ score, and AUC. The
-FullIsingModule exhibits a systematic failure mode: on several datasets it
-converges to a degenerate solution that predicts the positive class for all
-samples, resulting in recall $\approx 1.0$ but precision $\approx 0.5$ and
-accuracy $\approx 0.5$. This behaviour suggests that the Ising-based model
-may be susceptible to local minima or to the loss landscape induced by
-imbalanced gradient signals during training.
+\paragraph{UCI benchmarks.}
+The MultiIsingNetwork is preferable on datasets with a clear, well-separable
+signal: it improves over the single FullIsingModule on
+\texttt{00\_iris\_versicolor\_virginica}, \texttt{02\_banknote},
+\texttt{03\_breast\_cancer}, \texttt{04\_contraceptive\_method} and
+\texttt{07\_ionosphere} on accuracy, $F_1$ and AUC simultaneously. On the
+opposite end of the spectrum, the small and noisy benchmarks
+(\texttt{05\_haberman\_survival}, \texttt{06\_heart\_failure},
+\texttt{08\_SPECTF\_Heart}) are handled at least as well by the single
+Ising module, which retains higher accuracy and AUC on
+\texttt{05\_haberman\_survival} and \texttt{08\_SPECTF\_Heart} and matches
+the ensemble on \texttt{06\_heart\_failure}. A practical implication is
+that the additional capacity introduced by the four extra Ising
+perceptrons and the linear combiner ($\sim\!10\,000$ extra trainable
+parameters and a $5\times$ increase in annealing calls per forward pass)
+pays off mainly when a strong signal is present in the input features.
 
-On the XOR benchmarks, the FullIsingModule solves the 1-D problem with high
-fidelity but degrades rapidly as dimensionality increases, collapsing to a
-degenerate solution at 6-D. This result highlights a fundamental limitation
-in representing high-order interactions within the current parameterisation
-of the Ising energy function. By contrast, the NeuralNet is expected (cf.\
-Table~\ref{tab:nn_xor}) to maintain competitive performance across all XOR
-dimensionalities, owing to its ability to compose non-linear transformations
-through multiple hidden layers.
+\paragraph{XOR benchmarks.}
+The synthetic XOR family separates the two architectures more sharply.
+Both models solve the 1-D problem (FullIsingModule:
+$\mathrm{acc}=0.975$; MultiIsingNetwork: $\mathrm{acc}=1.000$). Already at
+2-D the FullIsingModule loses about $30$ accuracy points
+(Table~\ref{tab:ising_xor}), whereas the MultiIsingNetwork retains
+accuracy~$\geq 0.84$ and $\mathrm{AUC}\geq 0.92$ up to 6-D
+(Table~\ref{tab:nn_xor}). The five parallel Ising perceptrons therefore
+provide enough additional expressivity to approximate the disjoint
+$2^d$-region decision rule that a single quadratic energy cannot capture.
 
-These findings motivate further investigation into regularisation strategies
-and initialisation schemes for the FullIsingModule, as well as structural
-extensions that could enhance its expressivity for high-dimensional problems.
+\paragraph{Capacity vs.\ cost.}
+The expressive advantage of the MultiIsingNetwork comes at a cost that
+grows with the number of perceptrons and with the input dimension: training
+the 6-D XOR with $M=5$ requires of the order of $4\,200$\,s on CPU
+(Table~\ref{tab:nn_xor}), and each forward pass issues $M$ annealing
+queries instead of one. The trade-off between expressive capacity and
+annealing budget is the central practical consideration when choosing
+between the two architectures.
 
 
-\section{Discussion (maybe?)}
-observations?
-complexity?
+\section{Discussion}
+% TODO
 
 \section{Conclusion}
-sappiamo che il modello singolo è molto sensibile all'inizializzazione. leggeri cambi di hyperparametri potrebbero portare a risultati considerevolmente diversi.
-ci aspettiamo che in architetture ibride questo nodo quantistico sia capace di affrontare bene problemi di ottimizzazione combinatoria riconducibili alla formula Ising/Qubo: "...".
+% TODO
 
 
 \EOD
