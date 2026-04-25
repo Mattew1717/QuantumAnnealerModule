@@ -1,0 +1,688 @@
+\documentclass{ieeeaccess}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{soul}
+\usepackage{algpseudocode}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+\history{Date of publication xxxx 00, 0000, date of current version xxxx 00, 0000.}
+\doi{10.1109/TQE.2020.DOI}
+
+\title{Preparation of Papers for IEEE Transactions on Quantum Engineering (March 2020)}
+\author{\uppercase{First A. Author}\authorrefmark{1}, \IEEEmembership{Fellow, IEEE},
+\uppercase{Second B. Author\authorrefmark{2}, and Third C. Author,
+Jr}.\authorrefmark{3},
+\IEEEmembership{Member, IEEE}}
+\address[1]{National Institute of Standards and 
+Technology, Boulder, CO 80305 USA (email: author@boulder.nist.gov)}
+\address[2]{Department of Physics, Colorado State University, Fort Collins, 
+CO 80523 USA (email: author@lamar.colostate.edu)}
+\address[3]{Electrical Engineering Department, University of Colorado, Boulder, CO 
+80309 USA}
+\tfootnote{This paragraph of the first footnote will contain support 
+information, including sponsor and financial support acknowledgment. For 
+example, ``This work was supported in part by the U.S. Department of 
+Commerce under Grant BS123456.''}
+
+\markboth
+{Author \headeretal: Preparation of Papers for IEEE Transactions on Quantum Engineering}
+{Author \headeretal: Preparation of Papers for IEEE Transactions on Quantum Engineering}
+
+\corresp{Corresponding author: First A. Author (email: author@ boulder.nist.gov).}
+
+\begin{abstract}
+...
+\end{abstract}
+
+\begin{keywords}
+Enter key words or phrases in alphabetical 
+order, separated by commas. For a list of suggested keywords, send a blank 
+email to keywords@ieee.org or visit \underline
+{http://www.ieee.org/organizations/pubs/ani\_prod/keywrd98.txt}
+\end{keywords}
+
+\titlepgskip=-15pt
+
+\maketitle
+
+\newcommand{\added}[1]{\textcolor{green}{#1}}
+\newcommand{\removed}[1]{{\textcolor{red}{\st{#1}}}}
+
+\section{Introduction}
+code: https://github.com/Mattew1717/QuantumAnnealerModule
+
+\clearpage
+\section{Background}%1-1.5 pages
+In this section we aim at introducing the background required to understand the proposed method, focusing on the Ising Model and its realization through quantum annealing, as well as the learning process the method is based on.
+
+\subsection{The Ising Model}
+The Ising model provides a mathematical framework originally introduced to describe ferromagnetic systems. It is defined on a graph \( (V, E) \), where each vertex \( i \in V \) represents a discrete spin variable \( z_i \in \{-1, +1\} \). Each spin is associated with a local bias \( \theta_i \in \mathbb{R} \) and pairwise couplings \( \Gamma_{ij} \in \mathbb{R} \) for each edge \( (i, j) \). The total energy of a configuration is given by the Hamiltonian:
+\begin{equation}\label{eq:ising}
+    E(\theta, \Gamma, z) = \sum_{i \in V} \theta_i z_i + \sum_{(i,j) \in E} \Gamma_{ij} z_i z_j.
+\end{equation} 
+
+An Ising machine seeks the spin configuration that minimizes this Hamiltonian:
+\begin{equation}
+z^* = \arg\min_z E(\theta, \Gamma, z),
+\end{equation}
+where $z^*$ corresponds to the ground state configuration. This minimization process can be used to encode a wide class of combinatorial optimization problems, since many discrete problems can be expressed in the form of the Ising model.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{isingModel.png}
+    \caption{On the left, an illustration of the graph structure of an Ising model 
+        characterized by a fully connected graph, with \( |V| = 5 \) spins \( z \), 
+        corresponding biases \( \theta \), and couplings \( \Gamma \). 
+        An Ising machine maps the Ising model to the right-hand side of the figure, 
+        returning a \(\{-1, +1\}\) assignment (illustrated as white/black nodes) to each 
+        binary variable \( z_i \). The output is the spin configuration \( z^{*} \) 
+        and the corresponding minimal energy \( E_{0}(\theta, \Gamma) \).
+    }
+    \label{fig:isingModel}
+\end{figure}
+
+\subsection{Quantum Annealing}
+Quantum annealing is a heuristic method for solving optimization problems by evolving a quantum system toward the ground state of a problem Hamiltonian. 
+In the context of the Ising model, the optimization problem defined in Eq.~\ref{eq:ising} can be mapped to the ground-state search of a corresponding Hamiltonian.
+Specifically, consider the time-dependent Hamiltonian
+\begin{equation}
+    H(t) = \gamma(t) H_D + H_P
+\end{equation}
+where $H_P$ is the problem Hamiltonian, $H_D$ is the transverse field Hamiltonian, and $\gamma : \mathbb{R}^+ \to \mathbb{R}$ is a decreasing function that gradually suppresses the kinetic term $H_D$, guiding the system toward the ground state of $H_P$. The transverse field Hamiltonian $H_D$ provides quantum fluctuations that allow the exploration of the solution landscape, while the modulation $\gamma(t)$ controls the annealing process.  
+
+Quantum annealing can be physically realized using a network of qubits arranged on the vertices of a graph $(V, E)$, with $|V| = n$, where the edges $E$ represent the couplings between qubits. The problem Hamiltonian is defined as a self-adjoint operator on the $n$-qubit Hilbert space $\left(\mathbb{C}^2\right)^{\otimes n}$:
+\begin{equation}
+H_P = \sum_{i \in V} \theta_i \, \sigma_z^{(i)} + \sum_{(i,j) \in E} \Gamma_{ij} \, \sigma_z^{(i)} \sigma_z^{(j)},
+\label{hamiltonian}
+\end{equation}
+where $\sigma_z^{(i)}$ is the Pauli-$z$ operator acting on qubit $i$, and $\theta_i$ and $\Gamma_{ij}$ represent, respectively, the local fields and the couplings between qubits.
+Thus, quantum annealing can be viewed as a physical mechanism for minimizing the Ising Hamiltonian.
+
+\subsection{Parametric Model}
+The parametric model proposed by Schmid et al. \cite{10.21468/SciPostPhysCore.7.1.013} defines a supervised learning framework based on the principles of Ising machines.
+The definition of the model is the following:
+\begin{align}
+F(\boldsymbol{\theta}|\Gamma, \lambda, \varepsilon) &= \lambda \min_{\mathbf{z} \in \{-1,1\}^n} E(\boldsymbol{\theta}, \Gamma, \mathbf{z}) + \varepsilon \\
+&= \lambda E_0(\boldsymbol{\theta}, \Gamma) + \varepsilon.
+\label{model}
+\end{align}
+In this formulation, input data are encoded into the spin biases $\boldsymbol{\theta} = (\theta_1, \ldots, \theta_n)$ of an Ising model, while the trainable parameters correspond to the couplings $\Gamma_{ij}$ determined by the topology of the underlying Ising machine. The model output is defined as the ground-state energy of the system, scaled and shifted through two additional parameters $\lambda$ and $\varepsilon$.
+
+\subsubsection{Training Phase}
+
+Given the training set $\mathcal{D} = \{(\boldsymbol{\theta}^{(a)}, y^{(a)})\}_{a=1,\ldots,N}$, with $y^{(a)} = f(\boldsymbol{\theta}^{(a)})$, where $f : \mathcal{X} \rightarrow \mathbb{R}$ is an unknown function to approximate, the model in \ref{model} can be trained by minimizing a loss function, for example the mean squared error (MSE).
+\begin{equation}
+L(\Gamma, \lambda, \varepsilon) = \frac{1}{N} \sum_{a=1}^{N} 
+\left[ F(\boldsymbol{\theta}^{(a)} | \Gamma, \lambda, \varepsilon) - y^{(a)} \right]^2 
+\label{eq:loss}
+\end{equation}
+The objective is to perform this minimization task by using a gradient descent approach, iteratively updating the parameters $\Gamma$, $\lambda$, and $\varepsilon$ by taking steps in the direction opposite to the gradient of the loss function $L$:
+\begin{equation}
+\delta \Gamma = -\eta \nabla_{\Gamma} L, \quad
+\delta \lambda = -\eta \frac{\partial L}{\partial \lambda}, \quad
+\delta \varepsilon = -\eta \frac{\partial L}{\partial \varepsilon},
+\label{eq:gradients}
+\end{equation}
+where $\eta > 0$ is the learning rate controlling the optimization step size.
+
+
+This representation highlights a neural-like structure, where spins act as neurons and couplings as synaptic weights. Notably, the learning process does not require exact ground-state solutions; approximate energies produced by the Ising machine can be effectively integrated into the optimization, as their systematic deviations are absorbed by the parameter tuning process. This property makes the model practical and robust for real-world training scenarios.
+
+
+\clearpage
+\section{Proposal}
+\subsection{Quantum Ising Modules in Neural Networks}
+
+Integrating quantum-inspired optimization models within neural network architectures opens new avenues for solving complex, high-dimensional problems. In this work, we propose a framework where quantum Ising models are embedded as differentiable modules within a neural network, combining the combinatorial optimization capabilities of Ising machines with the function approximation power of deep learning.
+
+\subsubsection{Motivation}
+
+Standard neural networks rely on continuous differentiable mappings to propagate gradients during training. However, many real-world optimization problems are discrete in nature and can be naturally expressed as spin systems in the form of Ising Hamiltonians. Quantum annealers, or their classical simulations, provide a mechanism to efficiently explore the combinatorial space and approximate ground-state solutions of these Hamiltonians. Embedding such mechanisms into neural networks allows us to leverage this optimization power while retaining end-to-end differentiability for gradient-based learning.
+
+\subsubsection{Differentiable Ising Energy Function}
+
+To integrate an Ising-based module within a neural network, we define a custom differentiable function that computes the ground-state energy of an Ising Hamiltonian given a batch of input biases. For each input vector $\theta$, representing a set of local fields on the spins, the module uses an annealing solver to find an approximate ground-state configuration \(z^*\) that minimizes the Hamiltonian:
+
+\[
+E_0(\theta, \Gamma) = \min_{z \in \{-1,+1\}^n} \left( \sum_i \theta_i z_i + \sum_{i<j} \Gamma_{ij} z_i z_j \right),
+\]
+
+where $\Gamma$ are the learnable couplings encoding the interactions between spins. By storing the resulting spin configurations during the forward pass, the module can propagate gradients with respect to $\Gamma$ in the backward pass using a surrogate gradient:
+
+\[
+\frac{\partial E_0}{\partial \Gamma_{ij}} = z_i^* z_j^*.
+\]
+
+This design ensures that the module is fully compatible with automatic differentiation frameworks such as PyTorch, allowing seamless integration with larger neural network architectures.
+
+\begin{algorithm}[H]
+\caption{Differentiable Ising Energy Function (Forward and Backward)}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} batch of biases $\{\theta_i\}$, coupling matrix $\Gamma$, annealer instance
+\STATE \textbf{Forward pass:}
+\FOR{each sample $i$ in batch}
+    \STATE Convert $\theta_i$ to biases $h_i$
+    \STATE Convert $\Gamma$ to coupling matrix $J$
+    \STATE Sample approximate ground state $z_i^*$ using annealer
+    \STATE Compute energy $E_i = \sum_j h_{i,j} z_{i,j} + \sum_{j<k} J_{jk} z_{i,j} z_{i,k}$
+    \STATE Store $z_i^*$ for backward
+\ENDFOR
+\STATE \textbf{Return:} batch energies $\{E_i\}$
+\STATEx
+\STATE \textbf{Backward pass:}
+\FOR{each sample $i$ in batch}
+    \STATE Compute outer product $z_i^* (z_i^*)^\top$
+    \STATE Multiply by incoming gradient $\partial L / \partial E_i$
+\ENDFOR
+\STATE Average over batch and retain upper-triangular part to get $\partial L / \partial \Gamma$
+\STATE \textbf{Return:} $\partial L / \partial \Gamma$
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Full Ising Module}
+
+While the \texttt{IsingLayer} computes the Ising ground-state energy, the \texttt{FullIsingModule} extends this functionality by introducing two additional learnable parameters: a scaling factor $\lambda$ and an energy offset. The module output is defined as:
+
+\[
+E_\text{out} = \lambda E_0 + \text{offset}.
+\]
+
+This linear transformation allows the Ising module to match the scale of the target outputs in a supervised learning context, providing flexibility analogous to the activation and bias terms in traditional neural network layers. Consequently, the module can be trained end-to-end, learning both the spin couplings and the  scaling parameters.
+
+\begin{algorithm}[H]
+\caption{Forward Pass of Full Ising Module}
+\begin{algorithmic}[1]
+\STATE Compute $E_0$ using Ising Energy Function
+\STATE Scale and shift: $E_\text{out} = \lambda \cdot E_0 + \text{offset}$
+\STATE \textbf{Return:} $E_\text{out}$
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Parallelized Computation and Scalability}
+
+The computation of ground-state energies for a batch of inputs can be efficiently parallelized. By splitting the batch across multiple threads, each thread computes the annealing solution for a subset of inputs. This allows leveraging multicore CPUs or distributed systems for scalability, ensuring that the computational overhead of embedding an Ising solver within a neural network remains manageable even for moderately large spin systems.
+
+\subsubsection{Integration into Neural Networks}
+Embedding the Full Ising Module in a neural network effectively creates a hybrid model where discrete combinatorial optimization is combined with continuous learning. The neural network can supply input biases to the Ising module, which then computes a structured, discrete representation of the energy landscape. Gradients flow backward from the loss function through the Ising module to update both the couplings and the scaling parameters. This enables the network to learn complex mappings that require both discrete reasoning and continuous function approximation.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{nn.png}
+    \caption{An illustration of single layer neural network.
+    }
+    \label{fig:isingModel}
+\end{figure}
+
+\subsubsection{Single-Layer Ising Neural Network}\label{sec:singlelayer}
+In addition to a single \texttt{FullIsingModule}, we consider a shallow architecture composed of $M$ parallel Full Ising Modules whose outputs are linearly combined. This structure can be interpreted as a single-layer neural network where each unit is an independent Ising-based energy model.
+
+Given an input vector $\boldsymbol{\theta}$, the $m$-th \texttt{FullIsingModule} produces an output
+\begin{equation}
+F^{(m)}(\boldsymbol{\theta}) \;=\; \lambda^{(m)} \, E_0\!\big(\boldsymbol{\theta}, \Gamma^{(m)}\big) \;+\; \varepsilon^{(m)},
+\label{eq:fullising_out}
+\end{equation}
+where $E_0(\boldsymbol{\theta}, \Gamma^{(m)})$ denotes the ground-state energy of the Ising Hamiltonian with input biases $\boldsymbol{\theta}$ and trainable couplings $\Gamma^{(m)}$, while $\lambda^{(m)}$ and $\varepsilon^{(m)}$ are learnable scaling and offset parameters.
+
+The single-layer network with $M$ parallel modules aggregates their outputs through a linear readout:
+\begin{equation}
+F(\boldsymbol{\theta}) \;=\; b \;+\; \sum_{m=1}^{M} w_m \, F^{(m)}(\boldsymbol{\theta}),
+\label{eq:linear_comb_fullising}
+\end{equation}
+with $w_m$ and $b$ being additional trainable parameters.
+
+This architecture is analogous to a single fully connected layer in standard neural networks, with the key difference that each neuron is replaced by a structured Ising energy minimization block. The nonlinearity arises from the discrete ground-state computation within each module, while the outer linear combination enables flexible aggregation of multiple energy-based representations.
+
+Despite its shallow structure, this model increases expressive power compared to a single Ising module, as different modules can learn different coupling patterns, effectively acting as an ensemble of energy-based learners trained end-to-end.
+% ============================================================
+%  Section: Empirical Evaluation Single vs NN
+% ============================================================
+
+\section{Empirical Evaluation: FullIsingModule vs.\ MultiIsingNetwork}
+
+We compare the single \texttt{FullIsingModule} against the shallow
+\texttt{MultiIsingNetwork} (an ensemble of $M=5$ parallel
+\texttt{FullIsingModule}s combined through a linear readout, as introduced
+in Section~\ref{sec:singlelayer} and corresponding to the
+implementation in \texttt{ModularNetwork/Network\_1L.py}). Both architectures
+are evaluated on a common pool of UCI benchmarks and synthetic XOR problems.
+
+% ------------------------------------------------------------
+\subsection{Method}
+% ------------------------------------------------------------
+
+\subsubsection{Datasets}
+
+The experimental evaluation was conducted on a broad selection of benchmark
+datasets obtained from the UCI Machine Learning
+Repository~\cite{Dua:2019}. The considered datasets span different feature
+dimensionalities and sample sizes in order to assess the robustness and
+generalization capabilities of the proposed approach across heterogeneous
+scenarios.
+
+The UCI datasets are stored in their original, possibly imbalanced form
+(see Table~\ref{tab:datasets}). Balancing is enforced at evaluation
+time only: we adopt stratified 5-fold cross-validation and, within each
+fold, we apply random undersampling of the majority class independently
+on the training and the test split. As a result, every training fold
+contains an equal number of class~0 and class~1 samples, and the same
+holds for every test fold, so that both training and evaluation operate
+on perfectly balanced data. Feature standardization was performed by
+computing the mean and standard deviation exclusively on the training
+set, and subsequently applying the same transformation to the test set.
+This procedure prevents information leakage and ensures a fair evaluation
+protocol.
+
+In addition to real-world benchmarks, we conducted controlled experiments on
+synthetic multidimensional XOR problems, ranging from 1-D to 6-D. These
+datasets were included to explicitly evaluate the capability of the models
+to capture higher-order non-linear interactions.
+
+Table~\ref{tab:datasets} summarizes the main characteristics of the adopted
+datasets, including the number of features, the number of samples and the
+per-class distribution.
+
+\begin{table}[h]
+\centering
+\caption{Summary of the datasets used in the experimental evaluation.}
+\label{tab:datasets}
+\begin{tabular}{lcccc}
+\hline
+Dataset                         & \# Features & \# Samples & Class dist.\ (0/1) & Balanced \\
+\hline
+00\_iris\_versicolor\_virginica & 4           & 99          & 49 / 50      & Yes \\
+01\_vertebral\_column           & 6           & 200         & 100 / 100    & Yes \\
+02\_banknote                    & 4           & 1372        & 762 / 610    & No  \\
+03\_breast\_cancer              & 30          & 569         & 357 / 212    & No  \\
+04\_contraceptive\_method       & 9           & 962         & 629 / 333    & No  \\
+05\_haberman\_survival          & 3           & 306         & 225 / 81     & No  \\
+06\_heart\_failure              & 12          & 299         & 203 / 96     & No  \\
+07\_ionosphere                  & 34          & 351         & 126 / 225    & No  \\
+08\_SPECTF\_Heart               & 44          & 267         & 55 / 212     & No  \\
+\multicolumn{5}{c}{\textit{Synthetic XOR datasets}} \\
+XOR-1D                          & 1           & 200         & 100 / 100    & Yes \\
+XOR-2D                          & 2           & 400         & 200 / 200    & Yes \\
+XOR-3D                          & 3           & 800         & 400 / 400    & Yes \\
+XOR-4D                          & 4           & 1600        & 800 / 800    & Yes \\
+XOR-5D                          & 5           & 3200        & 1600 / 1600  & Yes \\
+XOR-6D                          & 6           & 6400        & 3200 / 3200  & Yes \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Evaluation Protocol}
+
+Model performance was assessed using 5-fold cross-validation ($k=5$). The
+random seed was fixed across all experiments to ensure reproducibility. For
+each fold, training and validation splits were generated deterministically,
+and final performance metrics were computed by averaging results across folds.
+
+The following evaluation metrics were collected:
+\begin{itemize}
+    \item Classification accuracy,
+    \item Precision,
+    \item Recall,
+    \item $F_1$ score,
+    \item Area Under the ROC Curve (AUC).
+\end{itemize}
+
+These metrics provide a comprehensive assessment of classification
+performance, including sensitivity to class-specific errors.
+
+\subsubsection{Training and Inference Procedure}
+
+The training phase was implemented using PyTorch. All models were trained
+using the Adam optimizer and the Binary Cross-Entropy loss with logits
+(\texttt{BCEWithLogitsLoss}). Models were trained for a fixed number of
+epochs with mini-batch gradient descent. During inference, the sigmoid
+activation was applied to the logits to obtain class probabilities, and a
+threshold of 0.5 was used for binary classification.
+
+\subsubsection{Hyperparameter Configuration}
+
+To ensure a fair comparison between the considered architectures, the same
+set of hyperparameters was adopted across all models. These hyperparameters
+were not individually optimized for each architecture and dataset; instead,
+they were selected to provide reasonably good and stable performance across
+the considered benchmarks. This choice allows the comparison to focus on
+architectural differences rather than on architecture-specific hyperparameter
+tuning.
+
+Table~\ref{tab:hyperparameters} reports the adopted hyperparameter
+configuration.
+
+\begin{table}[h]
+\centering
+\caption{Hyperparameters used in all experiments. Values are shared between
+the \texttt{FullIsingModule} and the \texttt{MultiIsingNetwork} unless
+otherwise noted; the combiner learning rate applies to the
+\texttt{MultiIsingNetwork} only, and the K-Fold cross-validation is used
+on UCI benchmarks only.}
+\label{tab:hyperparameters}
+\begin{tabular}{ll}
+\hline
+Hyperparameter                                  & Value \\
+\hline
+\multicolumn{2}{l}{\textit{Optimization}} \\
+Optimizer                                       & Adam \\
+Loss                                            & \texttt{BCEWithLogitsLoss} \\
+Number of epochs                                & 200 \\
+Batch size                                      & 32 \\
+K-Folds (UCI only)                              & 5 \\
+Random seed                                     & 42 \\
+\hline
+\multicolumn{2}{l}{\textit{Per-parameter learning rates}} \\
+$\eta_{\Gamma}$ (couplings)                     & $1\!\times\!10^{-3}$ \\
+$\eta_{\lambda}$ (energy scale)                 & $5\!\times\!10^{-3}$ \\
+$\eta_{\varepsilon}$ (offset)                   & $1\!\times\!10^{-2}$ \\
+$\eta_{\text{comb}}$ (linear combiner)          & $5\!\times\!10^{-3}$ \\
+\hline
+\multicolumn{2}{l}{\textit{Architecture}} \\
+Annealer size $n$                               & 50 spins \\
+Ising perceptrons $M$ (MultiIsingNetwork)       & 5 \\
+Partition input across perceptrons              & False (full input replicated) \\
+Hidden-nodes offset $\varepsilon_h$             & $-0.02$ \\
+$\Gamma$ initialization                         & $\mathrm{triu}\!\big(\mathcal{N}(0,0.01^2)\big)$ \\
+$\lambda$ initialization                        & $-0.1$ ($\pm 0.1$ per perceptron) \\
+$\varepsilon$ initialization                    & $0.0$ ($\pm 0.1$ per perceptron) \\
+\# trainable parameters (FullIsingModule)       & 2\,502 \\
+\# trainable parameters (MultiIsingNetwork)     & 12\,516 \\
+\hline
+\multicolumn{2}{l}{\textit{Simulated annealing}} \\
+Inverse temperature $\beta$ range               & $[1,\,10]$ \\
+Number of reads                                 & 1 \\
+Number of sweeps                                & 1\,000 \\
+Sweeps per $\beta$ step                         & 1 \\
+\hline
+\end{tabular}
+\end{table}
+
+% ------------------------------------------------------------
+\subsection{Results}
+% ------------------------------------------------------------
+
+We report experimental results separately for the two model families under
+evaluation: the single \texttt{FullIsingModule} and the
+\texttt{MultiIsingNetwork} (an ensemble of $M=5$ FullIsingModules combined
+through a linear readout). For each model, results are presented first on
+the UCI benchmark datasets and then on the synthetic XOR problems.
+Quantitative results are accompanied by box plots and bar charts that
+illustrate the distribution of performance across cross-validation folds.
+
+% ============================================================
+\subsubsection{FullIsingModule --- UCI Benchmark Datasets}
+% ============================================================
+
+Figure~\ref{fig:boxplot_ising_uci} reports the distribution of classification
+accuracy across the 5-fold cross-validation runs for each of the nine UCI
+benchmark datasets.
+
+\begin{figure}[h]
+    \centering
+    % NOTE: SVG sources live in plots_paper_svg/. For pdfLaTeX compile them
+    % to PDF (e.g. inkscape --export-type=pdf) or use \includesvg with the
+    % svg package. Filename is given without extension so LaTeX picks the
+    % first available format on its search path.
+    \includegraphics[width=\linewidth]{plots_paper_svg/uci_boxplot_fullising}
+    \caption{Box plots of classification accuracy (5-fold CV) for the
+             FullIsingModule on each UCI benchmark dataset.}
+    \label{fig:boxplot_ising_uci}
+\end{figure}
+
+Table~\ref{tab:ising_uci} summarises the mean performance of the
+FullIsingModule across all UCI datasets. The model performs strongly on
+benchmarks with well-separated, informative features: it reaches
+$\mathrm{AUC}=0.996$ and accuracy~$0.971$ on \texttt{02\_banknote}, and
+$\mathrm{AUC}=0.960$ with accuracy~$0.896$ on \texttt{07\_ionosphere}.
+Solid performance is also observed on \texttt{08\_SPECTF\_Heart}
+(AUC~$0.814$, recall~$0.925$) and \texttt{01\_vertebral\_column}
+(AUC~$0.785$, accuracy~$0.739$). On benchmarks with low feature
+separability or small sample size, however, the single Ising module
+struggles: accuracy drops to $0.520$ on \texttt{00\_iris\_versicolor\_virginica}
+(AUC~$0.570$) and to $0.578$ on \texttt{05\_haberman\_survival}, with
+correspondingly high standard deviations across folds. The relatively
+large dispersion observed on several datasets (e.g.\ recall std~$0.232$
+on \texttt{00\_iris}, $0.174$ on \texttt{05\_haberman\_survival}) reflects
+the known sensitivity of the model to the random initialisation of the
+couplings $\Gamma$ and to the sparse spin samples produced by the annealer
+with a single read per query.
+
+\begin{table}[h]
+\centering
+\caption{Mean classification performance of the FullIsingModule on UCI
+         benchmark datasets (5-fold CV). Values are reported as mean
+         $\pm$ std.}
+\label{tab:ising_uci}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lccccc}
+\hline
+Dataset                         & Accuracy          & Precision         & Recall            & $F_1$             & AUC               \\
+\hline
+00\_iris\_versicolor\_virginica & $0.520 \pm 0.093$ & $0.506 \pm 0.073$ & $0.680 \pm 0.232$ & $0.569 \pm 0.133$ & $0.570 \pm 0.140$ \\
+01\_vertebral\_column           & $0.739 \pm 0.050$ & $0.722 \pm 0.063$ & $0.800 \pm 0.084$ & $0.755 \pm 0.046$ & $0.785 \pm 0.061$ \\
+02\_banknote                    & $0.971 \pm 0.015$ & $0.958 \pm 0.027$ & $0.985 \pm 0.008$ & $0.971 \pm 0.014$ & $0.996 \pm 0.002$ \\
+03\_breast\_cancer              & $0.690 \pm 0.036$ & $0.718 \pm 0.028$ & $0.628 \pm 0.068$ & $0.669 \pm 0.047$ & $0.751 \pm 0.056$ \\
+04\_contraceptive\_method       & $0.645 \pm 0.054$ & $0.632 \pm 0.045$ & $0.696 \pm 0.101$ & $0.660 \pm 0.060$ & $0.704 \pm 0.049$ \\
+05\_haberman\_survival          & $0.578 \pm 0.081$ & $0.625 \pm 0.170$ & $0.325 \pm 0.174$ & $0.411 \pm 0.179$ & $0.614 \pm 0.061$ \\
+06\_heart\_failure              & $0.618 \pm 0.094$ & $0.619 \pm 0.101$ & $0.646 \pm 0.096$ & $0.630 \pm 0.091$ & $0.639 \pm 0.098$ \\
+07\_ionosphere                  & $0.896 \pm 0.060$ & $0.923 \pm 0.049$ & $0.864 \pm 0.097$ & $0.890 \pm 0.069$ & $0.960 \pm 0.047$ \\
+08\_SPECTF\_Heart               & $0.720 \pm 0.091$ & $0.665 \pm 0.090$ & $0.925 \pm 0.061$ & $0.769 \pm 0.060$ & $0.814 \pm 0.052$ \\
+\hline
+\end{tabular}}
+\end{table}
+
+% ============================================================
+\subsubsection{FullIsingModule --- Synthetic XOR Datasets}
+% ============================================================
+
+Figure~\ref{fig:bar_ising_xor} shows the mean classification accuracy of
+the FullIsingModule as a function of the XOR dimensionality (1-D to 6-D).
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.85\linewidth]{plots_paper_svg/xor_accuracy_fullising}
+    \caption{Mean classification accuracy of the FullIsingModule on
+             synthetic XOR datasets of increasing dimensionality (1-D to
+             6-D).}
+    \label{fig:bar_ising_xor}
+\end{figure}
+
+Table~\ref{tab:ising_xor} reports the full set of performance metrics on the
+XOR benchmarks. The model achieves near-perfect classification on the 1-D
+XOR task (accuracy~$0.975$, AUC~$1.000$), confirming that a single Ising
+module can learn simple non-linear decision boundaries. Performance,
+however, degrades rapidly with the number of dimensions: from 2-D onwards
+accuracy drops below $0.70$, and at 6-D the model collapses to a
+degenerate solution (accuracy~$0.500$, recall~$1.000$, AUC~$\approx 0.509$).
+This behaviour is consistent with the limited expressive capacity of a
+single energy-based learner: encoding the $2^d$ disjoint quadrants of a
+$d$-dimensional XOR with only quadratic spin--spin couplings becomes
+increasingly hard, and a single annealing read per query is insufficient
+to disambiguate near-degenerate ground states.
+
+\begin{table}[h]
+\centering
+\caption{Classification performance of the FullIsingModule on synthetic
+         XOR datasets of increasing dimensionality.}
+\label{tab:ising_xor}
+\begin{tabular}{lccccc}
+\hline
+Dataset & Accuracy & Precision & Recall & $F_1$ & AUC    \\
+\hline
+XOR-1D  & 0.9750   & 0.9524    & 1.0000 & 0.9756 & 1.0000 \\
+XOR-2D  & 0.6625   & 0.6512    & 0.7000 & 0.6747 & 0.7969 \\
+XOR-3D  & 0.6125   & 0.5900    & 0.7375 & 0.6556 & 0.6555 \\
+XOR-4D  & 0.6500   & 0.6739    & 0.5813 & 0.6242 & 0.6974 \\
+XOR-5D  & 0.5078   & 0.5182    & 0.2219 & 0.3107 & 0.5131 \\
+XOR-6D  & 0.5000   & 0.5000    & 1.0000 & 0.6667 & 0.5093 \\
+\hline
+\end{tabular}
+\end{table}
+
+% ============================================================
+\subsubsection{MultiIsingNetwork --- UCI Benchmark Datasets}
+% ============================================================
+
+Figure~\ref{fig:boxplot_nn_uci} reports the distribution of classification
+accuracy across the 5-fold cross-validation runs for the MultiIsingNetwork
+($M=5$ parallel Ising perceptrons combined through a linear readout) on
+each UCI benchmark dataset.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{plots_paper_svg/uci_boxplot_multiising}
+    \caption{Box plots of classification accuracy (5-fold CV) for the
+             MultiIsingNetwork on each UCI benchmark dataset.}
+    \label{fig:boxplot_nn_uci}
+\end{figure}
+
+Table~\ref{tab:nn_uci} summarises the mean performance of the
+MultiIsingNetwork across all UCI datasets. The ensemble structure broadens
+the range of problems on which the model is competitive: accuracy spans
+from $0.521$ on the small and weakly separable \texttt{05\_haberman\_survival}
+benchmark to $0.989$ on \texttt{02\_banknote}, with AUC scores between
+$0.573$ and $0.999$. Compared to the single FullIsingModule
+(Table~\ref{tab:ising_uci}), the MultiIsingNetwork delivers consistent
+gains on the more separable benchmarks --- \texttt{00\_iris} ($+0.36$ in
+accuracy), \texttt{03\_breast\_cancer} ($+0.10$) and
+\texttt{04\_contraceptive\_method} ($+0.04$) --- and a smaller but clear
+improvement on \texttt{07\_ionosphere} ($+0.04$ accuracy, $+0.01$ AUC).
+Conversely, on the smaller and noisier benchmarks
+(\texttt{05\_haberman\_survival}, \texttt{06\_heart\_failure},
+\texttt{08\_SPECTF\_Heart}) the single Ising module remains competitive
+with, or slightly above, the ensemble in accuracy and AUC, suggesting
+that the additional capacity of the linear combiner is not always
+exploitable when the training signal is weak.
+
+\begin{table}[h]
+\centering
+\caption{Mean classification performance of the MultiIsingNetwork on UCI
+         benchmark datasets (5-fold CV). Values are reported as mean
+         $\pm$ std.}
+\label{tab:nn_uci}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lccccc}
+\hline
+Dataset                         & Accuracy          & Precision         & Recall            & $F_1$             & AUC               \\
+\hline
+00\_iris\_versicolor\_virginica & $0.880 \pm 0.040$ & $0.869 \pm 0.089$ & $0.920 \pm 0.117$ & $0.883 \pm 0.042$ & $0.934 \pm 0.030$ \\
+01\_vertebral\_column           & $0.733 \pm 0.076$ & $0.728 \pm 0.088$ & $0.780 \pm 0.087$ & $0.748 \pm 0.056$ & $0.825 \pm 0.060$ \\
+02\_banknote                    & $0.989 \pm 0.004$ & $0.986 \pm 0.012$ & $0.992 \pm 0.009$ & $0.989 \pm 0.004$ & $0.999 \pm 0.001$ \\
+03\_breast\_cancer              & $0.785 \pm 0.016$ & $0.782 \pm 0.045$ & $0.802 \pm 0.056$ & $0.789 \pm 0.012$ & $0.869 \pm 0.027$ \\
+04\_contraceptive\_method       & $0.680 \pm 0.070$ & $0.670 \pm 0.063$ & $0.702 \pm 0.117$ & $0.683 \pm 0.085$ & $0.742 \pm 0.057$ \\
+05\_haberman\_survival          & $0.521 \pm 0.074$ & $0.519 \pm 0.087$ & $0.450 \pm 0.207$ & $0.459 \pm 0.147$ & $0.573 \pm 0.090$ \\
+06\_heart\_failure              & $0.586 \pm 0.060$ & $0.594 \pm 0.069$ & $0.583 \pm 0.052$ & $0.587 \pm 0.051$ & $0.627 \pm 0.053$ \\
+07\_ionosphere                  & $0.936 \pm 0.041$ & $0.959 \pm 0.025$ & $0.912 \pm 0.085$ & $0.932 \pm 0.047$ & $0.973 \pm 0.039$ \\
+08\_SPECTF\_Heart               & $0.658 \pm 0.049$ & $0.661 \pm 0.083$ & $0.693 \pm 0.097$ & $0.665 \pm 0.037$ & $0.757 \pm 0.107$ \\
+\hline
+\end{tabular}}
+\end{table}
+
+% ============================================================
+\subsubsection{MultiIsingNetwork --- Synthetic XOR Datasets}
+% ============================================================
+
+Figure~\ref{fig:bar_nn_xor} shows the mean classification accuracy of the
+MultiIsingNetwork as a function of XOR dimensionality.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.85\linewidth]{plots_paper_svg/xor_accuracy_1l}
+    \caption{Mean classification accuracy of the MultiIsingNetwork on
+             synthetic XOR datasets of increasing dimensionality (1-D to
+             6-D).}
+    \label{fig:bar_nn_xor}
+\end{figure}
+
+\begin{table}[h]
+\centering
+\caption{Classification performance of the MultiIsingNetwork on synthetic
+         XOR datasets of increasing dimensionality. The last column reports
+         the wall-clock training time on a single CPU (200 epochs,
+         $M=5$ Ising perceptrons of size~50).}
+\label{tab:nn_xor}
+\begin{tabular}{lcccccc}
+\hline
+Dataset & Accuracy & Precision & Recall & $F_1$  & AUC    & Time [s] \\
+\hline
+XOR-1D  & 1.0000   & 1.0000    & 1.0000 & 1.0000 & 1.0000 & 136      \\
+XOR-2D  & 0.8750   & 0.8750    & 0.8750 & 0.8750 & 0.9637 & 270      \\
+XOR-3D  & 0.8688   & 0.8315    & 0.9250 & 0.8757 & 0.9483 & 537      \\
+XOR-4D  & 0.8969   & 0.8896    & 0.9062 & 0.8978 & 0.9735 & 1\,074   \\
+XOR-5D  & 0.8469   & 0.9081    & 0.7719 & 0.8345 & 0.9289 & 2\,136   \\
+XOR-6D  & 0.8414   & 0.8813    & 0.7891 & 0.8326 & 0.9332 & 4\,243   \\
+\hline
+\end{tabular}
+\end{table}
+
+In contrast to the single FullIsingModule, the MultiIsingNetwork attains
+perfect classification on the 1-D problem and remains well above chance
+across all higher dimensionalities, with accuracy in the range $0.84$--$0.90$
+and AUC always above~$0.92$. The ensemble of $M=5$ Ising perceptrons,
+combined linearly, therefore exhibits a markedly larger effective
+capacity than a single module on this family of strictly non-linear
+tasks. Training time, on the other hand, scales roughly as $2^{d}$:
+from~$136\text{\,s}$ at 1-D to~$4\,243\text{\,s}$ at 6-D, dominated by
+the cost of the $|D|$ annealing queries per epoch.
+
+% ============================================================
+\subsubsection{Comparative Discussion}
+% ============================================================
+
+Across UCI and XOR benchmarks the two architectures exhibit complementary
+behaviours rather than a uniform dominance of one over the other.
+
+\paragraph{UCI benchmarks.}
+The MultiIsingNetwork is preferable on datasets with a clear, well-separable
+signal: it improves over the single FullIsingModule on
+\texttt{00\_iris\_versicolor\_virginica}, \texttt{02\_banknote},
+\texttt{03\_breast\_cancer}, \texttt{04\_contraceptive\_method} and
+\texttt{07\_ionosphere} on accuracy, $F_1$ and AUC simultaneously. On the
+opposite end of the spectrum, the small and noisy benchmarks
+(\texttt{05\_haberman\_survival}, \texttt{06\_heart\_failure},
+\texttt{08\_SPECTF\_Heart}) are handled at least as well by the single
+Ising module, which retains higher accuracy and AUC on
+\texttt{05\_haberman\_survival} and \texttt{08\_SPECTF\_Heart} and matches
+the ensemble on \texttt{06\_heart\_failure}. A practical implication is
+that the additional capacity introduced by the four extra Ising
+perceptrons and the linear combiner ($\sim\!10\,000$ extra trainable
+parameters and a $5\times$ increase in annealing calls per forward pass)
+pays off mainly when a strong signal is present in the input features.
+
+\paragraph{XOR benchmarks.}
+The synthetic XOR family separates the two architectures more sharply.
+Both models solve the 1-D problem (FullIsingModule:
+$\mathrm{acc}=0.975$; MultiIsingNetwork: $\mathrm{acc}=1.000$). Already at
+2-D the FullIsingModule loses about $30$ accuracy points
+(Table~\ref{tab:ising_xor}), whereas the MultiIsingNetwork retains
+accuracy~$\geq 0.84$ and $\mathrm{AUC}\geq 0.92$ up to 6-D
+(Table~\ref{tab:nn_xor}). The five parallel Ising perceptrons therefore
+provide enough additional expressivity to approximate the disjoint
+$2^d$-region decision rule that a single quadratic energy cannot capture.
+
+\paragraph{Capacity vs.\ cost.}
+The expressive advantage of the MultiIsingNetwork comes at a cost that
+grows with the number of perceptrons and with the input dimension: training
+the 6-D XOR with $M=5$ requires of the order of $4\,200$\,s on CPU
+(Table~\ref{tab:nn_xor}), and each forward pass issues $M$ annealing
+queries instead of one. The trade-off between expressive capacity and
+annealing budget is the central practical consideration when choosing
+between the two architectures.
+
+
+\section{Discussion}
+% TODO
+
+\section{Conclusion}
+% TODO
+
+
+\EOD
+
+\end{document}

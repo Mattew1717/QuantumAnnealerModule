@@ -14,13 +14,14 @@ class MultiIsingNetwork(nn.Module):
              lambda_init: float = 1.0,
              offset_init: float = 0.0,
              combiner_bias: bool = True,
-             partition_input: bool = False):
+             partition_input: bool = False,
+             num_workers: int = 1):
 
         super().__init__()
         self.num_ising_perceptrons = num_ising_perceptrons
         self.size_annealer = size_annealer
         self.partition_input = partition_input
-    
+
         self.ising_perceptrons_layer = nn.ModuleList()
         for i in range(num_ising_perceptrons):
             # Noise to the initial parameters
@@ -32,7 +33,8 @@ class MultiIsingNetwork(nn.Module):
                 annealer_type=annealer_type,
                 annealing_settings=annealing_settings,
                 lambda_init=lambda_i,
-                offset_init=offset_i
+                offset_init=offset_i,
+                num_workers=num_workers,
             )
 
             self.ising_perceptrons_layer.append(module)

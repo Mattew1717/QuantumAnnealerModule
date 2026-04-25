@@ -300,7 +300,9 @@ def train_network_2L(dim, X_train, y_train, X_test, y_test, params, plotter):
     return final_accuracy, training_losses, validation_accuracies, predictions, y_test, probs
 
 
-def train_network_1L(dim, X_train, y_train, X_test, y_test, params, plotter):
+def train_network_1L(dim, X_train, y_train, X_test, y_test, params, plotter,
+                     annealer_type: AnnealerType = AnnealerType.SIMULATED,
+                     num_workers: int = None):
     """Train MultiIsingNetwork (1L) on XOR data."""
 
     logger.info(f"\n{'='*60}")
@@ -328,15 +330,18 @@ def train_network_1L(dim, X_train, y_train, X_test, y_test, params, plotter):
     SA_settings.num_sweeps = params['sa_num_sweeps']
     SA_settings.num_sweeps_per_beta = params['sa_sweeps_per_beta']
 
+    _num_workers = num_workers if num_workers is not None else params['num_workers']
+
     # Create Network_1L (MultiIsingNetwork)
     model = MultiIsingNetwork(
         num_ising_perceptrons=params['num_ising_net'],  # Use num_ising_net as the number of perceptrons
         size_annealer=model_size,
         annealing_settings=SA_settings,
-        annealer_type=AnnealerType.SIMULATED,
+        annealer_type=annealer_type,
         lambda_init=params['lambda_init'],
         offset_init=params['offset_init'],
-        partition_input=False  # No partitioning for fair comparison
+        partition_input=False,  # No partitioning for fair comparison
+        num_workers=_num_workers,
     ).to(params['device'])
 
     logger.info(f"Model created with {sum(p.numel() for p in model.parameters())} parameters")
@@ -445,7 +450,9 @@ def train_network_1L(dim, X_train, y_train, X_test, y_test, params, plotter):
     return final_accuracy, training_losses, validation_accuracies, predictions, y_test, probs
 
 
-def train_full_ising_model(dim, X_train, y_train, X_test, y_test, params, plotter):
+def train_full_ising_model(dim, X_train, y_train, X_test, y_test, params, plotter,
+                           annealer_type: AnnealerType = AnnealerType.SIMULATED,
+                           num_workers: int = None):
     """Train FullIsingModule on XOR data."""
 
     logger.info(f"\n{'='*60}")
@@ -470,12 +477,16 @@ def train_full_ising_model(dim, X_train, y_train, X_test, y_test, params, plotte
     SA_settings.num_sweeps = params['sa_num_sweeps']
     SA_settings.num_sweeps_per_beta = params['sa_sweeps_per_beta']
 
+    _num_workers = num_workers if num_workers is not None else params['num_workers']
+
     model = FullIsingModule(
         size_annealer=model_size,
-        annealer_type=AnnealerType.SIMULATED,
+        annealer_type=annealer_type,
         annealing_settings=SA_settings,
         lambda_init=params['lambda_init'],
-        offset_init=params['offset_init']
+        offset_init=params['offset_init'],
+        num_workers=_num_workers,
+        num_reads=params['num_reads'],
     ).to(params['device'])
 
     logger.info(f"Model created with {sum(p.numel() for p in model.parameters())} parameters")
@@ -676,7 +687,8 @@ def test_xor_all_dimensions_1L():
         'accuracies': [],
         'losses': [],
         'val_accuracies': [],
-        'execution_times': []
+        'execution_times': [],
+        'all_metrics': [],
     }
 
     # Start total timer
@@ -692,12 +704,13 @@ def test_xor_all_dimensions_1L():
             X_train, X_test, y_train, y_test = prepare_xor_data(dim, params)
 
             # Train and evaluate
-            accuracy, losses, val_accs, predictions, y_true, _ = train_network_1L(
+            accuracy, losses, val_accs, predictions, y_true, probs = train_network_1L(
                 dim, X_train, y_train, X_test, y_test, params, plotter
             )
 
             # End timer for this dimension
             dim_time = perf_counter() - dim_start
+            ms = compute_metrics(y_true, probs)
 
             # Store results
             results['dimensions'].append(dim)
@@ -705,8 +718,13 @@ def test_xor_all_dimensions_1L():
             results['losses'].append(losses)
             results['val_accuracies'].append(val_accs)
             results['execution_times'].append(dim_time)
+            results['all_metrics'].append(ms)
 
-            logger.info(f"\n{dim}D XOR completed with accuracy: {accuracy:.4f} | Execution time: {dim_time:.2f}s\n")
+            logger.info(
+                f"\n{dim}D XOR | acc={ms['accuracy']:.4f} prec={ms['precision']:.4f} "
+                f"rec={ms['recall']:.4f} f1={ms['f1']:.4f} auc={ms['auc']:.4f} "
+                f"| time={dim_time:.2f}s\n"
+            )
 
         except Exception as e:
             logger.error(f"Error on {dim}D XOR: {str(e)}")
@@ -716,6 +734,10 @@ def test_xor_all_dimensions_1L():
 
     # End total timer
     total_time = perf_counter() - total_start
+
+    if not results['dimensions']:
+        logger.error("No valid XOR dimensions processed.")
+        return
 
     # Summary
     logger.info("\n" + "="*80)
@@ -727,12 +749,24 @@ def test_xor_all_dimensions_1L():
 
     logger.info(f"\nTotal execution time: {total_time:.2f}s ({total_time/60:.2f} minutes)")
 
-    # Plot summary
-    logger.info(f"\nPlots saved to {plotter.output_dir}")
-
     # Create dimension comparison plot
-    plotter.plot_tot_accuracy(results['accuracies'], [f"{d}D" for d in results['dimensions']])
+    dataset_names = [f"{d}D" for d in results['dimensions']]
+    plotter.plot_tot_accuracy(results['accuracies'], dataset_names)
 
+    # Metrics CSV
+    rows = []
+    for i, ds_name in enumerate(dataset_names):
+        ms = results['all_metrics'][i]
+        row = {'dataset': ds_name, 'model': 'Network_1L', 'execution_time_s': results['execution_times'][i]}
+        for m in METRICS:
+            row[f'{m}'] = ms[m]
+        rows.append(row)
+    df = pd.DataFrame(rows)
+    csv_path = os.path.join(str(plotter.output_dir), 'metrics_summary.csv')
+    df.to_csv(csv_path, index=False, float_format='%.4f')
+    logger.info(f"Metrics CSV saved to: {csv_path}")
+
+    logger.info(f"\nPlots saved to {plotter.output_dir}")
     logger.info("\nXOR Test Suite for Network_1L Completed!")
 
 
@@ -990,6 +1024,144 @@ def fullIsing_xor_all_dim():
     logger.info("FullIsingModule XOR Test Suite Completed!")
 
 
+def test_xor_2d_qpu():
+    """Test 2D XOR with FullIsingModule and Network_1L using the D-Wave QPU.
+
+    Train and test sets are generated separately using generate_xor_balanced:
+      - train: N_TRAIN_PER_REGION samples per quadrant (4 quadrants → 4×N total)
+      - test:  N_TEST_PER_REGION  samples per quadrant (4 quadrants → 4×N total)
+    QPU settings: single call per sample (num_reads=1), 1 thread (num_workers=1).
+    All hyperparameters are read from Inference/.env.
+    Saves logs, metrics CSV, run-curve CSV, and plots to a timestamped output directory.
+    """
+
+    params = get_xor_params()
+
+    n_train_per_region = int(os.getenv('N_TRAIN_PER_REGION', 50))
+    n_test_per_region  = int(os.getenv('N_TEST_PER_REGION', 20))
+
+    run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    out_dir = f'plots_xor_2d_qpu_{run_timestamp}'
+
+    global logger
+    logger = Logger(log_dir=out_dir)
+    plotter = Plot(output_dir=out_dir)
+
+    logger.info("\n" + "=" * 80)
+    logger.info("XOR 2D Test — FullIsingModule vs Network_1L (D-Wave QPU)")
+    logger.info("=" * 80)
+    logger.info(f"Device: {params['device']}")
+    logger.info(f"Epochs: {params['epochs']} | Batch size: {params['batch_size']} | Model size: {params['model_size']}")
+    logger.info(f"Train samples: {n_train_per_region} per region × 4 quadrants = {4 * n_train_per_region} total")
+    logger.info(f"Test  samples: {n_test_per_region}  per region × 4 quadrants = {4 * n_test_per_region}  total")
+    logger.info(f"Learning rates: gamma={params['lr_gamma']}, lambda={params['lr_lambda']}, offset={params['lr_offset']}, classical={params['lr_classical']}")
+    logger.info(f"QPU: num_reads=1, num_workers=1 (single sequential calls)")
+
+    # Generate train and test independently to get exact per-region counts
+    logger.info("\nGenerating 2D XOR data...")
+    X_train, y_train = generate_xor_balanced(
+        dim=2,
+        n_samples_dim=n_train_per_region,
+        shuffle=True,
+        random_seed=params['random_seed']
+    )
+    X_test, y_test = generate_xor_balanced(
+        dim=2,
+        n_samples_dim=n_test_per_region,
+        shuffle=True,
+        random_seed=params['random_seed'] + 1
+    )
+
+    logger.info(f"Train set: {len(y_train)} samples — class distribution: {np.bincount(y_train.astype(int))}")
+    logger.info(f"Test  set: {len(y_test)}  samples — class distribution: {np.bincount(y_test.astype(int))}")
+
+    total_start = perf_counter()
+
+    # --- FullIsingModule ---
+    logger.info("\n" + "-" * 60)
+    logger.info("Training FullIsingModule (QPU)...")
+    try:
+        acc_fim, losses_fim, val_fim, preds_fim, y_true_fim, probs_fim = train_full_ising_model(
+            2, X_train, y_train, X_test, y_test, params, plotter,
+            annealer_type=AnnealerType.QUANTUM, num_workers=16,
+        )
+        metrics_fim = compute_metrics(y_true_fim, probs_fim)
+        logger.info(
+            f"FullIsingModule | acc={metrics_fim['accuracy']:.4f} prec={metrics_fim['precision']:.4f} "
+            f"rec={metrics_fim['recall']:.4f} f1={metrics_fim['f1']:.4f} auc={metrics_fim['auc']:.4f}"
+        )
+    except Exception as e:
+        logger.error(f"FullIsingModule training failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return
+
+    # --- Network_1L ---
+    logger.info("\n" + "-" * 60)
+    logger.info("Training Network_1L (QPU)...")
+    try:
+        acc_1l, losses_1l, val_1l, preds_1l, y_true_1l, probs_1l = train_network_1L(
+            2, X_train, y_train, X_test, y_test, params, plotter,
+            annealer_type=AnnealerType.QUANTUM, num_workers=16,
+        )
+        metrics_1l = compute_metrics(y_true_1l, probs_1l)
+        logger.info(
+            f"Network_1L      | acc={metrics_1l['accuracy']:.4f} prec={metrics_1l['precision']:.4f} "
+            f"rec={metrics_1l['recall']:.4f} f1={metrics_1l['f1']:.4f} auc={metrics_1l['auc']:.4f}"
+        )
+    except Exception as e:
+        logger.error(f"Network_1L training failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return
+
+    total_time = perf_counter() - total_start
+
+    # --- Summary ---
+    logger.info("\n" + "=" * 80)
+    logger.info("SUMMARY — 2D XOR")
+    logger.info("=" * 80)
+    logger.info(f"{'Model':<20} {'Accuracy':>10} {'Precision':>10} {'Recall':>10} {'F1':>10} {'AUC':>10}")
+    logger.info(f"{'FullIsingModule':<20} {metrics_fim['accuracy']:>10.4f} {metrics_fim['precision']:>10.4f} {metrics_fim['recall']:>10.4f} {metrics_fim['f1']:>10.4f} {metrics_fim['auc']:>10.4f}")
+    logger.info(f"{'Network_1L':<20} {metrics_1l['accuracy']:>10.4f} {metrics_1l['precision']:>10.4f} {metrics_1l['recall']:>10.4f} {metrics_1l['f1']:>10.4f} {metrics_1l['auc']:>10.4f}")
+    logger.info(f"\nDelta (1L - FIM): acc={metrics_1l['accuracy'] - metrics_fim['accuracy']:+.4f}")
+    logger.info(f"Total execution time: {total_time:.2f}s ({total_time / 60:.2f} minutes)")
+
+    # --- Summary plots ---
+    plotter.plot_compare_accuracy(
+        [metrics_fim['accuracy']], [metrics_1l['accuracy']], ['2D'],
+        model_name1='FullIsingModule', model_name2='Network_1L'
+    )
+    plotter.plot_parity_scatter(
+        [metrics_fim['accuracy']], [metrics_1l['accuracy']], ['2D'],
+        model_name1='FullIsingModule', model_name2='Network_1L'
+    )
+
+    # --- Metrics CSV ---
+    csv_path = save_metrics_csv(
+        ['2D'],
+        [{m: [metrics_fim[m]] for m in METRICS}],
+        [{m: [metrics_1l[m]]  for m in METRICS}],
+        out_dir,
+        model_name1='FullIsingModule', model_name2='Network_1L'
+    )
+    logger.info(f"Metrics CSV saved to: {csv_path}")
+
+    # --- Run-curve CSV (loss + val_accuracy per epoch, both models) ---
+    curve_rows = [
+        {'epoch': i + 1, 'model': 'FullIsingModule', 'loss': l, 'val_accuracy': v}
+        for i, (l, v) in enumerate(zip(losses_fim, val_fim))
+    ] + [
+        {'epoch': i + 1, 'model': 'Network_1L', 'loss': l, 'val_accuracy': v}
+        for i, (l, v) in enumerate(zip(losses_1l, val_1l))
+    ]
+    curves_path = os.path.join(str(out_dir), 'run_curves.csv')
+    pd.DataFrame(curve_rows).to_csv(curves_path, index=False, float_format='%.6f')
+    logger.info(f"Run curves CSV saved to: {curves_path}")
+
+    logger.info(f"\nAll outputs saved to: {out_dir}")
+    logger.info("XOR 2D QPU Test Completed!")
+
+
 if __name__ == '__main__':
-    #compare_xor_models_all_dimensions()
-    fullIsing_xor_all_dim()
+    test_xor_all_dimensions_1L()

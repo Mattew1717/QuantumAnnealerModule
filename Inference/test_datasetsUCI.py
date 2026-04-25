@@ -513,6 +513,21 @@ def compare_models():
                                      model_name1='FullIsingModule', model_name2='NeuralNet')
         logger.info(f"Metrics CSV saved to: {csv_path}")
 
+        per_fold_rows = []
+        for ds_idx, ds in enumerate(dataset_names):
+            for fold_idx in range(params['k_folds']):
+                per_fold_rows.append({
+                    'dataset': ds, 'model': 'FullIsingModule', 'fold': fold_idx + 1,
+                    **{m: all_single_metrics[ds_idx][m][fold_idx] for m in METRICS},
+                })
+                per_fold_rows.append({
+                    'dataset': ds, 'model': 'NeuralNet', 'fold': fold_idx + 1,
+                    **{m: all_neural_metrics[ds_idx][m][fold_idx] for m in METRICS},
+                })
+        per_fold_path = os.path.join(str(plotter.output_dir), 'metrics_per_fold.csv')
+        pd.DataFrame(per_fold_rows).to_csv(per_fold_path, index=False, float_format='%.4f')
+        logger.info(f"Per-fold metrics CSV saved to: {per_fold_path}")
+
         # Prepare per-metric aggregated arrays
         m1 = {m: [np.nanmean(all_single_metrics[i][m]) for i in range(len(dataset_names))] for m in METRICS}
         m2 = {m: [np.nanmean(all_neural_metrics[i][m]) for i in range(len(dataset_names))] for m in METRICS}
@@ -835,7 +850,8 @@ def iris_matrix():
 if __name__ == '__main__':
 
     # Compare Single vs Multi Ising on all datasets
-    #compare_models()
+    compare_models()
 
     # Iris matrix experiment (num_nodi × node_size), no K-fold
-    iris_matrix()
+    #iris_matrix()
+    

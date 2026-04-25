@@ -8,6 +8,20 @@ import os
 from dotenv import load_dotenv
 load_dotenv(override = True)
 
+
+def _balance_split(X, y, rng):
+    """Random undersampling of the majority class to match the minority count."""
+    y_int = y.astype(int)
+    idx0 = np.where(y_int == 0)[0]
+    idx1 = np.where(y_int == 1)[0]
+    n = min(len(idx0), len(idx1))
+    sel0 = rng.choice(idx0, size=n, replace=False)
+    sel1 = rng.choice(idx1, size=n, replace=False)
+    sel = np.concatenate([sel0, sel1])
+    rng.shuffle(sel)
+    return X[sel], y[sel]
+
+
 class DatasetManager:
     
     def __init__(self):
@@ -38,12 +52,14 @@ class DatasetManager:
         return X, y
 
     def generate_k_folds(self, X, y, k):
-        skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=int(os.getenv('RANDOM_SEED')))
+        seed = int(os.getenv('RANDOM_SEED'))
+        skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=seed)
+        rng = np.random.default_rng(seed)
         folds = []
 
         for train_idx, test_idx in skf.split(X, y):
-            X_train, X_test = X[train_idx], X[test_idx]
-            y_train, y_test = y[train_idx], y[test_idx]
+            X_train, y_train = _balance_split(X[train_idx], y[train_idx], rng)
+            X_test, y_test = _balance_split(X[test_idx], y[test_idx], rng)
             folds.append((X_train, y_train, X_test, y_test))
 
         return folds
