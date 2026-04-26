@@ -97,8 +97,10 @@ def main():
     ds_x_fi, acc_fi = _load_xor_single(args.xor_fullising_dir / 'metrics_summary.csv')
     ds_x_1l, acc_1l = _load_xor_single(args.xor_1l_dir / 'metrics_summary.csv')
 
-    pp.plot_tot_accuracy(acc_fi, ds_x_fi, filename='xor_accuracy_fullising')
-    pp.plot_tot_accuracy(acc_1l, ds_x_1l, filename='xor_accuracy_1l')
+    pp.plot_tot_accuracy(acc_fi, ds_x_fi, filename='xor_accuracy_fullising',
+                         xtick_rotation=0)
+    pp.plot_tot_accuracy(acc_1l, ds_x_1l, filename='xor_accuracy_1l',
+                         xtick_rotation=0)
 
     _check_aligned(ds_x_fi, ds_x_1l, 'XOR dimension ordering')
     pp.plot_compare_accuracy(
@@ -106,6 +108,7 @@ def main():
         model_name1='FullIsingModule',
         model_name2='Network_1L',
         filename='xor_accuracy_compare',
+        xtick_rotation=0,
     )
 
     print(f'SVG figures written to {args.out_dir}')

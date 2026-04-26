@@ -518,13 +518,16 @@ class PlotPaper:
         ax.spines['bottom'].set_linewidth(0.6)
 
     def _rotate_xticks(self, ax, labels, angle=30):
-        ax.set_xticklabels(labels, rotation=angle, ha='right')
+        ha = 'right' if angle not in (0, 90) else 'center'
+        ax.set_xticklabels(labels, rotation=angle, ha=ha)
 
     def _save_svg(self, fig, filename):
-        output_path = self.output_dir / f'{filename}.svg'
-        fig.savefig(output_path, format='svg', bbox_inches='tight')
+        svg_path = self.output_dir / f'{filename}.svg'
+        pdf_path = self.output_dir / f'{filename}.pdf'
+        fig.savefig(svg_path, format='svg', bbox_inches='tight')
+        fig.savefig(pdf_path, format='pdf', bbox_inches='tight')
         plt.close(fig)
-        return output_path
+        return svg_path
 
     def _box_style(self, model_idx):
         if model_idx == 0:
@@ -621,7 +624,8 @@ class PlotPaper:
             return self._save_svg(fig, filename)
 
     def plot_tot_accuracy(self, accuracy_list, labels,
-                          filename='tot_accuracy_paper'):
+                          filename='tot_accuracy_paper',
+                          xtick_rotation=30):
         """Bar chart of mean accuracy per dataset, single model."""
         with plt.rc_context(self.PAPER_RC):
             fig, ax = self._new_fig(self.COL_DOUBLE)
@@ -633,7 +637,7 @@ class PlotPaper:
                    linewidth=0.9, alpha=self.PALETTE['alpha_fill'])
 
             ax.set_xticks(x)
-            self._rotate_xticks(ax, labels, angle=30)
+            self._rotate_xticks(ax, labels, angle=xtick_rotation)
             ax.set_xlabel('Dataset')
             ax.set_ylabel('Accuracy')
             ax.set_ylim(0.0, 1.0)
@@ -644,7 +648,8 @@ class PlotPaper:
 
     def plot_compare_accuracy(self, accuracy_list1, accuracy_list2, labels,
                               model_name1='Model 1', model_name2='Model 2',
-                              filename='compare_accuracy_paper'):
+                              filename='compare_accuracy_paper',
+                              xtick_rotation=30):
         """Grouped bar chart comparing two models' mean accuracy per dataset."""
         with plt.rc_context(self.PAPER_RC):
             fig, ax = self._new_fig(self.COL_DOUBLE)
@@ -663,7 +668,7 @@ class PlotPaper:
                    label=model_name2)
 
             ax.set_xticks(x)
-            self._rotate_xticks(ax, labels, angle=30)
+            self._rotate_xticks(ax, labels, angle=xtick_rotation)
             ax.set_xlabel('Dataset')
             ax.set_ylabel('Accuracy')
             ax.set_ylim(0.0, 1.0)

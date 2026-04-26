@@ -664,11 +664,12 @@ def test_xor_all_dimensions_1L():
 
     # Create output directory with timestamp
     run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    plotter = Plot(output_dir=f'plots_xor_1L_{run_timestamp}')
+    out_dir = f'Xor_1L_{run_timestamp}'
+    plotter = Plot(output_dir=out_dir)
 
     # Reinitialize logger to write to plots directory
     global logger
-    logger = Logger(log_dir=f'plots_xor_1L_{run_timestamp}')
+    logger = Logger(log_dir=out_dir)
 
     logger.info("\n" + "="*80)
     logger.info("XOR Test Suite for Network_1L (MultiIsingNetwork)")
@@ -926,8 +927,9 @@ def fullIsing_xor_all_dim():
     run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     global logger
-    plotter = Plot(output_dir=f'plots_xor_fullising_{run_timestamp}')
-    logger = Logger(log_dir=f'plots_xor_fullising_{run_timestamp}')
+    out_dir = f'Xor_FullIsing_{run_timestamp}'
+    plotter = Plot(output_dir=out_dir)
+    logger = Logger(log_dir=out_dir)
 
     logger.info("\n" + "=" * 80)
     logger.info("XOR Test Suite - FullIsingModule (1D to 6D)")
@@ -1164,4 +1166,5 @@ def test_xor_2d_qpu():
 
 
 if __name__ == '__main__':
+    fullIsing_xor_all_dim()
     test_xor_all_dimensions_1L()
