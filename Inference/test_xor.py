@@ -31,6 +31,7 @@ from Inference.utils.utils import (
     generate_xor_balanced,
     resolve_model_size,
     save_metrics_csv,
+    set_global_seed,
     standardize_train_test,
 )
 from full_ising_model.annealers import AnnealerType
@@ -62,7 +63,7 @@ def get_xor_params():
         'sa_num_sweeps': int(os.environ['SA_NUM_SWEEPS']),
         'sa_sweeps_per_beta': int(os.environ['SA_SWEEPS_PER_BETA']),
         'num_workers': int(os.environ['NUM_THREADS']),
-        'validation_interval': int(os.environ['VALIDATION_INTERVAL']),
+        'print_interval': int(os.environ['PRINT_INTERVAL']),
         'n_samples_per_region': int(os.environ['N_SAMPLES_PER_REGION']),
         'test_size': float(os.environ['TEST_SIZE']),
         'partition_input': os.environ['PARTITION_INPUT'].lower() == 'true',
@@ -109,8 +110,7 @@ def create_dataloaders(X_train, y_train, X_test, y_test, params):
 
 def _train_loop(model, optimizer, loss_fn, train_loader, X_te, y_test, params, label):
     training_losses = []
-    validation_accuracies = []
-    val_interval = params['validation_interval']
+    print_interval = params['print_interval']
 
     for epoch in range(params['epochs']):
         model.train()
@@ -129,19 +129,8 @@ def _train_loop(model, optimizer, loss_fn, train_loader, X_te, y_test, params, l
         avg_loss = float(np.mean(epoch_losses)) if epoch_losses else 0.0
         training_losses.append(avg_loss)
 
-        if (epoch + 1) % val_interval == 0 or epoch == 0 or epoch == params['epochs'] - 1:
-            model.eval()
-            with torch.no_grad():
-                logits = flatten_logits(model(X_te.to(params['device'])))
-                probs = torch.sigmoid(logits).cpu().numpy()
-                preds = (probs >= 0.5).astype(int)
-                acc = accuracy_score(y_test, preds)
-                validation_accuracies.append(acc)
-            if (epoch + 1) % 10 == 0:
-                logger.info(f"  [{label}] Epoch {epoch+1}/{params['epochs']} | Loss: {avg_loss:.4f} | Val Acc: {acc:.4f}")
-        else:
-            if validation_accuracies:
-                validation_accuracies.append(validation_accuracies[-1])
+        if (epoch + 1) % print_interval == 0 or epoch == 0 or epoch == params['epochs'] - 1:
+            logger.info(f"  [{label}] Epoch {epoch+1}/{params['epochs']} | Loss: {avg_loss:.4f}")
 
     model.eval()
     with torch.no_grad():
@@ -155,7 +144,7 @@ def _train_loop(model, optimizer, loss_fn, train_loader, X_te, y_test, params, l
                                              target_names=['Class 0', 'Class 1'],
                                              zero_division=0))
     logger.info(f"Confusion matrix:\n{confusion_matrix(y_test, preds)}")
-    return final_accuracy, training_losses, validation_accuracies, preds, probs
+    return final_accuracy, training_losses, preds, probs
 
 
 def train_full_ising_model(dim, X_train, y_train, X_test, y_test, params,
@@ -230,6 +219,7 @@ def train_modular_network(dim, X_train, y_train, X_test, y_test, params,
 def compare_xor_models_all_dimensions():
     """Compare FullIsingModule vs ModularNetwork on XOR dimensions 1D-6D."""
     params = get_xor_params()
+    set_global_seed(params['random_seed'])
     run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     out_dir = f'plots_xor_compare_{run_timestamp}'
@@ -264,7 +254,7 @@ def compare_xor_models_all_dimensions():
             X_train, X_test, y_train, y_test = prepare_xor_data(dim, params)
 
             logger.info("  Training FullIsingModule...")
-            _, _, _, _, probs_s = train_full_ising_model(
+            _, _, _, probs_s = train_full_ising_model(
                 dim, X_train, y_train, X_test, y_test, params
             )
             ms = compute_metrics(y_test, probs_s)
@@ -274,7 +264,7 @@ def compare_xor_models_all_dimensions():
             )
 
             logger.info("  Training ModularNetwork...")
-            _, _, _, _, probs_m = train_modular_network(
+            _, _, _, probs_m = train_modular_network(
                 dim, X_train, y_train, X_test, y_test, params
             )
             mm = compute_metrics(y_test, probs_m)

@@ -151,23 +151,14 @@ class Plots:
             fig.tight_layout()
             return self._save(fig, filename)
 
-    def plot_loss_accuracy(self, loss, accuracy, dataset_name,
-                           filename_prefix='loss_accuracy'):
+    def plot_loss(self, loss, dataset_name, filename_prefix='loss'):
         with plt.rc_context(self.PAPER_RC):
-            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=self.COL_DOUBLE)
+            fig, ax = self._new_fig(self.COL_SINGLE)
             epochs = np.arange(1, len(loss) + 1)
-
-            ax1.plot(epochs, loss, color=self.PALETTE['model1_face'], linewidth=1.2)
-            ax1.set_xlabel('Epoch')
-            ax1.set_ylabel('Loss')
-            self._clean_spines(ax1)
-
-            ax2.plot(epochs, accuracy, color=self.PALETTE['model2_face'], linewidth=1.2)
-            ax2.set_xlabel('Epoch')
-            ax2.set_ylabel('Validation accuracy')
-            ax2.set_ylim(0.0, 1.0)
-            self._clean_spines(ax2)
-
+            ax.plot(epochs, loss, color=self.PALETTE['model1_face'], linewidth=1.2)
+            ax.set_xlabel('Epoch')
+            ax.set_ylabel('Training loss')
+            self._clean_spines(ax)
             fig.tight_layout()
             return self._save(fig, f'{filename_prefix}_{dataset_name}')
 

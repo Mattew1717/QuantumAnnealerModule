@@ -80,7 +80,20 @@ def resolve_model_size(n_features: int, params: dict) -> int:
     """Return params['model_size'] if explicit, else max(n_features, params['minimum_model_size'])."""
     if params['model_size'] == -1:
         return max(n_features, params['minimum_model_size'])
+    if params['model_size'] < n_features:
+        raise ValueError(
+            f"MODEL_SIZE ({params['model_size']}) must be >= input feature dimension "
+            f"({n_features}). Use MODEL_SIZE=-1 for auto-sizing."
+        )
     return params['model_size']
+
+
+def set_global_seed(seed: int) -> None:
+    """Seed numpy and torch for reproducibility across runs."""
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
 
 
 def generate_xor_balanced(dim: int, n_samples_dim: int, shuffle: bool, random_seed: int):

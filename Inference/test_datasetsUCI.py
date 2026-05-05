@@ -31,6 +31,7 @@ from Inference.utils.utils import (
     flatten_logits,
     resolve_model_size,
     save_metrics_csv,
+    set_global_seed,
     standardize_train_test,
 )
 from full_ising_model.annealers import AnnealerType
@@ -63,6 +64,7 @@ def get_env_params():
         'sa_sweeps_per_beta': int(os.environ['SA_SWEEPS_PER_BETA']),
         'k_folds': int(os.environ['K_FOLDS']),
         'num_workers': int(os.environ['NUM_THREADS']),
+        'print_interval': int(os.environ['PRINT_INTERVAL']),
         'device': 'cuda' if torch.cuda.is_available() else 'cpu',
     }
 
@@ -83,7 +85,7 @@ def print_config(params, run_timestamp):
 
 def _train_eval(model, optimizer, loss_fn, train_loader, X_test_t, y_test_arr, params):
     training_losses = []
-    validation_accuracies = []
+    print_interval = params['print_interval']
 
     for epoch in range(params['epochs']):
         model.train()
@@ -101,22 +103,17 @@ def _train_eval(model, optimizer, loss_fn, train_loader, X_test_t, y_test_arr, p
 
         avg_loss = float(np.mean(epoch_losses)) if epoch_losses else 0.0
         training_losses.append(avg_loss)
-        if epoch % 10 == 0:
+        if (epoch + 1) % print_interval == 0 or epoch == 0 or epoch == params['epochs'] - 1:
             logger.info(f"  Epoch {epoch+1}/{params['epochs']} | Loss: {avg_loss:.4f}")
-
-        model.eval()
-        with torch.no_grad():
-            logits = flatten_logits(model(X_test_t.to(params['device'])))
-            probs = torch.sigmoid(logits).cpu().numpy()
-            preds = (probs >= 0.5).astype(int)
-            validation_accuracies.append(accuracy_score(y_test_arr, preds))
 
     model.eval()
     with torch.no_grad():
         logits = flatten_logits(model(X_test_t.to(params['device'])))
         final_probs = torch.sigmoid(logits).cpu().numpy()
+        final_preds = (final_probs >= 0.5).astype(int)
+        final_acc = accuracy_score(y_test_arr, final_preds)
 
-    return validation_accuracies[-1], final_probs, training_losses, validation_accuracies
+    return final_acc, final_probs, training_losses
 
 
 def train_full_ising_module(X_train, y_train, X_test, y_test, params):
@@ -201,6 +198,7 @@ def train_modular_network(X_train, y_train, X_test, y_test, params):
 def compare_models():
     """Compare FullIsingModule vs ModularNetwork on all UCI datasets via K-Fold CV."""
     params = get_env_params()
+    set_global_seed(params['random_seed'])
     run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     out_dir = f'plots_{run_timestamp}'
@@ -241,8 +239,6 @@ def compare_models():
             modular_accs = []
             single_losses = []
             modular_losses = []
-            single_val_accs_all = []
-            modular_val_accs_all = []
             single_fold_metrics = {m: [] for m in METRICS}
             modular_fold_metrics = {m: [] for m in METRICS}
 
@@ -250,7 +246,7 @@ def compare_models():
                 logger.info(f"Fold {fold_idx}/{params['k_folds']}")
 
                 logger.info("  Training FullIsingModule...")
-                _, probs_s, loss_s, val_accs_s = train_full_ising_module(
+                _, probs_s, loss_s = train_full_ising_module(
                     X_train, y_train, X_test, y_test, params
                 )
                 ms = compute_metrics(y_test, probs_s)
@@ -258,7 +254,7 @@ def compare_models():
                             f"rec={ms['recall']:.4f} f1={ms['f1']:.4f} auc={ms['auc']:.4f}")
 
                 logger.info("  Training ModularNetwork...")
-                _, probs_m, loss_m, val_accs_m = train_modular_network(
+                _, probs_m, loss_m = train_modular_network(
                     X_train, y_train, X_test, y_test, params
                 )
                 mm = compute_metrics(y_test, probs_m)
@@ -273,8 +269,6 @@ def compare_models():
                 modular_accs.append(mm['accuracy'])
                 single_losses.append(loss_s)
                 modular_losses.append(loss_m)
-                single_val_accs_all.append(val_accs_s)
-                modular_val_accs_all.append(val_accs_m)
 
             dataset_names.append(name)
             single_accuracies_all.append(single_accs)
@@ -292,10 +286,8 @@ def compare_models():
                         f"Modular: {mean_acc_m:.4f}±{std_acc_m:.4f} | "
                         f"Diff: {mean_acc_m - mean_acc_s:+.4f}\n")
 
-            plotter.plot_loss_accuracy(single_losses[0], single_val_accs_all[0],
-                                       f"{name}_single")
-            plotter.plot_loss_accuracy(modular_losses[0], modular_val_accs_all[0],
-                                       f"{name}_modular")
+            plotter.plot_loss(single_losses[0], f"{name}_single")
+            plotter.plot_loss(modular_losses[0], f"{name}_modular")
 
         except Exception as e:
             logger.error(f"ERROR: {name}: {e}")

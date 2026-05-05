@@ -121,7 +121,7 @@ def train_szp(X_train, y_train, X_test, y_test, model_size, params):
     model.settings.learning_rate_gamma = params['learning_rate_gamma']
     model.settings.learning_rate_lmd = params['learning_rate_lambda']
     model.settings.learning_rate_offset = params['learning_rate_offset']
-    model.settings.learning_rate_theta = params['learning_rate_gamma']
+    model.settings.learning_rate_theta = params['learning_rate_gamma']  # ignored: theta update commented out in SZP
     model.settings.dacay_rate = 1
 
     t0 = perf_counter()

@@ -49,11 +49,7 @@ class HiddenNodesInitialization:
         num_full_repeats = cached['num_full_repeats']
         offset_pattern = cached['offset_pattern']
 
-        if num_full_repeats > 0:
-            thetas_repeated = thetas.repeat(1, num_full_repeats + 1)[:, :target_size]
-        else:
-            thetas_repeated = thetas[:, :target_size]
-
+        thetas_repeated = thetas.repeat(1, num_full_repeats + 1)[:, :target_size]
         return thetas_repeated + offset_pattern
 
 

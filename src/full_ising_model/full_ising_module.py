@@ -27,7 +27,7 @@ class IsingEnergyFunction(Function):
         annealer: Annealer,
         num_workers: int,
     ):
-        batch_size, _ = thetas.shape
+        batch_size, n_spins = thetas.shape
         energies_bulk = [None] * batch_size
         configurations_bulk = [None] * batch_size
 
@@ -39,7 +39,8 @@ class IsingEnergyFunction(Function):
                 h = utils.vector_to_biases(theta)
                 sample_set = annealer.sample(h, J)
                 energies_bulk[i] = sample_set.first.energy
-                configurations_bulk[i] = list(sample_set.first.sample.values())
+                spin = sample_set.first.sample
+                configurations_bulk[i] = [spin[k] for k in range(n_spins)]
 
         chunk_size = (batch_size + num_workers - 1) // num_workers
         threads = []

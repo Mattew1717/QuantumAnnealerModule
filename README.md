@@ -12,7 +12,7 @@ This work starts from the Ising-based machine learning model introduced in [Schm
 
 ## How it works
 
-An `FullIsingModule` is a standard `nn.Module`. Its forward pass solves an Ising minimization problem; its backward pass propagates gradients through the spin configuration's outer product, updating the coupling matrix `Γ`.
+A `FullIsingModule` is a standard `nn.Module`. Its forward pass solves an Ising minimization problem; its backward pass propagates gradients through the spin configuration's outer product, updating the coupling matrix `Γ`.
 
 ```
 x  ──►  h (local fields)   +   J = f(Γ)  (couplings, learnable)
@@ -34,11 +34,11 @@ Gradients flow **only through `Γ`**; the input biases `θ` are treated as fixed
 | Path | Contents |
 |------|----------|
 | `src/full_ising_model/` | Installable PyTorch package: `FullIsingModule`, annealers, utils |
+| `NeuralNetwork/` | `ModularNetwork` — N parallel Ising perceptrons + linear combiner |
 | `SZP_Model/` | Original SZP reference implementation (no PyTorch), used for comparison |
-| `ModularNetwork/` | `Network_1L` and `Network_2L` hybrid architectures |
-| `Inference/` | All test scripts, datasets, utilities |
-| `Inference/Datasets/` | 9 UCI binary classification datasets |
-| `Inference/.env` | All hyperparameters |
+| `Inference/` | Test scripts, datasets, plotting, logging |
+| `Inference/Datasets/` | 9 UCI binary classification datasets (no header row) |
+| `Inference/.env` | All hyperparameters (read strictly, no fallback defaults) |
 
 ---
 
@@ -47,23 +47,19 @@ Gradients flow **only through `Γ`**; the input biases `θ` are treated as fixed
 | `AnnealerType` | Backend | Notes |
 |----------------|---------|-------|
 | `SIMULATED` | `dwave-neal` | Default — no hardware required |
-| `EXACT` | `dimod.ExactSolver` | Brute-force — only for small N |
+| `EXACT` | `dimod.ExactSolver` | Brute-force — only for small N (≲ 20 spins) |
 | `QUANTUM` | D-Wave QPU | Requires a D-Wave Leap token and profile |
+
+Each backend keeps a thread-safe pool of `num_workers` independent samplers, so that batched forward calls can be parallelized without sharing sampler state.
 
 ---
 
 ## Networks
 
-**`Network_1L`** (`MultiIsingNetwork`) — N parallel Ising perceptrons, outputs combined by a linear layer. The input features can be partitioned so that each node in the first layer sees a portion of the input.
+**`ModularNetwork`** — N parallel `FullIsingModule` perceptrons combined by a final `Linear(N→1)` layer. Each perceptron has its own learnable `Γ`, `λ`, `b`. Optionally the input features can be partitioned across perceptrons (`partition_input=True`).
 
 ```
-x ──► IsingModule × N  ──►  Linear(N→1)  ──►  output
-```
-
-**`Network_2L`** (`TwoLayerIsingNetwork`) — two Ising layers with a linear mixing stage between them. Feature re-uploading.
-
-```
-x ──► [Ising ×N₁] ──► Linear ──► cat([E₁, x]) ──► [Ising ×N₂] ──► Linear ──► output
+x ──► FullIsingModule × N  ──►  Linear(N→1)  ──►  output
 ```
 
 ---
@@ -72,16 +68,17 @@ x ──► [Ising ×N₁] ──► Linear ──► cat([E₁, x]) ──► [
 
 | Script | What it does |
 |--------|-------------|
-| `test_xor.py` | Trains `FullIsingModule`, `Network_1L`, `Network_2L` on XOR from 1D to 6D; outputs metrics, curves, confusion matrices |
-| `test_matrix_xor.py` | Grid search over `num_perceptrons × node_size` on `Network_1L` for each XOR dimension; outputs accuracy/F1/AUC/timing heatmaps |
-| `test_datasetsUCI.py` | K-Fold CV of `FullIsingModule` vs `Network_1L` on 9 UCI datasets |
+| `test_xor.py` | `FullIsingModule` vs `ModularNetwork` on XOR, dimensions 1D-6D |
+| `test_datasetsUCI.py` | K-Fold CV of `FullIsingModule` vs `ModularNetwork` on 9 UCI datasets |
 | `test_comparison_SZPvsTorch.py` | Direct comparison of original SZP vs `FullIsingModule` on Iris — validates the PyTorch port |
+
+All scripts seed `numpy` and `torch` from `RANDOM_SEED` for reproducibility, and write timestamped output directories (SVG + PDF plots, CSVs, `run_<ts>.log`) into the cwd.
 
 ---
 
 ## Datasets
 
-9 UCI binary classification datasets are in `Inference/Datasets/`: Iris, Vertebral Column, Banknote, Breast Cancer, Contraceptive Method, Haberman's Survival, Heart Failure, Ionosphere, SPECTF Heart.
+9 UCI binary classification CSVs in `Inference/Datasets/`: Iris (versicolor vs virginica), Vertebral Column, Banknote, Breast Cancer, Contraceptive Method, Haberman's Survival, Heart Failure, Ionosphere, SPECTF Heart. The CSVs have no header row; the last column is the label (binary, with `-1` automatically remapped to `0`).
 
 ---
 
@@ -93,11 +90,20 @@ cd QuantumAnnealerModule
 pip install -r requirements.txt
 pip install -e .          # installs the full_ising_model package
 ```
+
 ---
 
 ## Configuration
 
-All parameters live in `Inference/.env`. 
+All hyperparameters live in `Inference/.env` and are read strictly (a missing key raises `KeyError` at startup). Highlights:
+
+- `ANNEALER_TYPE`: `simulated` | `exact` | `quantum`
+- `NUM_THREADS`: workers in the sampler pool
+- `MODEL_SIZE`: `-1` for auto (`max(n_features, MINIMUM_MODEL_SIZE)`)
+- `HIDDEN_NODES_OFFSET_VALUE`: ε for the offset padding rule
+- `LAMBDA_INIT`, `OFFSET_INIT`: initial values for `λ` and `b`
+- Per-parameter learning rates: `LEARNING_RATE_GAMMA`, `LEARNING_RATE_LAMBDA`, `LEARNING_RATE_OFFSET`, `LEARNING_RATE_COMBINER`
+- `PRINT_INTERVAL`: epoch interval for loss logging during training (no test-set evaluation runs during training)
 
 ---
 
@@ -107,18 +113,15 @@ From the repository root:
 
 ```bash
 python -m Inference.test_xor
-python -m Inference.test_matrix_xor
 python -m Inference.test_datasetsUCI
 python -m Inference.test_comparison_SZPvsTorch
 ```
-
-Plots, CSVs and logs are saved in timestamped directories in the working directory.
 
 ---
 
 ## Notes
 
-- Training is slow: the annealer is the bottleneck. Each forward call invokes a sampler per sample.
+- Training is bottlenecked by the annealer: each forward call invokes one sample per element of the batch.
 - `ExactAnnealing` is only tractable for small N (≲ 20 spins).
 - QPU access requires a D-Wave Leap subscription and introduces network latency.
-- When the input dimension is smaller than the annealer size, `θ` is extended by tiling it cyclically and adding a small constant offset at each repetition: `θ[i] = x[i % d] + (i // d) · ε`. This fills the extra nodes with slightly shifted copies of the input, preserving structure while avoiding exact duplicates.
+- When the input dimension is smaller than the annealer size, `θ` is extended by tiling it cyclically and adding a small constant offset at each repetition: `θ_new[k] = θ[k mod n] + (k // n) · ε`.
