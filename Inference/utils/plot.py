@@ -2,460 +2,18 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 import seaborn as sns
 from pathlib import Path
-from matplotlib.patches import Patch
-from sklearn.metrics import confusion_matrix
 
 
-# Set paper style
-plt.rcParams['font.family'] = 'serif'
-plt.rcParams['font.serif'] = ['Times New Roman', 'DejaVu Serif']
-plt.rcParams['font.size'] = 11
-plt.rcParams['axes.labelsize'] = 12
-plt.rcParams['axes.titlesize'] = 13
-plt.rcParams['xtick.labelsize'] = 10
-plt.rcParams['ytick.labelsize'] = 10
-plt.rcParams['legend.fontsize'] = 10
-plt.rcParams['figure.titlesize'] = 14
-plt.rcParams['axes.linewidth'] = 1.2
-plt.rcParams['grid.alpha'] = 0.3
-plt.rcParams['grid.linestyle'] = '--'
-plt.rcParams['axes.grid'] = True
-plt.rcParams['axes.axisbelow'] = True
-
-# Set seaborn style for scientific plots
-sns.set_style("whitegrid")
-sns.set_context("paper", font_scale=1.2)
-
-class Plot:
-
-    def __init__(self, output_dir='plots'):
-        self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(parents=True, exist_ok=True)
-
-        # Color palette for scientific plots
-        self.colors = {
-            'primary': '#2E86AB',    # blue
-            'secondary': '#A23B72',  # magenta
-            'tertiary': '#F18F01',   # orange
-            'quaternary': '#C73E1D', # red
-            'success': '#6A994E',    # green
-            'neutral': '#606060'     # gray
-        }
-
-    def plot_loss_accuracy(self, loss, accuracy, dataset_name):
-        """
-        Creates a plot with two subplots: loss and accuracy per epochs.
-        """
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
-
-        epochs = range(1, len(loss) + 1)
-
-        # Subplot loss (left)
-        ax1.plot(epochs, loss, color=self.colors['primary'], linewidth=2)
-        ax1.set_xlabel('Epoch', fontweight='bold')
-        ax1.set_ylabel('Loss', fontweight='bold')
-        ax1.set_ylim(0, 1)
-        ax1.set_title('(a) Training Loss', loc='left', fontweight='bold')
-        ax1.spines['top'].set_visible(False)
-        ax1.spines['right'].set_visible(False)
-
-        # Subplot accuracy (right)
-        ax2.plot(epochs, accuracy, color=self.colors['success'], linewidth=2)
-        ax2.set_xlabel('Epoch', fontweight='bold')
-        ax2.set_ylabel('Accuracy', fontweight='bold')
-        ax2.set_ylim(0, 1)
-        ax2.set_title('(b) Validation Accuracy', loc='left', fontweight='bold')
-        ax2.spines['top'].set_visible(False)
-        ax2.spines['right'].set_visible(False)
-
-        # Title
-        fig.suptitle(f'Training Metrics - {dataset_name}', fontweight='bold', y=1.02)
-
-        plt.tight_layout()
-        output_path = self.output_dir / f'loss_accuracy_{dataset_name}.png'
-        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white', edgecolor='none')
-        plt.close()
-
-    def plot_tot_accuracy(self, accuracy_list, labels):
-        """
-        Creates a bar chart of accuracies.
-        """
-        fig, ax = plt.subplots(figsize=(8, 5))
-
-        x_pos = np.arange(len(labels))
-
-        bars = ax.bar(x_pos, accuracy_list, color=self.colors['primary'],
-                     alpha=0.85, edgecolor='black', linewidth=1.2)
-
-        # Add value labels on top of bars
-        for bar, val in zip(bars, accuracy_list):
-            height = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2., height,
-                   f'{val:.3f}', ha='center', va='bottom', fontsize=9, fontweight='bold')
-
-        ax.set_xlabel('Dataset', fontweight='bold')
-        ax.set_ylabel('Accuracy', fontweight='bold')
-        ax.set_title('Model Accuracy Across Datasets', fontweight='bold', pad=15)
-        ax.set_xticks(x_pos)
-        ax.set_xticklabels(labels, rotation=45, ha='right')
-        ax.set_ylim(0, max(accuracy_list) * 1.15)
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-
-        plt.tight_layout()
-        output_path = self.output_dir / 'tot_accuracy.png'
-        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white', edgecolor='none')
-        plt.close()
-
-    def plot_compare_accuracy(self, accuracy_list1, accuracy_list2, labels, model_name1='Model 1', model_name2='Model 2'):
-        """
-        Creates a bar chart comparing two accuracy lists.
-        """
-        fig, ax = plt.subplots(figsize=(10, 5))
-
-        x_pos = np.arange(len(labels))
-        width = 0.35
-
-        ax.bar(x_pos - width/2, accuracy_list1, width, label=model_name1,
-               color=self.colors['primary'], alpha=0.85, edgecolor='black', linewidth=1.2)
-        ax.bar(x_pos + width/2, accuracy_list2, width, label=model_name2,
-               color=self.colors['secondary'], alpha=0.85, edgecolor='black', linewidth=1.2)
-
-        ax.set_xlabel('Dataset', fontweight='bold')
-        ax.set_ylabel('Accuracy', fontweight='bold')
-        ax.set_title('Comparative Model Performance', fontweight='bold', pad=15)
-        ax.set_xticks(x_pos)
-        ax.set_xticklabels(labels, rotation=45, ha='right')
-        ax.legend(frameon=True, shadow=True, loc='best')
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-        ax.set_ylim(0, max(max(accuracy_list1), max(accuracy_list2)) * 1.15)
-
-        plt.tight_layout()
-        output_path = self.output_dir / 'compare_accuracy.png'
-        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white', edgecolor='none')
-        plt.close()
-
-    def plot_parity_scatter(self, accuracy_list1, accuracy_list2, dataset_names, model_name1='Model 1', model_name2='Model 2'):
-        """
-        Creates a parity scatter plot comparing two accuracy lists.
-        """
-        fig, ax = plt.subplots(figsize=(7, 7))
-
-        # Scatter plot
-        ax.scatter(accuracy_list1, accuracy_list2, s=120, alpha=0.7,
-                  color=self.colors['primary'], edgecolors='black', linewidth=1.5, zorder=3)
-
-        # Labels for each point
-        for i, name in enumerate(dataset_names):
-            ax.annotate(name, (accuracy_list1[i], accuracy_list2[i]),
-                       xytext=(7, 7), textcoords='offset points', fontsize=9,
-                       bbox=dict(boxstyle='round,pad=0.3', facecolor='white',
-                                edgecolor='gray', alpha=0.7))
-
-        # Diagonal dashed line (y=x)
-        min_val = min(min(accuracy_list1), min(accuracy_list2))
-        max_val = max(max(accuracy_list1), max(accuracy_list2))
-        padding = (max_val - min_val) * 0.05
-        ax.plot([min_val - padding, max_val + padding], [min_val - padding, max_val + padding],
-               'k--', linewidth=2, label='Perfect Parity', zorder=2)
-
-        ax.set_xlabel(f'{model_name1} Accuracy', fontweight='bold')
-        ax.set_ylabel(f'{model_name2} Accuracy', fontweight='bold')
-        ax.set_title('Parity Plot - Model Comparison', fontweight='bold', pad=15)
-        ax.legend(frameon=True, shadow=True, loc='lower right')
-        ax.set_aspect('equal', adjustable='box')
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-        ax.set_xlim(min_val - padding, max_val + padding)
-        ax.set_ylim(min_val - padding, max_val + padding)
-
-        plt.tight_layout()
-        output_path = self.output_dir / 'parity_scatter.png'
-        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white', edgecolor='none')
-        plt.close()
-
-    def box_plot(self, accuracy_data, dataset_names, title='Accuracy Distribution Across Datasets',
-                 filename='box_plot', box_color='primary'):
-        """
-        Creates a box plot of accuracies for each dataset.
-        """
-        fig, ax = plt.subplots(figsize=(10, 6))
-
-        # Box plot
-        ax.boxplot(accuracy_data, labels=dataset_names, patch_artist=True,
-                   showmeans=True, meanline=False,
-                   meanprops=dict(marker='D', markerfacecolor=self.colors['quaternary'],
-                                 markeredgecolor='black', markersize=7),
-                   medianprops=dict(color=self.colors['neutral'], linewidth=2.5),
-                   boxprops=dict(facecolor=self.colors[box_color], alpha=0.7,
-                                edgecolor='black', linewidth=1.5),
-                   whiskerprops=dict(color='black', linewidth=1.5),
-                   capprops=dict(color='black', linewidth=1.5),
-                   flierprops=dict(marker='o', markerfacecolor='red', markersize=6,
-                                  markeredgecolor='black', alpha=0.6))
-
-        ax.set_xlabel('Dataset', fontweight='bold')
-        ax.set_ylabel('Test Accuracy', fontweight='bold')
-        ax.set_title(title, fontweight='bold', pad=15, fontsize=13)
-        ax.set_xticklabels(dataset_names, rotation=45, ha='right')
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-        ax.set_ylim(0, 1.05)
-
-        # Add legend
-        legend_elements = [
-            Patch(facecolor=self.colors[box_color], alpha=0.7, edgecolor='black',
-                  label='Interquartile Range (IQR)'),
-            plt.Line2D([0], [0], color=self.colors['neutral'], linewidth=2.5, label='Median'),
-            plt.Line2D([0], [0], marker='D', color='w', markerfacecolor=self.colors['quaternary'],
-                      markersize=7, markeredgecolor='black', label='Mean'),
-            plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='red',
-                      markersize=6, markeredgecolor='black', label='Outliers')
-        ]
-        ax.legend(handles=legend_elements, loc='lower left', frameon=True, shadow=True)
-
-        plt.tight_layout()
-        output_path = self.output_dir / f'{filename}.png'
-        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white', edgecolor='none')
-        plt.close()
-
-    def plot_comparison_accuracies(self, szp_accs, pt_accs, filename='comparison_accuracies'):
-        """
-        Overlapping line plot of per-fold accuracies for SZP vs TorchModel.
-        """
-        fig, ax = plt.subplots(figsize=(8, 5))
-
-        folds = np.arange(1, len(szp_accs) + 1)
-
-        ax.plot(folds, szp_accs, marker='o', linewidth=2, markersize=7,
-                color=self.colors['primary'], label='SZP')
-        ax.plot(folds, pt_accs, marker='s', linewidth=2, markersize=7,
-                color=self.colors['secondary'], label='TorchModel')
-
-        ax.set_xlabel('Fold', fontweight='bold')
-        ax.set_ylabel('Accuracy', fontweight='bold')
-        ax.set_title('Per-Fold Accuracy: SZP vs TorchModel', fontweight='bold', pad=15)
-        ax.set_xticks(folds)
-        ax.set_ylim(0, 1.05)
-        ax.legend(frameon=True, shadow=True, loc='best')
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-
-        plt.tight_layout()
-        output_path = self.output_dir / f'{filename}.png'
-        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white', edgecolor='none')
-        plt.close()
-        return output_path
-
-    def plot_confusion_matrix(self, y_true, y_pred, labels=None, filename='confusion_matrix', save_path=None):
-        """Create and save a confusion matrix"""
-        plt.style.use('classic')
-        cm = confusion_matrix(y_true, y_pred, labels=labels)
-        fig, ax = plt.subplots(figsize=(5, 4))
-        sns.heatmap(
-            cm, annot=True, fmt='d', cmap='Greys', cbar=False, ax=ax,
-            annot_kws={'size': 14, 'weight': 'bold'}, linewidths=0.5, linecolor='black'
-        )
-        ax.set_xlabel('Predicted label', fontsize=14, fontname='serif')
-        ax.set_ylabel('True label', fontsize=14, fontname='serif')
-        ax.set_xticklabels(labels, fontsize=12, fontname='serif')
-        ax.set_yticklabels(labels, fontsize=12, fontname='serif', rotation=0)
-        ax.set_title('Confusion Matrix', fontsize=16, fontname='serif', pad=12)
-        plt.tight_layout()
-        output_path = save_path if save_path else self.output_dir / f'{filename}.png'
-        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white', edgecolor='none')
-        plt.close()
-
-    def plot_metrics_bar_comparison(self, metrics1, metrics2, dataset_names,
-                                     errors1=None, errors2=None,
-                                     model_name1='Model 1', model_name2='Model 2',
-                                     filename='metrics_bar_comparison'):
-        """
-        Grouped bar chart (one subplot per metric) comparing two models across datasets.
-        metrics1/metrics2: dict {metric_name: [value_per_dataset]}
-        errors1/errors2:   dict {metric_name: [std_per_dataset]}  (optional)
-        """
-        metric_keys = ['accuracy', 'precision', 'recall', 'f1', 'auc']
-        metric_labels = ['Accuracy', 'Precision', 'Recall', 'F1 Score', 'AUC-ROC']
-
-        fig, axes = plt.subplots(2, 3, figsize=(15, 9))
-        axes = axes.flatten()
-
-        x = np.arange(len(dataset_names))
-        width = 0.35
-
-        for i, (key, label) in enumerate(zip(metric_keys, metric_labels)):
-            ax = axes[i]
-            v1 = metrics1[key]
-            v2 = metrics2[key]
-            e1 = errors1[key] if errors1 else None
-            e2 = errors2[key] if errors2 else None
-
-            ax.bar(x - width / 2, v1, width, label=model_name1,
-                   color=self.colors['primary'], alpha=0.85, edgecolor='black', linewidth=1.0,
-                   yerr=e1, capsize=3, error_kw={'elinewidth': 1.5})
-            ax.bar(x + width / 2, v2, width, label=model_name2,
-                   color=self.colors['secondary'], alpha=0.85, edgecolor='black', linewidth=1.0,
-                   yerr=e2, capsize=3, error_kw={'elinewidth': 1.5})
-
-            ax.set_title(f'({chr(97 + i)}) {label}', loc='left', fontweight='bold')
-            ax.set_xticks(x)
-            ax.set_xticklabels(dataset_names, rotation=45, ha='right', fontsize=8)
-            ax.set_ylim(0, 1.15)
-            ax.set_ylabel(label, fontweight='bold')
-            ax.legend(fontsize=8, loc='lower right', frameon=True)
-            ax.spines['top'].set_visible(False)
-            ax.spines['right'].set_visible(False)
-
-        axes[5].set_visible(False)
-        fig.suptitle(f'Metrics Comparison: {model_name1} vs {model_name2}',
-                     fontweight='bold', y=1.01)
-        plt.tight_layout()
-        output_path = self.output_dir / f'{filename}.png'
-        plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
-        plt.close()
-
-    def plot_metrics_heatmap(self, df1, df2,
-                              model_name1='Model 1', model_name2='Model 2',
-                              filename='metrics_heatmap'):
-        """
-        Side-by-side heatmaps (dataset × metric) for two models.
-        df1/df2: pandas DataFrame, index=dataset names, columns=metric names.
-        """
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, max(4, len(df1) * 0.7 + 2)))
-
-        for ax, df, title in [(ax1, df1, model_name1), (ax2, df2, model_name2)]:
-            sns.heatmap(df, ax=ax, annot=True, fmt='.3f', cmap='YlOrRd',
-                        vmin=0, vmax=1, linewidths=0.5, linecolor='lightgray',
-                        cbar_kws={'shrink': 0.8, 'label': 'Score'})
-            ax.set_title(title, fontweight='bold', pad=10)
-            ax.set_xlabel('Metric', fontweight='bold')
-            ax.set_ylabel('Dataset', fontweight='bold')
-            ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right')
-            ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
-
-        fig.suptitle('Performance Heatmap Across Datasets', fontweight='bold', y=1.02)
-        plt.tight_layout()
-        output_path = self.output_dir / f'{filename}.png'
-        plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
-        plt.close()
-
-    def plot_radar_chart(self, means1, means2,
-                          model_name1='Model 1', model_name2='Model 2',
-                          filename='radar_chart'):
-        """
-        Radar/spider chart comparing two models on 5 average metrics.
-        means1/means2: dict {metric_key: scalar_value} for keys
-                       'accuracy','precision','recall','f1','auc'.
-        """
-        keys = ['accuracy', 'precision', 'recall', 'f1', 'auc']
-        labels = ['Accuracy', 'Precision', 'Recall', 'F1', 'AUC']
-        N = len(keys)
-
-        angles = [n / N * 2 * np.pi for n in range(N)]
-        angles += angles[:1]
-
-        v1 = [means1[k] for k in keys] + [means1[keys[0]]]
-        v2 = [means2[k] for k in keys] + [means2[keys[0]]]
-
-        fig, ax = plt.subplots(figsize=(7, 7), subplot_kw=dict(polar=True))
-
-        ax.plot(angles, v1, 'o-', linewidth=2.5, color=self.colors['primary'], label=model_name1)
-        ax.fill(angles, v1, alpha=0.2, color=self.colors['primary'])
-        ax.plot(angles, v2, 's-', linewidth=2.5, color=self.colors['secondary'], label=model_name2)
-        ax.fill(angles, v2, alpha=0.2, color=self.colors['secondary'])
-
-        ax.set_xticks(angles[:-1])
-        ax.set_xticklabels(labels, fontsize=12, fontweight='bold')
-        ax.set_ylim(0, 1)
-        ax.set_yticks([0.2, 0.4, 0.6, 0.8, 1.0])
-        ax.set_yticklabels(['0.2', '0.4', '0.6', '0.8', '1.0'], fontsize=8, color='gray')
-        ax.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.6)
-        ax.set_title('Average Performance Radar Chart\n(mean across datasets)',
-                     fontweight='bold', pad=20)
-        ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1), frameon=True, shadow=True)
-
-        plt.tight_layout()
-        output_path = self.output_dir / f'{filename}.png'
-        plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
-        plt.close()
-
-    def plot_combined_boxplot(self, data1, data2, dataset_names,
-                               model_name1='Model 1', model_name2='Model 2',
-                               filename='combined_boxplot'):
-        """
-        Side-by-side box plots for two models on the same axes.
-        data1/data2: list of lists, one inner list per dataset (K-fold accuracy values).
-        """
-        n = len(dataset_names)
-        fig, ax = plt.subplots(figsize=(max(10, n * 2.2), 6))
-
-        pos1 = np.arange(1, n + 1) * 3 - 0.7
-        pos2 = np.arange(1, n + 1) * 3 + 0.7
-
-        bp_kw = dict(patch_artist=True, showmeans=True, meanline=False,
-                     meanprops=dict(marker='D', markersize=6,
-                                    markerfacecolor=self.colors['quaternary'],
-                                    markeredgecolor='black'),
-                     medianprops=dict(color='black', linewidth=2.0),
-                     whiskerprops=dict(color='black', linewidth=1.2),
-                     capprops=dict(color='black', linewidth=1.2),
-                     flierprops=dict(marker='o', markersize=5,
-                                     markeredgecolor='black', alpha=0.6))
-
-        bp1 = ax.boxplot(data1, positions=pos1, widths=1.0,
-                         boxprops=dict(facecolor=self.colors['primary'], alpha=0.75,
-                                       edgecolor='black', linewidth=1.2),
-                         flierprops={**bp_kw['flierprops'],
-                                     'markerfacecolor': self.colors['primary']},
-                         **{k: v for k, v in bp_kw.items()
-                            if k not in ('boxprops', 'flierprops')})
-
-        bp2 = ax.boxplot(data2, positions=pos2, widths=1.0,
-                         boxprops=dict(facecolor=self.colors['secondary'], alpha=0.75,
-                                       edgecolor='black', linewidth=1.2),
-                         flierprops={**bp_kw['flierprops'],
-                                     'markerfacecolor': self.colors['secondary']},
-                         **{k: v for k, v in bp_kw.items()
-                            if k not in ('boxprops', 'flierprops')})
-
-        ax.set_xticks(np.arange(1, n + 1) * 3)
-        ax.set_xticklabels(dataset_names, rotation=45, ha='right')
-        ax.set_ylabel('Test Accuracy', fontweight='bold')
-        ax.set_xlabel('Dataset', fontweight='bold')
-        ax.set_title(f'K-Fold Accuracy Distribution: {model_name1} vs {model_name2}',
-                     fontweight='bold', pad=15)
-        ax.set_ylim(0, 1.08)
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-
-        legend_elements = [
-            Patch(facecolor=self.colors['primary'], alpha=0.75, edgecolor='black', label=model_name1),
-            Patch(facecolor=self.colors['secondary'], alpha=0.75, edgecolor='black', label=model_name2),
-            plt.Line2D([0], [0], color='black', linewidth=2, label='Median'),
-            plt.Line2D([0], [0], marker='D', color='w', markerfacecolor=self.colors['quaternary'],
-                       markersize=6, markeredgecolor='black', label='Mean'),
-        ]
-        ax.legend(handles=legend_elements, loc='lower left', frameon=True, shadow=True)
-
-        plt.tight_layout()
-        output_path = self.output_dir / f'{filename}.png'
-        plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
-        plt.close()
-
-
-class PlotPaper:
+class Plots:
     """
-    Scientific-paper-ready figures as SVG.
+    Scientific-paper-ready figures saved as SVG + PDF.
 
-    Style choices follow common journal conventions: serif fonts, thin rules,
-    hollow/hatched fills so plots remain readable in black-and-white print,
-    column-width figure sizes, and no in-figure titles by default (captions
-    belong in the manuscript). Text is kept as text in the SVG via
-    `svg.fonttype='none'` so figures remain editable in Inkscape/Illustrator.
+    Style: serif fonts, thin rules, column-width figures, no in-figure titles
+    by default (captions belong in the manuscript). `svg.fonttype='none'` keeps
+    text editable in Inkscape/Illustrator.
     """
 
     PAPER_RC = {
@@ -494,9 +52,9 @@ class PlotPaper:
     COL_DOUBLE_TALL = (7.16, 4.0)
 
     PALETTE = {
-        'model1_face': '#4C72B0',   # steel blue
+        'model1_face': '#4C72B0',
         'model1_edge': '#1f3b73',
-        'model2_face': '#DD8452',   # muted orange
+        'model2_face': '#DD8452',
         'model2_edge': '#8a3d1a',
         'accent': '#1f3b73',
         'neutral_gray': '#555555',
@@ -504,9 +62,11 @@ class PlotPaper:
         'alpha_fill': 0.75,
     }
 
-    def __init__(self, output_dir='plots_paper'):
+    def __init__(self, output_dir='plots'):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
+
+    # -------- internal helpers --------
 
     def _new_fig(self, figsize):
         return plt.subplots(figsize=figsize)
@@ -521,7 +81,7 @@ class PlotPaper:
         ha = 'right' if angle not in (0, 90) else 'center'
         ax.set_xticklabels(labels, rotation=angle, ha=ha)
 
-    def _save_svg(self, fig, filename):
+    def _save(self, fig, filename):
         svg_path = self.output_dir / f'{filename}.svg'
         pdf_path = self.output_dir / f'{filename}.pdf'
         fig.savefig(svg_path, format='svg', bbox_inches='tight')
@@ -549,62 +109,153 @@ class PlotPaper:
                             alpha=0.6),
         )
 
+    # -------- single-model plots --------
+
+    def plot_tot_accuracy(self, accuracy_list, labels,
+                          filename='tot_accuracy',
+                          xtick_rotation=30):
+        with plt.rc_context(self.PAPER_RC):
+            fig, ax = self._new_fig(self.COL_DOUBLE)
+            x = np.arange(len(labels))
+            ax.bar(x, accuracy_list, width=0.65,
+                   facecolor=self.PALETTE['model1_face'],
+                   edgecolor=self.PALETTE['model1_edge'],
+                   linewidth=0.9, alpha=self.PALETTE['alpha_fill'])
+            ax.set_xticks(x)
+            self._rotate_xticks(ax, labels, angle=xtick_rotation)
+            ax.set_xlabel('Dataset')
+            ax.set_ylabel('Accuracy')
+            ax.set_ylim(0.0, 1.0)
+            self._clean_spines(ax)
+            fig.tight_layout()
+            return self._save(fig, filename)
+
     def box_plot(self, accuracy_data, dataset_names, title=None,
-                 filename='box_plot_paper'):
-        """K-fold accuracy boxplot, single model."""
+                 filename='box_plot'):
         with plt.rc_context(self.PAPER_RC):
             fig, ax = self._new_fig(self.COL_DOUBLE_TALL)
             style = self._box_style(0)
-
             ax.boxplot(accuracy_data, labels=dataset_names,
                        patch_artist=True, widths=0.55,
                        showmeans=False, **style)
-
             ax.set_xlabel('Dataset')
             ax.set_ylabel('Test accuracy')
             if title:
                 ax.set_title(title)
             self._rotate_xticks(ax, dataset_names, angle=30)
             self._clean_spines(ax)
-
             flat = [v for row in accuracy_data for v in row]
             if flat:
                 lo = max(0.0, min(flat) - 0.02)
                 ax.set_ylim(lo, 1.0)
+            fig.tight_layout()
+            return self._save(fig, filename)
+
+    def plot_loss_accuracy(self, loss, accuracy, dataset_name,
+                           filename_prefix='loss_accuracy'):
+        with plt.rc_context(self.PAPER_RC):
+            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=self.COL_DOUBLE)
+            epochs = np.arange(1, len(loss) + 1)
+
+            ax1.plot(epochs, loss, color=self.PALETTE['model1_face'], linewidth=1.2)
+            ax1.set_xlabel('Epoch')
+            ax1.set_ylabel('Loss')
+            self._clean_spines(ax1)
+
+            ax2.plot(epochs, accuracy, color=self.PALETTE['model2_face'], linewidth=1.2)
+            ax2.set_xlabel('Epoch')
+            ax2.set_ylabel('Validation accuracy')
+            ax2.set_ylim(0.0, 1.0)
+            self._clean_spines(ax2)
 
             fig.tight_layout()
-            return self._save_svg(fig, filename)
+            return self._save(fig, f'{filename_prefix}_{dataset_name}')
+
+    # -------- two-model plots --------
+
+    def plot_compare_accuracy(self, accuracy_list1, accuracy_list2, labels,
+                              model_name1: str, model_name2: str,
+                              filename='compare_accuracy',
+                              xtick_rotation=30):
+        with plt.rc_context(self.PAPER_RC):
+            fig, ax = self._new_fig(self.COL_DOUBLE)
+            x = np.arange(len(labels))
+            width = 0.38
+            ax.bar(x - width / 2, accuracy_list1, width,
+                   facecolor=self.PALETTE['model1_face'],
+                   edgecolor=self.PALETTE['model1_edge'],
+                   linewidth=0.9, alpha=self.PALETTE['alpha_fill'],
+                   label=model_name1)
+            ax.bar(x + width / 2, accuracy_list2, width,
+                   facecolor=self.PALETTE['model2_face'],
+                   edgecolor=self.PALETTE['model2_edge'],
+                   linewidth=0.9, alpha=self.PALETTE['alpha_fill'],
+                   label=model_name2)
+            ax.set_xticks(x)
+            self._rotate_xticks(ax, labels, angle=xtick_rotation)
+            ax.set_xlabel('Dataset')
+            ax.set_ylabel('Accuracy')
+            ax.set_ylim(0.0, 1.0)
+            ax.legend(loc='lower center', bbox_to_anchor=(0.5, 1.02),
+                      ncol=2, frameon=False, borderaxespad=0.0)
+            self._clean_spines(ax)
+            fig.tight_layout()
+            return self._save(fig, filename)
+
+    def plot_parity_scatter(self, accuracy_list1, accuracy_list2,
+                            dataset_names,
+                            model_name1: str, model_name2: str,
+                            filename='parity_scatter'):
+        with plt.rc_context(self.PAPER_RC):
+            fig, ax = self._new_fig(self.COL_SINGLE_SQUARE)
+            lo = min(min(accuracy_list1), min(accuracy_list2))
+            hi = max(max(accuracy_list1), max(accuracy_list2))
+            pad = max((hi - lo) * 0.05, 0.01)
+            ax.plot([lo - pad, hi + pad], [lo - pad, hi + pad],
+                    color=self.PALETTE['light_gray'], linewidth=0.7,
+                    linestyle='--', label=r'$y = x$', zorder=2)
+            ax.scatter(accuracy_list1, accuracy_list2, s=42,
+                       facecolor=self.PALETTE['model1_face'],
+                       edgecolor=self.PALETTE['model1_edge'],
+                       alpha=self.PALETTE['alpha_fill'],
+                       linewidth=0.9, zorder=3)
+            for i, name in enumerate(dataset_names):
+                ax.annotate(name, (accuracy_list1[i], accuracy_list2[i]),
+                            xytext=(4, 4), textcoords='offset points',
+                            fontsize=7, color=self.PALETTE['neutral_gray'])
+            ax.set_xlabel(f'{model_name1} accuracy')
+            ax.set_ylabel(f'{model_name2} accuracy')
+            ax.set_xlim(lo - pad, hi + pad)
+            ax.set_ylim(lo - pad, hi + pad)
+            ax.set_aspect('equal', adjustable='box')
+            ax.legend(loc='upper left', frameon=False)
+            self._clean_spines(ax)
+            fig.tight_layout()
+            return self._save(fig, filename)
 
     def plot_combined_boxplot(self, data1, data2, dataset_names,
-                              model_name1='Model 1', model_name2='Model 2',
-                              filename='combined_boxplot_paper'):
-        """K-fold accuracy boxplot, two models side-by-side per dataset."""
+                              model_name1: str, model_name2: str,
+                              filename='combined_boxplot'):
         with plt.rc_context(self.PAPER_RC):
             n = len(dataset_names)
             fig, ax = self._new_fig(self.COL_DOUBLE_TALL)
-
             centers = np.arange(1, n + 1) * 3
             pos1 = centers - 0.7
             pos2 = centers + 0.7
-
             s1 = self._box_style(0)
             s2 = self._box_style(1)
-
             ax.boxplot(data1, positions=pos1, widths=1.0,
                        patch_artist=True, showmeans=False, **s1)
             ax.boxplot(data2, positions=pos2, widths=1.0,
                        patch_artist=True, showmeans=False, **s2)
-
             ax.set_xticks(centers)
             self._rotate_xticks(ax, dataset_names, angle=45)
             ax.set_xlabel('Dataset')
             ax.set_ylabel('Test accuracy')
-
             flat = [v for row in (list(data1) + list(data2)) for v in row]
             if flat:
                 lo = max(0.0, min(flat) - 0.02)
                 ax.set_ylim(lo, 1.0)
-
             legend_elements = [
                 Patch(facecolor=self.PALETTE['model1_face'],
                       edgecolor=self.PALETTE['model1_edge'],
@@ -619,99 +270,95 @@ class PlotPaper:
                       loc='lower center', bbox_to_anchor=(0.5, 1.02),
                       ncol=2, frameon=False, borderaxespad=0.0)
             self._clean_spines(ax)
-
             fig.tight_layout()
-            return self._save_svg(fig, filename)
+            return self._save(fig, filename)
 
-    def plot_tot_accuracy(self, accuracy_list, labels,
-                          filename='tot_accuracy_paper',
-                          xtick_rotation=30):
-        """Bar chart of mean accuracy per dataset, single model."""
+    def plot_metrics_bar_comparison(self, metrics1, metrics2, dataset_names,
+                                    errors1, errors2,
+                                    model_name1: str, model_name2: str,
+                                    filename='metrics_bar_comparison'):
+        """metrics{1,2}, errors{1,2}: dict {metric_name: [value_per_dataset]}."""
+        keys = ['accuracy', 'precision', 'recall', 'f1', 'auc']
+        labels = ['Accuracy', 'Precision', 'Recall', 'F1', 'AUC']
+
         with plt.rc_context(self.PAPER_RC):
-            fig, ax = self._new_fig(self.COL_DOUBLE)
-            x = np.arange(len(labels))
-
-            ax.bar(x, accuracy_list, width=0.65,
-                   facecolor=self.PALETTE['model1_face'],
-                   edgecolor=self.PALETTE['model1_edge'],
-                   linewidth=0.9, alpha=self.PALETTE['alpha_fill'])
-
-            ax.set_xticks(x)
-            self._rotate_xticks(ax, labels, angle=xtick_rotation)
-            ax.set_xlabel('Dataset')
-            ax.set_ylabel('Accuracy')
-            ax.set_ylim(0.0, 1.0)
-            self._clean_spines(ax)
-
-            fig.tight_layout()
-            return self._save_svg(fig, filename)
-
-    def plot_compare_accuracy(self, accuracy_list1, accuracy_list2, labels,
-                              model_name1='Model 1', model_name2='Model 2',
-                              filename='compare_accuracy_paper',
-                              xtick_rotation=30):
-        """Grouped bar chart comparing two models' mean accuracy per dataset."""
-        with plt.rc_context(self.PAPER_RC):
-            fig, ax = self._new_fig(self.COL_DOUBLE)
-            x = np.arange(len(labels))
+            fig, axes = plt.subplots(2, 3, figsize=(7.16, 4.6))
+            axes = axes.flatten()
+            x = np.arange(len(dataset_names))
             width = 0.38
 
-            ax.bar(x - width / 2, accuracy_list1, width,
-                   facecolor=self.PALETTE['model1_face'],
-                   edgecolor=self.PALETTE['model1_edge'],
-                   linewidth=0.9, alpha=self.PALETTE['alpha_fill'],
-                   label=model_name1)
-            ax.bar(x + width / 2, accuracy_list2, width,
-                   facecolor=self.PALETTE['model2_face'],
-                   edgecolor=self.PALETTE['model2_edge'],
-                   linewidth=0.9, alpha=self.PALETTE['alpha_fill'],
-                   label=model_name2)
+            for i, (key, label) in enumerate(zip(keys, labels)):
+                ax = axes[i]
+                ax.bar(x - width / 2, metrics1[key], width,
+                       yerr=errors1[key],
+                       facecolor=self.PALETTE['model1_face'],
+                       edgecolor=self.PALETTE['model1_edge'],
+                       linewidth=0.7, alpha=self.PALETTE['alpha_fill'],
+                       error_kw={'elinewidth': 0.7},
+                       label=model_name1)
+                ax.bar(x + width / 2, metrics2[key], width,
+                       yerr=errors2[key],
+                       facecolor=self.PALETTE['model2_face'],
+                       edgecolor=self.PALETTE['model2_edge'],
+                       linewidth=0.7, alpha=self.PALETTE['alpha_fill'],
+                       error_kw={'elinewidth': 0.7},
+                       label=model_name2)
+                ax.set_title(f'({chr(97 + i)}) {label}', loc='left')
+                ax.set_xticks(x)
+                ax.set_xticklabels(dataset_names, rotation=45, ha='right', fontsize=7)
+                ax.set_ylim(0, 1.0)
+                self._clean_spines(ax)
 
-            ax.set_xticks(x)
-            self._rotate_xticks(ax, labels, angle=xtick_rotation)
-            ax.set_xlabel('Dataset')
+            axes[-1].set_visible(False)
+
+            handles = [
+                Patch(facecolor=self.PALETTE['model1_face'],
+                      edgecolor=self.PALETTE['model1_edge'],
+                      alpha=self.PALETTE['alpha_fill'], label=model_name1),
+                Patch(facecolor=self.PALETTE['model2_face'],
+                      edgecolor=self.PALETTE['model2_edge'],
+                      alpha=self.PALETTE['alpha_fill'], label=model_name2),
+            ]
+            fig.legend(handles=handles, loc='lower right', ncol=2, frameon=False)
+            fig.tight_layout()
+            return self._save(fig, filename)
+
+    def plot_metrics_heatmap(self, df1, df2,
+                             model_name1: str, model_name2: str,
+                             filename='metrics_heatmap'):
+        """df{1,2}: DataFrame index=dataset, columns=metric labels (values in [0,1])."""
+        with plt.rc_context(self.PAPER_RC):
+            height = max(2.6, len(df1) * 0.4 + 1.6)
+            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7.16, height))
+            for ax, df, title in [(ax1, df1, model_name1), (ax2, df2, model_name2)]:
+                sns.heatmap(df, ax=ax, annot=True, fmt='.3f', cmap='YlOrRd',
+                            vmin=0, vmax=1, linewidths=0.5, linecolor='lightgray',
+                            cbar_kws={'shrink': 0.8})
+                ax.set_title(title)
+                ax.set_xlabel('Metric')
+                ax.set_ylabel('Dataset')
+                ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right')
+                ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
+            fig.tight_layout()
+            return self._save(fig, filename)
+
+    def plot_comparison_accuracies(self, accs1, accs2,
+                                   model_name1: str, model_name2: str,
+                                   filename='comparison_accuracies'):
+        """Per-fold accuracy line plot for two models."""
+        with plt.rc_context(self.PAPER_RC):
+            fig, ax = self._new_fig(self.COL_DOUBLE)
+            folds = np.arange(1, len(accs1) + 1)
+            ax.plot(folds, accs1, marker='o', linewidth=1.2, markersize=4,
+                    color=self.PALETTE['model1_face'], label=model_name1)
+            ax.plot(folds, accs2, marker='s', linewidth=1.2, markersize=4,
+                    color=self.PALETTE['model2_face'], label=model_name2)
+            ax.set_xlabel('Fold')
             ax.set_ylabel('Accuracy')
+            ax.set_xticks(folds)
             ax.set_ylim(0.0, 1.0)
             ax.legend(loc='lower center', bbox_to_anchor=(0.5, 1.02),
                       ncol=2, frameon=False, borderaxespad=0.0)
             self._clean_spines(ax)
-
             fig.tight_layout()
-            return self._save_svg(fig, filename)
-
-    def plot_parity_scatter(self, accuracy_list1, accuracy_list2,
-                            dataset_names,
-                            model_name1='Model 1', model_name2='Model 2',
-                            filename='parity_scatter_paper'):
-        """Parity plot: Model 1 accuracy vs Model 2 accuracy, one point per dataset."""
-        with plt.rc_context(self.PAPER_RC):
-            fig, ax = self._new_fig(self.COL_SINGLE_SQUARE)
-
-            lo = min(min(accuracy_list1), min(accuracy_list2))
-            hi = max(max(accuracy_list1), max(accuracy_list2))
-            pad = max((hi - lo) * 0.05, 0.01)
-            ax.plot([lo - pad, hi + pad], [lo - pad, hi + pad],
-                    color=self.PALETTE['light_gray'], linewidth=0.7,
-                    linestyle='--', label=r'$y = x$', zorder=2)
-
-            ax.scatter(accuracy_list1, accuracy_list2, s=42,
-                       facecolor=self.PALETTE['model1_face'],
-                       edgecolor=self.PALETTE['model1_edge'],
-                       alpha=self.PALETTE['alpha_fill'],
-                       linewidth=0.9, zorder=3)
-
-            for i, name in enumerate(dataset_names):
-                ax.annotate(name, (accuracy_list1[i], accuracy_list2[i]),
-                            xytext=(4, 4), textcoords='offset points',
-                            fontsize=7, color=self.PALETTE['neutral_gray'])
-
-            ax.set_xlabel(f'{model_name1} accuracy')
-            ax.set_ylabel(f'{model_name2} accuracy')
-            ax.set_xlim(lo - pad, hi + pad)
-            ax.set_ylim(lo - pad, hi + pad)
-            ax.set_aspect('equal', adjustable='box')
-            ax.legend(loc='upper left', frameon=False)
-            self._clean_spines(ax)
-
-            fig.tight_layout()
-            return self._save_svg(fig, filename)
+            return self._save(fig, filename)

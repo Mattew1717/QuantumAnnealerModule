@@ -1,21 +1,26 @@
+import os
+
 import numpy as np
+import pandas as pd
 import torch
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score,
     f1_score, roc_auc_score,
 )
 
+from full_ising_model.annealers import AnnealingSettings
+
+
+METRICS = ['accuracy', 'precision', 'recall', 'f1', 'auc']
+
 
 def flatten_logits(logits: torch.Tensor) -> torch.Tensor:
-    """Safely flatten model output to one logit per sample."""
+    """Flatten model output to one logit per sample."""
     if logits.ndim == 1:
         return logits
     if logits.ndim == 2 and logits.shape[1] == 1:
         return logits.squeeze(1)
     raise ValueError(f"Unexpected model output shape: {logits.shape}")
-
-
-METRICS = ['accuracy', 'precision', 'recall', 'f1', 'auc']
 
 
 def compute_metrics(y_true, probs):
@@ -33,14 +38,14 @@ def compute_metrics(y_true, probs):
 
 
 def save_metrics_csv(dataset_names, all_metrics_1, all_metrics_2, output_dir,
-                     model_name1='FullIsingModule', model_name2='Network_1L'):
-    """Save mean +/- std metrics for two models to CSV."""
-    import os
-    import pandas as pd
+                     model_name1: str, model_name2: str):
+    """Save mean ± std metrics for two models to CSV."""
     rows = []
     for i, ds_name in enumerate(dataset_names):
-        for model_name, model_metrics in [(model_name1, all_metrics_1[i]),
-                                           (model_name2, all_metrics_2[i])]:
+        for model_name, model_metrics in [
+            (model_name1, all_metrics_1[i]),
+            (model_name2, all_metrics_2[i]),
+        ]:
             row = {'dataset': ds_name, 'model': model_name}
             for m in METRICS:
                 vals = model_metrics[m]
@@ -53,25 +58,34 @@ def save_metrics_csv(dataset_names, all_metrics_1, all_metrics_2, output_dir,
     return csv_path
 
 
-def fquad(x):
-    return -(x - 0.5) ** 2
+def standardize_train_test(X_train, X_test):
+    """Standardize features using statistics fitted on the training split only."""
+    mean = X_train.mean(axis=0)
+    std = X_train.std(axis=0)
+    std[std == 0] = 1e-8
+    return (X_train - mean) / std, (X_test - mean) / std
 
 
-def flin(x):
-    return 2 * x - 6
+def build_annealing_settings(params: dict) -> AnnealingSettings:
+    """Build an AnnealingSettings from a strict params dict."""
+    return AnnealingSettings(
+        beta_range=params['sa_beta_range'],
+        num_reads=params['num_reads'],
+        num_sweeps=params['sa_num_sweeps'],
+        num_sweeps_per_beta=params['sa_sweeps_per_beta'],
+    )
 
 
-def fcub(x):
-    return (x - 0.5) ** 3
+def resolve_model_size(n_features: int, params: dict) -> int:
+    """Return params['model_size'] if explicit, else max(n_features, params['minimum_model_size'])."""
+    if params['model_size'] == -1:
+        return max(n_features, params['minimum_model_size'])
+    return params['model_size']
 
 
-def flog(x):
-    return np.log(x)
-
-def generate_xor_balanced(dim, n_samples_dim=1000, shuffle=True, random_seed=42):
+def generate_xor_balanced(dim: int, n_samples_dim: int, shuffle: bool, random_seed: int):
     """Generate XOR data in U[0,1]^d with balanced classes."""
-    if random_seed is not None:
-        np.random.seed(random_seed)
+    np.random.seed(random_seed)
     samples = np.random.random(size=(2 ** dim * n_samples_dim, dim))
     for i in range(2 ** dim):
         signs = np.array([1 if int((i // 2 ** d) % 2) == 0 else -1 for d in range(dim)])

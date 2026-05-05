@@ -1,5 +1,5 @@
 """
-Comparison: SZP Model vs FullIsingModule on iris dataset with K-Fold cross-validation.
+Comparison: SZP_Model vs FullIsingModule on iris dataset with K-Fold cross-validation.
 """
 
 import os
@@ -19,50 +19,43 @@ dotenv.load_dotenv(dotenv_path=Path(__file__).parent / '.env')
 
 from Inference.utils.logger import Logger
 from Inference.utils.dataset_manager import DatasetManager
-from Inference.utils.plot import Plot
-from Inference.utils.utils import flatten_logits
+from Inference.utils.plot import Plots
+from Inference.utils.utils import (
+    flatten_logits, standardize_train_test, build_annealing_settings, resolve_model_size,
+)
 from SZP_Model.sim_anneal_model import SimAnnealModel, AnnealingSettings as SZP_AnnealingSettings
 from SZP_Model.data import SimpleDataset as SZP_SimpleDataset, HiddenNodesInitialization
 from SZP_Model.utils import GammaInitialization
 from full_ising_model.full_ising_module import FullIsingModule
-from full_ising_model.annealers import AnnealingSettings, AnnealerType
+from full_ising_model.annealers import AnnealerType
 
 logger = Logger()
 
 
-def _standardize_train_test(X_train, X_test):
-    """Standardize test features using statistics fitted on the training split only."""
-    mean = X_train.mean(axis=0)
-    std = X_train.std(axis=0)
-    std[std == 0] = 1e-8
-    return (X_train - mean) / std, (X_test - mean) / std
-
-
 def print_params_table(params):
-    """Print a formatted table of all comparison parameters."""
     rows = [
-        ('random_seed',          params['random_seed']),
-        ('k_folds',              params['k_folds']),
-        ('epochs',               params['epochs']),
-        ('batch_size',           params['batch_size']),
-        ('model_size',           params['resolved_model_size']),
-        ('lambda_init',          params['lambda_init']),
-        ('offset_init',          params['offset_init']),
-        ('learning_rate_gamma',  params['learning_rate_gamma']),
-        ('learning_rate_lambda', params['learning_rate_lambda']),
-        ('learning_rate_offset', params['learning_rate_offset']),
-        ('sa_beta_range',        params['sa_beta_range']),
-        ('num_reads',            params['num_reads']),
-        ('sa_num_sweeps',        params['sa_num_sweeps']),
-        ('sa_sweeps_per_beta',   params['sa_sweeps_per_beta']),
-        ('num_workers',          params['num_workers']),
+        ('random_seed',                  params['random_seed']),
+        ('k_folds',                      params['k_folds']),
+        ('epochs',                       params['epochs']),
+        ('batch_size',                   params['batch_size']),
+        ('model_size',                   params['resolved_model_size']),
+        ('lambda_init',                  params['lambda_init']),
+        ('offset_init',                  params['offset_init']),
+        ('hidden_nodes_offset_value',    params['hidden_nodes_offset_value']),
+        ('learning_rate_gamma',          params['learning_rate_gamma']),
+        ('learning_rate_lambda',         params['learning_rate_lambda']),
+        ('learning_rate_offset',         params['learning_rate_offset']),
+        ('sa_beta_range',                params['sa_beta_range']),
+        ('num_reads',                    params['num_reads']),
+        ('sa_num_sweeps',                params['sa_num_sweeps']),
+        ('sa_sweeps_per_beta',           params['sa_sweeps_per_beta']),
+        ('num_workers',                  params['num_workers']),
     ]
     col_w = max(len(r[0]) for r in rows) + 2
     val_w = max(len(str(r[1])) for r in rows) + 2
     sep = '+' + '-' * col_w + '+' + '-' * val_w + '+'
-    header = f"| {'Parameter':<{col_w-1}}| {'Value':<{val_w-1}}|"
     logger.info(sep)
-    logger.info(header)
+    logger.info(f"| {'Parameter':<{col_w-1}}| {'Value':<{val_w-1}}|")
     logger.info(sep)
     for name, val in rows:
         logger.info(f"| {name:<{col_w-1}}| {str(val):<{val_w-1}}|")
@@ -70,37 +63,32 @@ def print_params_table(params):
 
 
 def get_params():
-    seed = int(os.getenv('RANDOM_SEED'))
+    seed = int(os.environ['RANDOM_SEED'])
     np.random.seed(seed)
     torch.manual_seed(seed)
     return {
         'random_seed': seed,
-        'batch_size': int(os.getenv('BATCH_SIZE')),
-        'model_size': int(os.getenv('MODEL_SIZE')),
-        'minimum_model_size': int(os.getenv('MINIMUM_MODEL_SIZE')),
-        'epochs': int(os.getenv('EPOCHS')),
-        'lambda_init': float(os.getenv('LAMBDA_INIT')),
-        'offset_init': float(os.getenv('OFFSET_INIT')),
-        'learning_rate_gamma': float(os.getenv('LEARNING_RATE_GAMMA')),
-        'learning_rate_lambda': float(os.getenv('LEARNING_RATE_LAMBDA')),
-        'learning_rate_offset': float(os.getenv('LEARNING_RATE_OFFSET')),
-        'sa_beta_range': [int(os.getenv('SA_BETA_MIN')), int(os.getenv('SA_BETA_MAX'))],
-        'num_reads': int(os.getenv('NUM_READS')),
-        'sa_num_sweeps': int(os.getenv('SA_NUM_SWEEPS')),
-        'sa_sweeps_per_beta': int(os.getenv('SA_SWEEPS_PER_BETA')),
-        'num_workers': int(os.getenv('NUM_THREADS', 16)),
-        'k_folds': int(os.getenv('K_FOLDS', 5)),
+        'batch_size': int(os.environ['BATCH_SIZE']),
+        'model_size': int(os.environ['MODEL_SIZE']),
+        'minimum_model_size': int(os.environ['MINIMUM_MODEL_SIZE']),
+        'epochs': int(os.environ['EPOCHS']),
+        'lambda_init': float(os.environ['LAMBDA_INIT']),
+        'offset_init': float(os.environ['OFFSET_INIT']),
+        'hidden_nodes_offset_value': float(os.environ['HIDDEN_NODES_OFFSET_VALUE']),
+        'learning_rate_gamma': float(os.environ['LEARNING_RATE_GAMMA']),
+        'learning_rate_lambda': float(os.environ['LEARNING_RATE_LAMBDA']),
+        'learning_rate_offset': float(os.environ['LEARNING_RATE_OFFSET']),
+        'sa_beta_range': [int(os.environ['SA_BETA_MIN']), int(os.environ['SA_BETA_MAX'])],
+        'num_reads': int(os.environ['NUM_READS']),
+        'sa_num_sweeps': int(os.environ['SA_NUM_SWEEPS']),
+        'sa_sweeps_per_beta': int(os.environ['SA_SWEEPS_PER_BETA']),
+        'num_workers': int(os.environ['NUM_THREADS']),
+        'k_folds': int(os.environ['K_FOLDS']),
     }
 
 
-def get_model_size(n_features, params):
-    if params['model_size'] == -1:
-        return max(n_features, params['minimum_model_size'])
-    return params['model_size']
-
-
 def train_szp(X_train, y_train, X_test, y_test, model_size, params):
-    X_train, X_test = _standardize_train_test(X_train, X_test)
+    X_train, X_test = standardize_train_test(X_train, X_test)
 
     train_ds = SZP_SimpleDataset()
     train_ds.x = torch.tensor(X_train, dtype=torch.float32)
@@ -126,7 +114,7 @@ def train_szp(X_train, y_train, X_test, y_test, model_size, params):
     model.settings.gamma_init = GammaInitialization("zeros")
     model.settings.hidden_nodes_init = HiddenNodesInitialization("function")
     model.settings.hidden_nodes_init.function = SZP_SimpleDataset.offset
-    model.settings.hidden_nodes_init.fun_args = [-0.1]
+    model.settings.hidden_nodes_init.fun_args = [params['hidden_nodes_offset_value']]
     model.settings.mini_batch_size = params['batch_size']
     model.settings.num_reads = params['num_reads']
     model.settings.optim_steps = params['epochs']
@@ -137,10 +125,10 @@ def train_szp(X_train, y_train, X_test, y_test, model_size, params):
     model.settings.dacay_rate = 1
 
     t0 = perf_counter()
-    model.train(training_set=train_ds, test_set=test_ds, verbose=False, save_params=False, save_samples=False)
+    model.train(training_set=train_ds, test_set=test_ds,
+                verbose=False, save_params=False, save_samples=False)
     elapsed = perf_counter() - t0
 
-    # Predict on test set
     test_copy = SZP_SimpleDataset()
     test_copy.x = test_ds.x.clone()
     test_copy.y = test_ds.y.clone()
@@ -150,41 +138,33 @@ def train_szp(X_train, y_train, X_test, y_test, model_size, params):
         test_copy.resize(model_size, model.settings.hidden_nodes_init)
 
     preds = []
-    for theta, y_true, _ in test_copy:
+    for theta, _, _ in test_copy:
         sample_set = model.eval_single(theta.numpy())
         energy = model._lmd * sample_set.first.energy + model._offset
         preds.append(energy)
-
     preds = np.array(preds)
     pred_binary = (preds >= 0.5).astype(int)
     y_binary = (test_ds.y.numpy() >= 0.5).astype(int)
-    acc = accuracy_score(y_binary, pred_binary)
-    return acc, elapsed
+    return accuracy_score(y_binary, pred_binary), elapsed
 
 
 def train_pytorch(X_train, y_train, X_test, y_test, model_size, params):
-    X_train, X_test = _standardize_train_test(X_train, X_test)
+    X_train, X_test = standardize_train_test(X_train, X_test)
 
     X_tr = torch.tensor(X_train, dtype=torch.float32)
     y_tr = torch.tensor(y_train, dtype=torch.float32)
     X_te = torch.tensor(X_test, dtype=torch.float32)
     y_te = torch.tensor(y_test, dtype=torch.float32)
 
-    SA_settings = AnnealingSettings()
-    SA_settings.beta_range = params['sa_beta_range']
-    SA_settings.num_reads = params['num_reads']
-    SA_settings.num_sweeps = params['sa_num_sweeps']
-    SA_settings.num_sweeps_per_beta = params['sa_sweeps_per_beta']
-
     model = FullIsingModule(
         size_annealer=model_size,
         annealer_type=AnnealerType.SIMULATED,
-        annealing_settings=SA_settings,
+        annealing_settings=build_annealing_settings(params),
         lambda_init=params['lambda_init'],
         offset_init=params['offset_init'],
         num_workers=params['num_workers'],
-        hidden_nodes_offset_value=-0.1,
-        gamma_init=torch.zeros((model_size, model_size), dtype=torch.float32)
+        hidden_nodes_offset_value=params['hidden_nodes_offset_value'],
+        gamma_init=torch.zeros((model_size, model_size), dtype=torch.float32),
     )
 
     optimizer = torch.optim.Adam([
@@ -192,16 +172,14 @@ def train_pytorch(X_train, y_train, X_test, y_test, model_size, params):
         {'params': [model.lmd], 'lr': params['learning_rate_lambda']},
         {'params': [model.offset], 'lr': params['learning_rate_offset']},
     ])
-    # MSELoss matches the SZP model's training objective: both models predict
-    # lmd * E_ising + offset and classify with threshold 0.5 on raw energies.
     loss_fn = torch.nn.MSELoss()
     train_loader = torch.utils.data.DataLoader(
         torch.utils.data.TensorDataset(X_tr, y_tr),
-        batch_size=params['batch_size'], shuffle=True
+        batch_size=params['batch_size'], shuffle=True,
     )
 
     t0 = perf_counter()
-    for epoch in range(params['epochs']):
+    for _ in range(params['epochs']):
         model.train()
         for x_b, y_b in train_loader:
             optimizer.zero_grad()
@@ -216,19 +194,19 @@ def train_pytorch(X_train, y_train, X_test, y_test, model_size, params):
         preds = flatten_logits(model(X_te)).cpu().numpy()
     pred_binary = (preds >= 0.5).astype(int)
     y_binary = (y_te.numpy() >= 0.5).astype(int)
-    acc = accuracy_score(y_binary, pred_binary)
-    return acc, elapsed
+    return accuracy_score(y_binary, pred_binary), elapsed
 
 
 def run_comparison():
     params = get_params()
     k = params['k_folds']
 
-    iris_path = os.path.join(os.path.dirname(__file__), 'Datasets', '00_iris_versicolor_virginica.csv')
+    iris_path = os.path.join(os.path.dirname(__file__), 'Datasets',
+                             '00_iris_versicolor_virginica.csv')
     dm = DatasetManager()
-    X, y = dm.load_csv_dataset(iris_path)
-    folds = dm.generate_k_folds(X, y, k)
-    model_size = get_model_size(X.shape[1], params)
+    X, y = dm.load_csv_dataset(iris_path, random_seed=params['random_seed'])
+    folds = dm.generate_k_folds(X, y, k, random_seed=params['random_seed'])
+    model_size = resolve_model_size(X.shape[1], params)
     params['resolved_model_size'] = model_size
 
     logger.info(f"\n{'='*60}")
@@ -241,7 +219,6 @@ def run_comparison():
 
     for i, (X_train, y_train, X_test, y_test) in enumerate(folds):
         logger.info(f"\n--- Fold {i+1}/{k} ---")
-
         acc_szp, t_szp = train_szp(X_train, y_train, X_test, y_test, model_size, params)
         logger.info(f"  SZP:     acc={acc_szp:.4f}  time={t_szp:.2f}s")
         szp_accs.append(acc_szp)
@@ -254,13 +231,16 @@ def run_comparison():
 
     logger.info(f"\n{'='*60}")
     logger.info(f"SUMMARY")
-    logger.info(f"  SZP     mean acc={np.mean(szp_accs):.4f} ± {np.std(szp_accs):.4f}  avg time={np.mean(szp_times):.2f}s")
-    logger.info(f"  PyTorch mean acc={np.mean(pt_accs):.4f} ± {np.std(pt_accs):.4f}  avg time={np.mean(pt_times):.2f}s")
+    logger.info(f"  SZP     mean acc={np.mean(szp_accs):.4f} ± {np.std(szp_accs):.4f}  "
+                f"avg time={np.mean(szp_times):.2f}s")
+    logger.info(f"  PyTorch mean acc={np.mean(pt_accs):.4f} ± {np.std(pt_accs):.4f}  "
+                f"avg time={np.mean(pt_times):.2f}s")
     logger.info(f"{'='*60}")
 
     plots_dir = os.path.join(os.path.dirname(__file__), 'plots')
-    plotter = Plot(output_dir=plots_dir)
-    out = plotter.plot_comparison_accuracies(szp_accs, pt_accs)
+    plotter = Plots(output_dir=plots_dir)
+    out = plotter.plot_comparison_accuracies(szp_accs, pt_accs,
+                                             model_name1='SZP', model_name2='PyTorch')
     logger.info(f"Accuracy plot saved to: {out}")
 
 
