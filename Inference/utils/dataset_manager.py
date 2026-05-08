@@ -1,18 +1,27 @@
+import logging
+
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import StratifiedKFold
 
-from Inference.utils.logger import Logger
-
 
 class DatasetManager:
     def __init__(self):
-        self.logger = Logger()
+        # Reuse the singleton without re-initializing it (which would drop handlers).
+        self.logger = logging.getLogger('IsingComparison')
 
     def load_csv_dataset(self, csv_path: str, random_seed: int):
         """Load and preprocess CSV dataset. Last column = labels (binary {0,1}; -1 -> 0)."""
         self.logger.info(f"Loading dataset from: {csv_path}")
         df = pd.read_csv(csv_path, header=None)
+
+        first_row_numeric = pd.to_numeric(df.iloc[0], errors='coerce').notna().all()
+        if not first_row_numeric:
+            self.logger.info("Detected header row, reloading with header=0")
+            df = pd.read_csv(csv_path, header=0)
+            df.columns = range(df.shape[1])
+
+        df = df.apply(pd.to_numeric)
 
         label_col = df.columns[-1]
         if (df[label_col] == -1).any():

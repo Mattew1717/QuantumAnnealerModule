@@ -22,7 +22,7 @@ fasteners==0.20
 filelock==3.20.0
 fonttools==4.60.1
 fsspec==2025.10.0
--e git+https://github.com/Mattew1717/QuantumAnnealerModule.git@da7e588bc740851ba1b1cc1af5ae2adc83af76a4#egg=FullIsingModel
+-e .
 homebase==1.0.1
 http-sf==1.0.4
 idna==3.11

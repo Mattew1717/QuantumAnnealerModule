@@ -1,0 +1,8 @@
+
+[RUN 20260505_221931]
+Device: cpu | Batch: 32 | Epochs: 200 | K-Folds: 5
+Model: size=50, perceptrons=5, partition=False, workers=16
+LR: gamma=0.0010, lambda=0.0050, offset=0.0100, combiner=0.0050
+SA: beta=[1, 10], reads=1, sweeps=1000
+Init: lambda=1.0000, offset=1.0000
+

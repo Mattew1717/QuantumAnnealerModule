@@ -201,7 +201,7 @@ def run_comparison():
     params = get_params()
     k = params['k_folds']
 
-    iris_path = os.path.join(os.path.dirname(__file__), 'Datasets',
+    iris_path = os.path.join(os.path.dirname(__file__), os.environ['DATASETS_DIR'],
                              '00_iris_versicolor_virginica.csv')
     dm = DatasetManager()
     X, y = dm.load_csv_dataset(iris_path, random_seed=params['random_seed'])

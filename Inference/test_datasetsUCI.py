@@ -209,7 +209,8 @@ def compare_models():
     print_config(params, run_timestamp)
 
     dataset_manager = DatasetManager()
-    datasets_dir = os.path.join(os.path.dirname(__file__), 'Datasets')
+    datasets_dir = os.path.join(os.path.dirname(__file__), os.environ['DATASETS_DIR'])
+    logger.info(f"Datasets directory: {datasets_dir}")
     csv_files = sorted(glob.glob(os.path.join(datasets_dir, '*.csv')))
     if not csv_files:
         logger.error(f"No CSV files found in {datasets_dir}")

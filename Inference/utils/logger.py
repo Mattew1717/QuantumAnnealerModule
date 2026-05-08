@@ -8,28 +8,31 @@ class Logger:
     
     def __init__(self, log_dir=None):
 
-        # Configure logging
+        # 'IsingComparison' is a global singleton: never clear existing handlers
+        # or a previously-attached file handler is silently lost.
         self.logger = logging.getLogger('IsingComparison')
         self.logger.setLevel(logging.INFO)
-        self.logger.handlers.clear()
-        
-        # Console handler
-        ch = logging.StreamHandler(sys.stdout)
-        ch.setLevel(logging.INFO)
-        
-        # Formatter
+
         formatter = logging.Formatter('%(message)s')
-        ch.setFormatter(formatter)
-        
-        self.logger.addHandler(ch)
-        
-        # File handler if log_dir is provided
-        self.file_handler = None
-        if log_dir:
+
+        has_stream = any(
+            isinstance(h, logging.StreamHandler) and not isinstance(h, logging.FileHandler)
+            for h in self.logger.handlers
+        )
+        if not has_stream:
+            ch = logging.StreamHandler(sys.stdout)
+            ch.setLevel(logging.INFO)
+            ch.setFormatter(formatter)
+            self.logger.addHandler(ch)
+
+        self.file_handler = next(
+            (h for h in self.logger.handlers if isinstance(h, logging.FileHandler)),
+            None,
+        )
+        if log_dir and self.file_handler is None:
             log_dir_path = Path(log_dir)
             log_dir_path.mkdir(parents=True, exist_ok=True)
-            
-            # Create log file with timestamp
+
             log_filename = log_dir_path / f'run_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'
             self.file_handler = logging.FileHandler(log_filename, mode='w')
             self.file_handler.setLevel(logging.INFO)
