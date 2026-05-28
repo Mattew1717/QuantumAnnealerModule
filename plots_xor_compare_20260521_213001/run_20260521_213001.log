@@ -1,0 +1,87 @@
+
+================================================================================
+XOR Comparison Suite - FullIsingModule vs ModularNetwork
+================================================================================
+Device: cpu
+Batch size: 32 | Epochs: 50 | Model size: 50
+Learning rates: gamma=0.001, lambda=0.005, offset=0.01, combiner=0.005
+Annealing: beta=[1, 10], reads=1, sweeps=1000, workers=16
+Annealer type: simulated
+
+[Dimension 2D]
+Generating 2D XOR data...
+Total samples: 80, Features: 2
+Class distribution: [40 40]
+Train set: 64 | Test set: 16
+  Training FullIsingModule...
+
+============================================================
+Training FullIsingModule on 2D XOR
+============================================================
+Model size: 50
+Model parameters: 2502
+  [FullIsing/2D] Epoch 1/50 | Loss: 9.5029
+  [FullIsing/2D] Epoch 5/50 | Loss: 7.3092
+  [FullIsing/2D] Epoch 10/50 | Loss: 5.4173
+  [FullIsing/2D] Epoch 15/50 | Loss: 4.1777
+  [FullIsing/2D] Epoch 20/50 | Loss: 3.1880
+  [FullIsing/2D] Epoch 25/50 | Loss: 2.3987
+  [FullIsing/2D] Epoch 30/50 | Loss: 1.7984
+  [FullIsing/2D] Epoch 35/50 | Loss: 1.3297
+  [FullIsing/2D] Epoch 40/50 | Loss: 0.9970
+  [FullIsing/2D] Epoch 45/50 | Loss: 0.7851
+  [FullIsing/2D] Epoch 50/50 | Loss: 0.6588
+  [FullIsing/2D] Final Test Accuracy: 0.6875
+
+              precision    recall  f1-score   support
+
+     Class 0       0.67      0.75      0.71         8
+     Class 1       0.71      0.62      0.67         8
+
+    accuracy                           0.69        16
+   macro avg       0.69      0.69      0.69        16
+weighted avg       0.69      0.69      0.69        16
+
+Confusion matrix:
+[[6 2]
+ [3 5]]
+  FullIsingModule | acc=0.6875 prec=0.7143 rec=0.6250 f1=0.6667 auc=0.7188
+  Training ModularNetwork...
+
+============================================================
+Training ModularNetwork on 2D XOR
+============================================================
+Model size: 50
+Model parameters: 12516
+  [Modular/2D] Epoch 1/50 | Loss: 0.9404
+  [Modular/2D] Epoch 5/50 | Loss: 0.3204
+  [Modular/2D] Epoch 10/50 | Loss: 0.2666
+  [Modular/2D] Epoch 15/50 | Loss: 0.1923
+  [Modular/2D] Epoch 20/50 | Loss: 0.1476
+  [Modular/2D] Epoch 25/50 | Loss: 0.1218
+  [Modular/2D] Epoch 30/50 | Loss: 0.1122
+  [Modular/2D] Epoch 35/50 | Loss: 0.1061
+  [Modular/2D] Epoch 40/50 | Loss: 0.1004
+  [Modular/2D] Epoch 45/50 | Loss: 0.0963
+  [Modular/2D] Epoch 50/50 | Loss: 0.0927
+  [Modular/2D] Final Test Accuracy: 0.8750
+
+              precision    recall  f1-score   support
+
+     Class 0       0.88      0.88      0.88         8
+     Class 1       0.88      0.88      0.88         8
+
+    accuracy                           0.88        16
+   macro avg       0.88      0.88      0.88        16
+weighted avg       0.88      0.88      0.88        16
+
+Confusion matrix:
+[[7 1]
+ [1 7]]
+  ModularNetwork  | acc=0.8750 prec=0.8750 rec=0.8750 f1=0.8750 auc=0.9688
+  Diff(Modular-Single): +0.1875
+
+[COMPLETED in 43.9s]
+Generating summary plots...
+Metrics CSV saved to: plots_xor_compare_20260521_213001\metrics_summary.csv
+All plots saved to plots_xor_compare_20260521_213001

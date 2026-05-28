@@ -83,9 +83,94 @@ def print_config(params, run_timestamp):
     logger.info(f"Init: lambda={params['lambda_init']:.4f}, offset={params['offset_init']:.4f}\n")
 
 
+def _get_lmd_values(model):
+    """Return current lmd value(s) as a list of floats (single-element for FullIsingModule)."""
+    if hasattr(model, 'ising_perceptrons_layer'):
+        return [float(p.lmd.detach().cpu().item()) for p in model.ising_perceptrons_layer]
+    if hasattr(model, 'lmd'):
+        return [float(model.lmd.detach().cpu().item())]
+    return []
+
+
+def _get_gamma_norms(model):
+    """Return Frobenius norm of gamma(s) as a list of floats."""
+    if hasattr(model, 'ising_perceptrons_layer'):
+        return [float(p.gamma.detach().norm().item()) for p in model.ising_perceptrons_layer]
+    if hasattr(model, 'gamma'):
+        return [float(model.gamma.detach().norm().item())]
+    return []
+
+
+def _get_offset_values(model):
+    """Return current offset value(s) as a list of floats."""
+    if hasattr(model, 'ising_perceptrons_layer'):
+        return [float(p.offset.detach().cpu().item()) for p in model.ising_perceptrons_layer]
+    if hasattr(model, 'offset'):
+        return [float(model.offset.detach().cpu().item())]
+    return []
+
+
+def _get_combiner_weights(model):
+    """Return combiner weights as a flat list of floats, or [] if model has no combiner."""
+    if hasattr(model, 'combiner_layer'):
+        return [float(v) for v in model.combiner_layer.weight.detach().cpu().flatten().tolist()]
+    return []
+
+
+def _get_combiner_bias(model):
+    """Return combiner bias as a float, or None if no combiner or bias disabled."""
+    if hasattr(model, 'combiner_layer') and model.combiner_layer.bias is not None:
+        return float(model.combiner_layer.bias.detach().cpu().item())
+    return None
+
+
+def _format_lmd(lmd_values):
+    if len(lmd_values) == 1:
+        return f"lmd={lmd_values[0]:+.4f}"
+    return "lmd=[" + ", ".join(f"{v:+.3f}" for v in lmd_values) + "]"
+
+
+def _format_offset(values):
+    if len(values) == 1:
+        return f"offset={values[0]:+.4f}"
+    return "offset=[" + ", ".join(f"{v:+.3f}" for v in values) + "]"
+
+
+def _format_gamma_norm(norms):
+    if len(norms) == 1:
+        return f"||gamma||={norms[0]:.4f}"
+    return "||gamma||=[" + ", ".join(f"{v:.4f}" for v in norms) + "]"
+
+
+def _format_combiner(weights, bias):
+    """Format combiner weights+bias; empty string if model has no combiner."""
+    if not weights:
+        return ""
+    w_str = "comb_w=[" + ", ".join(f"{v:+.3f}" for v in weights) + "]"
+    if bias is None:
+        return w_str
+    return f"{w_str} | comb_b={bias:+.4f}"
+
+
+def _model_state_log(model):
+    """Compose 'lmd=... | offset=... | ||gamma||_F=... [| comb_w=... [| comb_b=...]]'."""
+    parts = [
+        _format_lmd(_get_lmd_values(model)),
+        _format_offset(_get_offset_values(model)),
+        _format_gamma_norm(_get_gamma_norms(model)),
+    ]
+    combiner_str = _format_combiner(_get_combiner_weights(model), _get_combiner_bias(model))
+    if combiner_str:
+        parts.append(combiner_str)
+    return " | ".join(parts)
+
+
 def _train_eval(model, optimizer, loss_fn, train_loader, X_test_t, y_test_arr, params):
     training_losses = []
+    lmd_history = []
     print_interval = params['print_interval']
+
+    logger.info(f"  Init | {_model_state_log(model)}")
 
     for epoch in range(params['epochs']):
         model.train()
@@ -104,7 +189,11 @@ def _train_eval(model, optimizer, loss_fn, train_loader, X_test_t, y_test_arr, p
         avg_loss = float(np.mean(epoch_losses)) if epoch_losses else 0.0
         training_losses.append(avg_loss)
         if (epoch + 1) % print_interval == 0 or epoch == 0 or epoch == params['epochs'] - 1:
-            logger.info(f"  Epoch {epoch+1}/{params['epochs']} | Loss: {avg_loss:.4f}")
+            lmd_history.append(_get_lmd_values(model))
+            logger.info(
+                f"  Epoch {epoch+1}/{params['epochs']} | Loss: {avg_loss:.4f} | "
+                f"{_model_state_log(model)}"
+            )
 
     model.eval()
     with torch.no_grad():
@@ -112,6 +201,8 @@ def _train_eval(model, optimizer, loss_fn, train_loader, X_test_t, y_test_arr, p
         final_probs = torch.sigmoid(logits).cpu().numpy()
         final_preds = (final_probs >= 0.5).astype(int)
         final_acc = accuracy_score(y_test_arr, final_preds)
+
+    logger.info(f"  Final | {_model_state_log(model)}")
 
     return final_acc, final_probs, training_losses
 
@@ -179,7 +270,6 @@ def train_modular_network(X_train, y_train, X_test, y_test, params):
         num_workers=params['num_workers'],
         combiner_bias=True,
         partition_input=params['partition_input'],
-        random_seed=params['random_seed'],
     ).to(params['device'])
 
     optimizer_groups = []

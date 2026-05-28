@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import numpy as np
 
 from full_ising_model.annealers import AnnealingSettings, AnnealerType
 from full_ising_model.full_ising_module import FullIsingModule
@@ -21,7 +20,6 @@ class ModularNetwork(nn.Module):
         num_workers: int,
         combiner_bias: bool,
         partition_input: bool,
-        random_seed: int,
         profile: str | None = None,
         num_reads: int | None = None,
     ):
@@ -30,19 +28,14 @@ class ModularNetwork(nn.Module):
         self.size_annealer = size_annealer
         self.partition_input = partition_input
 
-        rng = np.random.default_rng(random_seed)
-
         self.ising_perceptrons_layer = nn.ModuleList()
         for _ in range(num_ising_perceptrons):
-            lambda_i = lambda_init + float(rng.uniform(-0.1, 0.1))
-            offset_i = offset_init + float(rng.uniform(-0.1, 0.1))
-
             module = FullIsingModule(
                 size_annealer=size_annealer,
                 annealer_type=annealer_type,
                 annealing_settings=annealing_settings,
-                lambda_init=lambda_i,
-                offset_init=offset_i,
+                lambda_init=lambda_init,
+                offset_init=offset_init,
                 num_workers=num_workers,
                 hidden_nodes_offset_value=hidden_nodes_offset_value,
                 profile=profile,

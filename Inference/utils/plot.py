@@ -144,10 +144,7 @@ class Plots:
                 ax.set_title(title)
             self._rotate_xticks(ax, dataset_names, angle=30)
             self._clean_spines(ax)
-            flat = [v for row in accuracy_data for v in row]
-            if flat:
-                lo = max(0.0, min(flat) - 0.02)
-                ax.set_ylim(lo, 1.0)
+            ax.set_ylim(0.0, 1.0)
             fig.tight_layout()
             return self._save(fig, filename)
 
@@ -243,10 +240,7 @@ class Plots:
             self._rotate_xticks(ax, dataset_names, angle=45)
             ax.set_xlabel('Dataset')
             ax.set_ylabel('Test accuracy')
-            flat = [v for row in (list(data1) + list(data2)) for v in row]
-            if flat:
-                lo = max(0.0, min(flat) - 0.02)
-                ax.set_ylim(lo, 1.0)
+            ax.set_ylim(0.0, 1.0)
             legend_elements = [
                 Patch(facecolor=self.PALETTE['model1_face'],
                       edgecolor=self.PALETTE['model1_edge'],

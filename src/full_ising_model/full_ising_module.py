@@ -142,14 +142,15 @@ class FullIsingModule(nn.Module):
         )
 
         if gamma_init is None:
-            initial_gamma = torch.randn((size_annealer, size_annealer), dtype=torch.float32) * 0.01
-            initial_gamma = torch.triu(initial_gamma, diagonal=1)
+            initial_gamma = torch.zeros((size_annealer, size_annealer), dtype=torch.float32)
         else:
             initial_gamma = gamma_init
         self.gamma = nn.Parameter(initial_gamma)
 
-        self.lmd = nn.Parameter(torch.tensor(float(lambda_init), dtype=torch.float32))
-        self.offset = nn.Parameter(torch.tensor(float(offset_init), dtype=torch.float32))
+        lambda_jitter = float(np.random.uniform(-0.1, 0.1))
+        offset_jitter = float(np.random.uniform(-0.1, 0.1))
+        self.lmd = nn.Parameter(torch.tensor(float(lambda_init) + lambda_jitter, dtype=torch.float32))
+        self.offset = nn.Parameter(torch.tensor(float(offset_init) + offset_jitter, dtype=torch.float32))
 
     def forward(self, thetas: torch.Tensor) -> torch.Tensor:
         if thetas.shape[1] > self.size_annealer:

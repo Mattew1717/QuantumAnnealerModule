@@ -240,9 +240,6 @@ with $w_m$ and $b$ being additional trainable parameters.
 This architecture is analogous to a single fully connected layer in standard neural networks, with the key difference that each neuron is replaced by a structured Ising energy minimization block. The nonlinearity arises from the discrete ground-state computation within each module, while the outer linear combination enables flexible aggregation of multiple energy-based representations.
 
 Despite its shallow structure, this model increases expressive power compared to a single Ising module, as different modules can learn different coupling patterns, effectively acting as an ensemble of energy-based learners trained end-to-end.
-% ============================================================
-%  Section: Empirical Evaluation Single vs NN
-% ============================================================
 
 \section{Empirical Evaluation}\label{sec:empirical}
 
@@ -259,9 +256,7 @@ differ only in data preparation, which lets us isolate the role of
 class imbalance from that of model capacity; the XOR block then
 stresses the architectural gap between the two models.
 
-% ------------------------------------------------------------
 \subsection{Method}\label{sec:method}
-% ------------------------------------------------------------
 
 \subsubsection{Datasets}\label{sec:datasets}
 
@@ -350,8 +345,7 @@ experiments (Table~\ref{tab:hyperparameters}); the values were selected
 to deliver reasonably good and stable performance across the considered
 benchmarks rather than tuned per architecture or per dataset, so that
 the comparison reflects architectural differences and not per-task
-hyperparameter gains. The configuration mirrors the values logged in
-the \texttt{run\_*.log} files produced by the experiment scripts.
+hyperparameter gains.
 
 \begin{table}[H]
 \centering
@@ -399,38 +393,28 @@ Sweeps per $\beta$ step                         & 1 \\
 \end{tabular}
 \end{table}
 
-% ------------------------------------------------------------
+
 \subsection{Results}\label{sec:results}
-% ------------------------------------------------------------
 
 Results are organized in the same three blocks already introduced.
 Sections~\ref{sec:res_imbalanced} and~\ref{sec:res_balanced} report the
 UCI comparison in the imbalanced and the pre-balanced regime,
 respectively. Section~\ref{sec:res_xor} closes the evaluation with the
-synthetic XOR family. Aggregate metrics are reported in tables, while
-fold-level dispersion and the dimensionality scan are shown in the
-companion figures.
+synthetic XOR family.
 
-% ============================================================
 \subsubsection{UCI Benchmarks --- Native (Imbalanced) Regime}\label{sec:res_imbalanced}
-% ============================================================
 
-% Placeholder: describes what the tables show on imbalanced UCI.
 Tables~\ref{tab:ising_uci_imbalanced} and~\ref{tab:nn_uci_imbalanced}
 collect the per-dataset metrics for the single module and the
 ensemble. The ensemble matches or exceeds the single module on every
 benchmark, with the gap most evident on the higher-dimensional sets
-(breast cancer, ionosphere, SPECTF). On the four most skewed problems
+(breast cancer, ionosphere, SPECTF). On the four most imbalanced problems
 (breast cancer, haberman, heart failure, SPECTF) the
 \texttt{FullIsingModule} returns precision, recall and $F_1$ that are
 either flat at zero or saturated at one, while its accuracy tracks the
 majority-class frequency. The ensemble does not exhibit the same
 behaviour on those datasets.
 
-% NOTE FOR REVIEW: the apparent advantage of the single module on
-% imbalanced data is a side effect of the class prior, not a sign of
-% better learning. See the pre-balanced regime below for the
-% counterpart.
 At first glance several entries in
 Table~\ref{tab:ising_uci_imbalanced} look reasonably strong, but they
 should not be read as a genuine signal. When a binary classifier
@@ -494,16 +478,13 @@ smallest benchmarks.
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{plots_paper_svg/uci_imbalanced_combined_boxplot}
-    \caption{UCI, native imbalanced regime: fold-level accuracy
+    \caption{UCI, native imbalanced regime: accuracy
     distribution for the two architectures.}
     \label{fig:boxplot_imbalanced}
 \end{figure}
 
-% ============================================================
 \subsubsection{UCI Benchmarks --- Pre-balanced Folds}\label{sec:res_balanced}
-% ============================================================
 
-% Placeholder: describes what the tables show on the pre-balanced split.
 The same comparison is now repeated on the pre-balanced variant of the
 nine UCI sets, with everything else held fixed. Per-dataset metrics
 are reported in Tables~\ref{tab:ising_uci_balanced}
@@ -516,24 +497,13 @@ sets where the single module previously collapsed to a constant
 predictor, precision, recall and $F_1$ are now non-zero across the
 board.
 
-% NOTE FOR REVIEW: on a handful of datasets the single module ends up
-% below random in the balanced regime, with AUC clearly under 0.5
-% (SPECTF reaches 0.21). This is consistent with the model converging
-% to the symmetric counterpart of the correct solution under the Z2
-% spin-flip symmetry of the Ising Hamiltonian. We treat this as a
-% placeholder to be revisited with the group.
 A handful of entries deserve a closer look. On haberman, heart
 failure, ionosphere and SPECTF the single module returns an accuracy
 below $0.5$, and on SPECTF the AUC is markedly under $0.5$ as well.
 Values of AUC well below $0.5$ are not just noise: they indicate that
 the ranking induced by the model is inverted with respect to the
 ground truth, i.e.\ the model is consistently predicting the
-\emph{opposite} relation. A natural reading is that, under perfectly
-balanced classes and a symmetric loss, the Ising Hamiltonian has two
-energetically equivalent ground states related by a global spin flip;
-the absence of a prior to break this symmetry can leave the optimizer
-on the wrong branch on the most challenging tasks. We come back to
-this point in the discussion.
+\emph{opposite} relation.
 
 \begin{table}[H]
 \centering
@@ -589,16 +559,13 @@ all but the smallest datasets.
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{plots_paper_svg/uci_balanced_combined_boxplot}
-    \caption{UCI, pre-balanced regime: fold-level accuracy
+    \caption{UCI, pre-balanced regime: accuracy
     distribution for the two architectures.}
     \label{fig:boxplot_balanced}
 \end{figure}
 
-% ============================================================
 \subsubsection{Synthetic XOR Datasets}\label{sec:res_xor}
-% ============================================================
 
-% Placeholder: describes the XOR scan.
 The last block tests the two architectures on the synthetic
 $d$-dimensional XOR family with $d \in \{1,\dots,6\}$. The decision
 boundary is a parity function of the inputs and any non-trivial
@@ -612,7 +579,7 @@ through $d=6$.
 
 \begin{table}[H]
 \centering
-\caption{\texttt{FullIsingModule} on the synthetic XOR family.}
+\caption{\texttt{FullIsingModule} on the synthetic XOR problem.}
 \label{tab:ising_xor}
 \begin{tabular}{lcccc}
 \hline
@@ -630,7 +597,7 @@ XOR-6D  & 0.50     & 0.53      & 0.05   & 0.58 \\
 
 \begin{table}[H]
 \centering
-\caption{\texttt{MultiIsingNetwork} on the synthetic XOR family.}
+\caption{\texttt{MultiIsingNetwork} on the synthetic XOR problem.}
 \label{tab:nn_xor}
 \begin{tabular}{lcccc}
 \hline
@@ -649,8 +616,7 @@ XOR-6D  & 0.87     & 0.84      & 0.93   & 0.96 \\
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\linewidth]{plots_paper_svg/xor_accuracy_compare}
-    \caption{XOR scan: mean test accuracy as a function of input
-    dimensionality $d$ for the two architectures.}
+    \caption{Mean test accuracy for the two architectures.}
     \label{fig:bar_compare_xor}
 \end{figure}
 
