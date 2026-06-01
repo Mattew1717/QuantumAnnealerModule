@@ -37,7 +37,7 @@ Gradients flow **only through `Γ`**; the input biases `θ` are treated as fixed
 | `NeuralNetwork/` | `ModularNetwork` — N parallel Ising perceptrons + linear combiner |
 | `SZP_Model/` | Original SZP reference implementation (no PyTorch), used for comparison |
 | `Inference/` | Test scripts, datasets, plotting, logging |
-| `Inference/Datasets/` | 9 UCI binary classification datasets (no header row) |
+| `Inference/Datasets/` | Two variants (`Datasets_balanced/`, `Datasets_unbalanced/`), each with 9 UCI binary classification CSVs (no header row) |
 | `Inference/.env` | All hyperparameters (read strictly, no fallback defaults) |
 
 ---
@@ -78,7 +78,12 @@ All scripts seed `numpy` and `torch` from `RANDOM_SEED` for reproducibility, and
 
 ## Datasets
 
-9 UCI binary classification CSVs in `Inference/Datasets/`: Iris (versicolor vs virginica), Vertebral Column, Banknote, Breast Cancer, Contraceptive Method, Haberman's Survival, Heart Failure, Ionosphere, SPECTF Heart. The CSVs have no header row; the last column is the label (binary, with `-1` automatically remapped to `0`).
+9 UCI binary classification CSVs, available in two variants under `Inference/Datasets/`:
+
+- `Datasets_balanced/` — class-balanced versions
+- `Datasets_unbalanced/` — original class distribution
+
+Both variants contain the same 9 datasets: Iris (versicolor vs virginica), Vertebral Column, Banknote, Breast Cancer, Contraceptive Method, Haberman's Survival, Heart Failure, Ionosphere, SPECTF Heart. The CSVs have no header row; the last column is the label (binary, with `-1` automatically remapped to `0`). The active variant is selected via `DATASETS_DIR` in `Inference/.env`.
 
 ---
 
@@ -95,15 +100,32 @@ pip install -e .          # installs the full_ising_model package
 
 ## Configuration
 
-All hyperparameters live in `Inference/.env` and are read strictly (a missing key raises `KeyError` at startup). Highlights:
+All hyperparameters live in `Inference/.env` and are read strictly (a missing key raises `KeyError` at startup).
 
-- `ANNEALER_TYPE`: `simulated` | `exact` | `quantum`
+**General**
 - `NUM_THREADS`: workers in the sampler pool
-- `MODEL_SIZE`: `-1` for auto (`max(n_features, MINIMUM_MODEL_SIZE)`)
-- `HIDDEN_NODES_OFFSET_VALUE`: ε for the offset padding rule
+- `DATASETS_DIR`: which dataset variant to use (e.g. `Datasets/Datasets_unbalanced`)
+- `RANDOM_SEED`: global seed for `numpy` and `torch`
 - `LAMBDA_INIT`, `OFFSET_INIT`: initial values for `λ` and `b`
+- `HIDDEN_NODES_OFFSET_VALUE`: ε for the offset padding rule
+
+**Annealer**
+- `ANNEALER_TYPE`: `simulated` | `exact` | `quantum`
+- `NUM_READS`: samples per annealer call
+- `SA_NUM_SWEEPS`, `SA_SWEEPS_PER_BETA`, `SA_BETA_MIN`, `SA_BETA_MAX`: simulated annealing schedule
+- `MODEL_SIZE`: annealer size (`-1` for auto, i.e. `max(n_features, MINIMUM_MODEL_SIZE)`)
+- `MINIMUM_MODEL_SIZE`: floor used by the auto-sizing rule above
+
+**Training**
+- `EPOCHS`, `BATCH_SIZE`
 - Per-parameter learning rates: `LEARNING_RATE_GAMMA`, `LEARNING_RATE_LAMBDA`, `LEARNING_RATE_OFFSET`, `LEARNING_RATE_COMBINER`
 - `PRINT_INTERVAL`: epoch interval for loss logging during training (no test-set evaluation runs during training)
+- `K_FOLDS`: folds for K-Fold CV (`test_datasetsUCI.py`)
+- `N_SAMPLES_PER_REGION`, `TEST_SIZE`: XOR experiment parameters (`test_xor.py`)
+
+**ModularNetwork**
+- `NUM_ISING_PERCEPTRONS`: number of parallel `FullIsingModule` perceptrons
+- `PARTITION_INPUT`: whether to slice the input features across perceptrons
 
 ---
 

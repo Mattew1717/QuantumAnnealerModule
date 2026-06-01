@@ -1,3 +1,0 @@
-dataset,model,accuracy_mean,accuracy_std,precision_mean,precision_std,recall_mean,recall_std,f1_mean,f1_std,auc_mean,auc_std
-2D,FullIsingModule,0.5000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.7188,0.0000
-2D,ModularNetwork,0.8125,0.0000,0.8571,0.0000,0.7500,0.0000,0.8000,0.0000,0.9531,0.0000
