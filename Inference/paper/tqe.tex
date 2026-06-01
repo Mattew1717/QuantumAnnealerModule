@@ -262,7 +262,7 @@ stresses the architectural gap between the two models.
 
 Nine binary classification datasets from the UCI Machine Learning
 Repository~\cite{Dua:2019} are adopted, spanning feature
-dimensionalities from 3 to 44 and sample sizes from 99 to 1\,372 in
+dimensionalities from 3 to 44 and sample sizes from 100 to 1\,372 in
 order to assess robustness and generalization across heterogeneous
 regimes. The UCI suite is complemented by a family of synthetic
 $d$-dimensional XOR datasets for $d \in \{1,\dots,6\}$, which serve as
@@ -379,8 +379,8 @@ Ising perceptrons $M$ (MultiIsingNetwork)       & 5 \\
 Partition input across perceptrons              & False (full input replicated) \\
 Hidden-nodes offset $\varepsilon_h$             & $-0.02$ \\
 $\Gamma$ initialization                         & $0.0$ \\
-$\lambda$ initialization                        & $1.0$ ($\pm 0.1$ per perceptron) \\
-$\varepsilon$ initialization                    & $1.0$ ($\pm 0.1$ per perceptron) \\
+$\lambda$ initialization                        & $1.0$ ($\pm 0.1$) \\
+$\varepsilon$ initialization                    & $1.0$ ($\pm 0.1$) \\
 \# trainable parameters (FullIsingModule)       & 2\,502 \\
 \# trainable parameters (MultiIsingNetwork)     & 12\,516 \\
 \hline
@@ -395,12 +395,6 @@ Sweeps per $\beta$ step                         & 1 \\
 
 
 \subsection{Results}\label{sec:results}
-
-Results are organized in the same three blocks already introduced.
-Sections~\ref{sec:res_imbalanced} and~\ref{sec:res_balanced} report the
-UCI comparison in the imbalanced and the pre-balanced regime,
-respectively. Section~\ref{sec:res_xor} closes the evaluation with the
-synthetic XOR family.
 
 \subsubsection{UCI Benchmarks --- Native (Imbalanced) Regime}\label{sec:res_imbalanced}
 
@@ -503,14 +497,6 @@ SPECTF). On the sets where the single module previously collapsed to a
 constant predictor, precision, recall and $F_1$ are now non-zero across
 the board.
 
-A handful of entries deserve a closer look. On haberman, heart
-failure and SPECTF the single module returns an accuracy
-below $0.5$, and on SPECTF the AUC is markedly under $0.5$ as well.
-Values of AUC well below $0.5$ are not just noise: they indicate that
-the ranking induced by the model is inverted with respect to the
-ground truth, i.e.\ the model is consistently predicting the
-\emph{opposite} relation.
-
 \begin{table}[H]
 \centering
 \caption{\texttt{FullIsingModule} on the pre-balanced UCI variants. 5-fold CV on the balanced files, mean $\pm$ std.}
@@ -557,12 +543,7 @@ SPECTF                          & $0.63 \pm 0.07$ & $0.60 \pm 0.06$ & $0.70 \pm 
 
 % Placeholder for the dispersion plot.
 Figure~\ref{fig:boxplot_balanced} reports the fold-level distribution
-on the balanced folds. With respect to the imbalanced case the
-single-module boxes shift downward and broaden, since the model can no
-longer fall back on a constant majority-class prediction. The ensemble
-keeps a comparatively tight, higher-valued distribution on most
-datasets, with haberman the main exception, where both architectures
-hover around chance.
+on the balanced folds
 
 \begin{figure}[H]
     \centering
