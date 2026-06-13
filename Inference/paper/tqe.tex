@@ -1,33 +1,37 @@
-\documentclass[journal]{IEEEtran}
+\documentclass{ieeeaccess}
 \usepackage{cite}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{algorithm}
 \usepackage{algorithmic}
 \usepackage{graphicx}
 \usepackage{textcomp}
-\usepackage{caption}
 \usepackage{float}
-\usepackage{url}
+\usepackage{soul}
 % \usepackage{algpseudocode}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
+\newcommand{\TODO}[1]{\textcolor{red}{\textbf{TODO:} #1}}
+
+\newlength{\xfigwd}
+
 \begin{document}
+\history{Date of publication xxxx 00, 0000, date of current version xxxx 00, 0000.}
+\doi{10.1109/TQE.2020.DOI}
 
 \title{A Differentiable Ising Module for Hybrid Quantum-Classical Neural Networks}
+\author{\uppercase{Matteo Marchiori}\authorrefmark{1},
+\uppercase{Enrico Blanzieri}\authorrefmark{1},
+\uppercase{Emiliano Tolotti}\authorrefmark{1},
+\uppercase{Daniele Franch}\authorrefmark{1},
+and \uppercase{Davide Pastorello}\authorrefmark{1}}
+\address[1]{University of Trento, Trento, Italy}
 
-\author{Matteo~Marchiori,
-        Enrico~Blanzieri,
-        Emiliano~Tolotti,
-        Daniele~Franch,
-        and~Davide~Pastorello%
-\thanks{Manuscript received xxxx 00, 0000; revised xxxx 00, 0000.}%
-\thanks{M.~Marchiori, E.~Blanzieri, E.~Tolotti, D.~Franch, and D.~Pastorello are with the University of Trento, Trento, Italy.}}
+\markboth
+{Marchiori \headeretal: A Differentiable Ising Module for Neural Networks}
+{Marchiori \headeretal: A Differentiable Ising Module for Neural Networks}
 
-\markboth{IEEE Transactions on Quantum Engineering}%
-{Marchiori \MakeLowercase{\textit{et al.}}: A Differentiable Ising Module for Hybrid Quantum-Classical Neural Networks}
-
-\maketitle
+\corresp{Corresponding author: Matteo Marchiori (email: matteo.marchiori03@gmail.com)}
 
 \begin{abstract}
 Ising machines and quantum annealers solve combinatorial optimization
@@ -51,22 +55,24 @@ six dimensions, while remaining trainable within the standard PyTorch
 ecosystem.
 \end{abstract}
 
-\begin{IEEEkeywords}
+\begin{keywords}
 Differentiable programming, hybrid quantum-classical machine learning,
 Ising model, neural networks, quantum annealing, supervised learning.
-\end{IEEEkeywords}
+\end{keywords}
 
-\IEEEpeerreviewmaketitle
+\titlepgskip=-15pt
+
+\maketitle
 
 \section{Introduction}
 
-Ising machines have emerged as specialized hardware and algorithmic solvers for combinatorial optimization. By encoding a problem into the couplings and local fields of a spin system, they return low energy configurations that correspond to good candidate solutions. Quantum annealers, such as those produced by D-Wave, realize this idea physically: a quantum system is slowly evolved from an easily prepared ground state toward the ground state of a problem Hamiltonian, and the measured spin configuration approximates the optimum. This paradigm has been applied to a broad range of discrete problems, from scheduling and routing to sampling and constraint satisfaction.
+\IEEEPARstart{I}{sing} machines have emerged as specialized hardware and algorithmic solvers for combinatorial optimization. By encoding a problem into the couplings and local fields of a spin system, they return low-energy configurations that correspond to good candidate solutions. Quantum annealers, such as those produced by D-Wave, realize this idea physically: a quantum system is slowly evolved from an easily prepared ground state toward the ground state of a problem Hamiltonian, and the measured spin configuration approximates the optimum. This paradigm has been applied to a broad range of discrete problems, from scheduling and routing to sampling and constraint satisfaction.
 
-A more recent line of work asks whether these solvers can be useful inside machine learning, not only as optimizers but as trainable components. Schmid, Zardini and Pastorello~\cite{10.21468/SciPostPhysCore.7.1.013} showed that an Ising energy minimization can itself act as a parametric supervised model, in which the data enter as local fields, the couplings are the trainable weights, and the ground state energy is the output. Their results suggest that a spin system can learn, and that the systematic error of an approximate solver is partly absorbed by the training process. What is still missing is a way to use such a model as an ordinary building block inside the deep learning ecosystem, where layers are composed freely and trained by automatic differentiation.
+A more recent line of work asks whether these solvers can be useful inside machine learning, not only as optimizers but as trainable components. Schmid, Zardini and Pastorello~\cite{10.21468/SciPostPhysCore.7.1.013} showed that an Ising energy minimization can itself act as a parametric supervised model, in which the data enter as local fields, the couplings are the trainable weights, and the ground-state energy is the output. Their results suggest that a spin system can learn, and that the systematic error of an approximate solver is partly absorbed by the training process. What is still missing is a way to use such a model as an ordinary building block inside the deep learning ecosystem, where layers are composed freely and trained by automatic differentiation.
 
-In this work we close that gap. We recast the parametric Ising model as a differentiable module that exposes a clean forward and backward interface and plugs directly into PyTorch. The forward pass calls an annealing solver to estimate the ground state energy of the spin system, while the backward pass propagates gradients to the couplings through an analytic surrogate built from the stored spin configurations. Because the module behaves like any other layer, it inherits the full PyTorch toolchain: optimizers, loss functions, learning rate schedulers, batching and GPU tensors. On top of this module we build the \texttt{MultiIsingNetwork}, a shallow architecture in which several Ising modules run in parallel and are combined by a trainable linear readout.
+In this work we close that gap. We recast the parametric Ising model as a differentiable module that exposes a clean forward and backward interface and plugs directly into PyTorch. The forward pass calls an annealing solver to estimate the ground-state energy of the spin system, while the backward pass propagates gradients to the couplings through an analytic surrogate built from the stored spin configurations. Because the module behaves like any other layer, it inherits the full PyTorch toolchain: optimizers, loss functions, learning rate schedulers, batching and GPU tensors. On top of this module we build the \texttt{MultiIsingNetwork}, a shallow architecture in which several Ising modules run in parallel and are combined by a trainable linear readout.
 
-Our contributions are threefold. First, we introduce a differentiable Ising energy module with an analytic gradient for the couplings, fully compatible with automatic differentiation. Second, we propose the \texttt{MultiIsingNetwork}, a hybrid architecture that turns a set of energy based units into a single trainable layer. Third, we report an empirical study on nine UCI benchmarks, evaluated both in their native class imbalanced form and in a pre balanced variant, and on a family of synthetic XOR problems of growing dimensionality, comparing the single module against the ensemble.
+Our contributions are threefold. First, we introduce a differentiable Ising energy module with an analytic gradient for the couplings, fully compatible with automatic differentiation. Second, we propose the \texttt{MultiIsingNetwork}, a hybrid architecture that turns a set of energy-based units into a single trainable layer. Third, we report an empirical study on nine UCI benchmarks, evaluated both in their native class-imbalanced form and in a pre-balanced variant, and on a family of synthetic XOR problems of growing dimensionality, comparing the single module against the ensemble.
 
 The remainder of the paper is organized as follows. Section~\ref{sec:background} reviews the Ising model, quantum annealing and the parametric model of Schmid et al. Section~\ref{sec:proposal} presents the differentiable module and the \texttt{MultiIsingNetwork}. Section~\ref{sec:empirical} describes the experimental protocol and reports the results. Sections~\ref{sec:discussion} and~\ref{sec:conclusion} discuss the findings and conclude.
 
@@ -85,19 +91,19 @@ z^* = \arg\min_z E(\theta, \Gamma, z),
 \end{equation}
 where $z^*$ corresponds to the ground state configuration. This minimization process can be used to encode a wide class of combinatorial optimization problems, since many discrete problems can be expressed in the form of the Ising model.
 
-\begin{figure}[H]
+\begin{figure*}[t]
     \centering
-    \includegraphics[width=0.45\textwidth]{isingModel.png}
-    \caption{On the left, an illustration of the graph structure of an Ising model 
-        characterized by a fully connected graph, with \( |V| = 5 \) spins \( z \), 
-        corresponding biases \( \theta \), and couplings \( \Gamma \). 
-        An Ising machine maps the Ising model to the right-hand side of the figure, 
-        returning a \(\{-1, +1\}\) assignment (illustrated as white/black nodes) to each 
-        binary variable \( z_i \). The output is the spin configuration \( z^{*} \) 
+    \includegraphics[width=0.95\textwidth]{plots/ising_model.pdf}
+    \caption{On the left, an illustration of the graph structure of an Ising model
+        characterized by a fully connected graph, with \( |V| = 5 \) spins \( z \),
+        corresponding biases \( \theta \), and couplings \( \Gamma \).
+        An Ising machine maps the Ising model to the right-hand side of the figure,
+        returning a \(\{-1, +1\}\) assignment (illustrated as white/black nodes) to each
+        binary variable \( z_i \). The output is the spin configuration \( z^{*} \)
         and the corresponding minimal energy \( E_{0}(\theta, \Gamma) \).
     }
     \label{fig:isingModel}
-\end{figure}
+\end{figure*}
 
 \subsection{Quantum Annealing}
 Quantum annealing is a heuristic method for solving optimization problems by evolving a quantum system toward the ground state of a problem Hamiltonian. 
@@ -222,15 +228,20 @@ The computation of ground-state energies for a batch of inputs can be efficientl
 \subsubsection{Integration into Neural Networks}
 Embedding the Full Ising Module in a neural network effectively creates a hybrid model where discrete combinatorial optimization is combined with continuous learning. The neural network can supply input biases to the Ising module, which then computes a structured, discrete representation of the energy landscape. Gradients flow backward from the loss function through the Ising module to update both the couplings and the scaling parameters. This enables the network to learn complex mappings that require both discrete reasoning and continuous function approximation.
 
-\begin{figure}[H]
+\begin{figure*}[t]
     \centering
-    % \includegraphics[width=0.45\textwidth]{nn.png}
-    \caption{Schematic of the \texttt{MultiIsingNetwork}: $M$ parallel
-    \texttt{FullIsingModule} units share the input biases and their scalar
-    outputs are aggregated by a trainable linear readout.
+    \includegraphics[width=0.9\textwidth]{plots/multiising_network.pdf}
+    \caption{Schematic of the \texttt{MultiIsingNetwork}. The input biases
+    $\boldsymbol{\theta}$ are shared across $M=5$ parallel
+    \texttt{FullIsingModule} units, each one an Ising energy model whose
+    spins and pairwise couplings $\Gamma^{(m)}$ are drawn as a small fully
+    connected graph. Every module returns a scalar
+    $F^{(m)}=\lambda^{(m)}E_0+\varepsilon^{(m)}$, and the trainable linear
+    combiner aggregates these outputs as $b+\sum_{m} w_m F^{(m)}$ to produce
+    the network output $F(\boldsymbol{\theta})$.
     }
     \label{fig:multiising_nn}
-\end{figure}
+\end{figure*}
 
 \subsubsection{The MultiIsingNetwork}\label{sec:singlelayer}
 In addition to a single \texttt{FullIsingModule}, we consider a shallow architecture, the \texttt{MultiIsingNetwork}, composed of $M$ parallel \texttt{FullIsingModule} units whose outputs are linearly combined. This structure can be interpreted as a single-layer neural network where each unit is an independent Ising-based energy model.
@@ -408,7 +419,7 @@ Sweeps per $\beta$ step                         & 1 \\
 
 \subsection{Results}\label{sec:results}
 
-\subsubsection{UCI Benchmarks --- Native (Imbalanced) Form}\label{sec:res_imbalanced}
+\subsubsection{Native (Imbalanced) UCI Benchmarks}\label{sec:res_imbalanced}
 
 Tables~\ref{tab:ising_uci_imbalanced} and~\ref{tab:nn_uci_imbalanced}
 collect the per-dataset metrics for the single module and the
@@ -495,14 +506,14 @@ the ensemble.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\linewidth]{plots/uci_imbalanced_combined_boxplot}
+    \includegraphics[width=\linewidth]{plots/uci_imbalanced_combined_boxplot.pdf}
     \caption{Per-fold test accuracy on the native imbalanced UCI datasets.
     Each box aggregates the five cross-validation folds for the
     \texttt{FullIsingModule} and the \texttt{MultiIsingNetwork}.}
     \label{fig:boxplot_imbalanced}
 \end{figure}
 
-\subsubsection{UCI Benchmarks --- Pre-balanced Folds}\label{sec:res_balanced}
+\subsubsection{Pre-balanced UCI Benchmarks}\label{sec:res_balanced}
 
 The same comparison is now repeated on the pre-balanced variant of the
 nine UCI sets, with everything else held fixed. Per-dataset metrics
@@ -571,12 +582,12 @@ SPECTF                          & $0.63 \pm 0.07$ & $0.60 \pm 0.06$ & $0.70 \pm 
 Figure~\ref{fig:boxplot_balanced} reports the fold-level distribution
 on the balanced folds. With the class prior removed, the
 single-module boxes drop and widen on the datasets where they had
-previously collapsed to a flat line, while the \texttt{MultiIsingNetwork}
+previously collapsed to a flat line, while the \texttt{MultiIsingNetwork}\
 keeps higher and more stable accuracy on the harder benchmarks.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\linewidth]{plots/uci_balanced_combined_boxplot}
+    \includegraphics[width=\linewidth]{plots/uci_balanced_combined_boxplot.pdf}
     \caption{Per-fold test accuracy on the pre-balanced UCI datasets,
     using the same splits and hyperparameters as
     Fig.~\ref{fig:boxplot_imbalanced}.}
@@ -635,7 +646,7 @@ higher-order interactions.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\linewidth]{plots/xor_accuracy_compare}
+    \includegraphics[width=0.95\linewidth]{plots/xor_accuracy_compare.pdf}
     \caption{Mean test accuracy on the synthetic XOR problem as a
     function of the input dimension, for the \texttt{FullIsingModule}
     and the \texttt{MultiIsingNetwork}.}
@@ -697,8 +708,8 @@ parametric Ising model of Schmid et al.~\cite{10.21468/SciPostPhysCore.7.1.013}
 into PyTorch, together with the \texttt{MultiIsingNetwork}, a shallow
 architecture that composes several such modules through a trainable
 linear readout. The module exposes an analytic gradient for the
-couplings and behaves as a standard layer, so it can be trained end to
-end with ordinary gradient based tooling.
+couplings and behaves as a standard layer, so it can be trained
+end-to-end with ordinary gradient-based tooling.
 
 The empirical study supports two conclusions. The single module is
 expressive but fragile under class imbalance, where it tends to
@@ -723,5 +734,6 @@ experiments on real quantum annealing hardware.
 
 \bibliographystyle{IEEEtran}
 \bibliography{bibliography}
+\EOD
 
 \end{document}
