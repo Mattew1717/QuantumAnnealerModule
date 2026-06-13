@@ -8,9 +8,12 @@
 \usepackage{caption}
 \usepackage{float}
 \usepackage{soul}
-\usepackage{algpseudocode}
+% \usepackage{algpseudocode}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\newcommand{\TODO}[1]{\textcolor{red}{\textbf{TODO:} #1}}
+
 \begin{document}
 \history{Date of publication xxxx 00, 0000, date of current version xxxx 00, 0000.}
 \doi{10.1109/TQE.2020.DOI}
@@ -56,7 +59,15 @@ email to keywords@ieee.org or visit \underline
 \newcommand{\removed}[1]{{\textcolor{red}{\st{#1}}}}
 
 \section{Introduction}
-code: https://github.com/Mattew1717/QuantumAnnealerModule
+
+\TODO{
+Write about 1 page:
+- Context: Ising machines and quantum annealing as combinatorial optimizers
+- Motivation: combining quantum annealing with deep learning
+- Related work: Schmid et al. parametric model, hybrid quantum-classical methods
+- Contributions: differentiable Ising module, MultiIsingNetwork, empirical results
+- Paper outline
+}
 
 \clearpage
 \section{Background}%1-1.5 pages
@@ -175,7 +186,7 @@ This design ensures that the module is fully compatible with automatic different
     \STATE Store $z_i^*$ for backward
 \ENDFOR
 \STATE \textbf{Return:} batch energies $\{E_i\}$
-\STATEx
+% \STATEx
 \STATE \textbf{Backward pass:}
 \FOR{each sample $i$ in batch}
     \STATE Compute outer product $z_i^* (z_i^*)^\top$
@@ -214,7 +225,7 @@ Embedding the Full Ising Module in a neural network effectively creates a hybrid
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.45\textwidth]{nn.png}
+    % \includegraphics[width=0.45\textwidth]{nn.png}
     \caption{An illustration of single layer neural network.
     }
     \label{fig:isingModel}
@@ -556,15 +567,7 @@ on the balanced folds
 \subsubsection{Synthetic XOR Datasets}\label{sec:res_xor}
 
 The last block tests the two architectures on the synthetic
-$d$-dimensional XOR family with $d \in \{1,\dots,6\}$. The decision
-boundary is a parity function of the inputs and any non-trivial
-classifier must therefore compose several non-linear interactions,
-which makes this setting a clean probe of capacity. Aggregate metrics
-are reported in Tables~\ref{tab:ising_xor} and~\ref{tab:nn_xor}; the
-accuracy as a function of $d$ is plotted in
-Figure~\ref{fig:bar_compare_xor}. The single module reaches chance
-level around $d=3$, while the ensemble stays above $0.85$ accuracy
-through $d=6$.
+$d$-dimensional XOR family with $d \in \{1,\dots,6\}$.
 
 \begin{table}[H]
 \centering
@@ -611,11 +614,36 @@ XOR-6D  & 0.87     & 0.84      & 0.93   & 0.96 \\
 
 
 \section{Discussion}
-% TODO
+
+\TODO{
+Write about 1 page:
+- Interpretation of results: MultiIsingNetwork consistently outperforms single module
+- Effect of class imbalance: single module more affected, ensemble more robust
+- XOR results: ensemble captures non-linear interactions up to 6D, single module fails
+- Possibility of compiling multiple nodes into the same physical annealer to reduce overhead
+}
 
 \section{Conclusion}
-% TODO
 
+\TODO{
+Write about 0.5 page:
+Summary: 
+- proposed differentiable Ising PyTorch module and NN architecture 
+- empirical results on UCI benchmarks and synthetic XOR problems
+Implications: 
+- NN of Ising modules promising. 
+- Good expressivity
+- Integrated to existing PyTorch workflows
+Limitations:
+- shallow architecture
+- sensitivity to hyperparameters
+Future work: 
+- deeper architectures
+- real quantum annealer hardware experiments
+}
+
+\bibliographystyle{IEEEtran}
+\bibliography{bibliography}
 
 \EOD
 
