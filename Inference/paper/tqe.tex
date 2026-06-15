@@ -35,11 +35,11 @@ and \uppercase{Davide Pastorello}\authorrefmark{1}}
 
 \begin{abstract}
 Ising machines and quantum annealers solve combinatorial optimization
-problems by searching for low-energy spin configurations, and recent
+problems by searching for low energy spin configurations, and recent
 work has shown that an Ising energy minimization can itself act as a
 trainable supervised model. We turn this idea into a reusable
 deep-learning component. We present a differentiable Ising module that,
-in its forward pass, computes the ground-state energy of a parametric
+in its forward pass, computes the ground state energy of a parametric
 Ising Hamiltonian through an annealing solver and, in its backward
 pass, propagates gradients to the couplings through an analytic
 surrogate, making it fully compatible with automatic differentiation in
@@ -51,7 +51,7 @@ imbalanced form and in a balanced variant, and on synthetic XOR
 problems of growing dimensionality. The ensemble consistently improves
 over the single module, removes its tendency to collapse onto a single
 class under class imbalance, and captures non-linear interactions up to
-six dimensions, while remaining trainable within the standard PyTorch
+six XOR dimensions, while remaining trainable within the standard PyTorch
 ecosystem.
 \end{abstract}
 
@@ -65,15 +65,13 @@ ecosystem.
 
 \section{Introduction}
 
-\IEEEPARstart{I}{sing} machines have emerged as specialized hardware and algorithmic solvers for combinatorial optimization. By encoding a problem into the couplings and local fields of a spin system, they return low-energy configurations that correspond to good candidate solutions. Quantum annealers, such as those produced by D-Wave, realize this idea physically: a quantum system is slowly evolved from an easily prepared ground state toward the ground state of a problem Hamiltonian, and the measured spin configuration approximates the optimum. This paradigm has been applied to a broad range of discrete problems, from scheduling and routing to sampling and constraint satisfaction.
+\IEEEPARstart{I}{sing} machines have emerged as specialized hardware and algorithmic solvers for combinatorial optimization. By encoding a problem into the couplings and local fields of a spin system, they return low energy configurations that correspond to good candidate solutions. Quantum annealers, such as those produced by D-Wave, realize this idea physically: a quantum system is slowly evolved from an easily prepared ground state toward the ground state of a problem Hamiltonian, and the measured spin configuration approximates the optimum. This paradigm has been applied to a broad range of discrete problems, from scheduling and routing to sampling and constraint satisfaction.
 
-A more recent line of work asks whether these solvers can be useful inside machine learning, not only as optimizers but as trainable components. Schmid, Zardini and Pastorello~\cite{10.21468/SciPostPhysCore.7.1.013} showed that an Ising energy minimization can itself act as a parametric supervised model, in which the data enter as local fields, the couplings are the trainable weights, and the ground-state energy is the output. Their results suggest that a spin system can learn, and that the systematic error of an approximate solver is partly absorbed by the training process. What is still missing is a way to use such a model as an ordinary building block inside the deep learning ecosystem, where layers are composed freely and trained by automatic differentiation.
+A more recent line of work asks whether these solvers can be useful inside machine learning, not only as optimizers but as trainable components. Schmid, Zardini and Pastorello~\cite{10.21468/SciPostPhysCore.7.1.013} showed that an Ising energy minimization can itself act as a parametric supervised model, in which the data enter as local fields, the couplings are the trainable weights, and the ground state energy is the output. Their results suggest that a spin system can learn, and that the systematic error of an approximate solver is partly absorbed by the training process. What is still missing is a way to use such a model as an ordinary building block inside the deep learning ecosystem, where layers are composed freely and trained by automatic differentiation.
 
-In this work we close that gap. We recast the parametric Ising model as a differentiable module that exposes a clean forward and backward interface and plugs directly into PyTorch. The forward pass calls an annealing solver to estimate the ground-state energy of the spin system, while the backward pass propagates gradients to the couplings through an analytic surrogate built from the stored spin configurations. Because the module behaves like any other layer, it inherits the full PyTorch toolchain: optimizers, loss functions, learning rate schedulers, batching and GPU tensors. On top of this module we build the \texttt{MultiIsingNetwork}, a shallow architecture in which several Ising modules run in parallel and are combined by a trainable linear readout.
+In this work we close that gap. We recast the parametric Ising model as a differentiable module that exposes a clean forward and backward interface and plugs directly into PyTorch. The forward pass calls an annealing solver to estimate the ground state energy of the spin system, while the backward pass propagates gradients to the couplings through an analytic surrogate built from the stored spin configurations. Because the module behaves like any other layer, it inherits the full PyTorch toolchain: optimizers, loss functions, learning rate schedulers, batching and GPU tensors. On top of this module we build the \texttt{MultiIsingNetwork}, a shallow architecture in which several Ising modules run in parallel and are combined by a trainable linear readout.
 
-Our contributions are threefold. First, we introduce a differentiable Ising energy module with an analytic gradient for the couplings, fully compatible with automatic differentiation. Second, we propose the \texttt{MultiIsingNetwork}, a hybrid architecture that turns a set of energy-based units into a single trainable layer. Third, we report an empirical study on nine UCI benchmarks, evaluated both in their native class-imbalanced form and in a pre-balanced variant, and on a family of synthetic XOR problems of growing dimensionality, comparing the single module against the ensemble.
-
-The remainder of the paper is organized as follows. Section~\ref{sec:background} reviews the Ising model, quantum annealing and the parametric model of Schmid et al. Section~\ref{sec:proposal} presents the differentiable module and the \texttt{MultiIsingNetwork}. Section~\ref{sec:empirical} describes the experimental protocol and reports the results. Sections~\ref{sec:discussion} and~\ref{sec:conclusion} discuss the findings and conclude.
+Our contributions are the following three. First, we introduce a differentiable Ising energy module with an analytic gradient for the couplings, fully compatible with automatic differentiation. Second, we propose the \texttt{MultiIsingNetwork}, a hybrid architecture that turns a set of energy based units into a single trainable layer. Third, we report an empirical study on nine UCI benchmarks, evaluated both in their native class-imbalanced form and in a pre-balanced variant, and on a family of synthetic XOR problems of growing dimensionality, comparing the single module against the ensemble.
 
 \section{Background}\label{sec:background}
 In this section we aim at introducing the background required to understand the proposed method, focusing on the Ising Model and its realization through quantum annealing, as well as the learning process the method is based on.
@@ -106,7 +104,7 @@ where $z^*$ corresponds to the ground state configuration. This minimization pro
 
 \subsection{Quantum Annealing}
 Quantum annealing is a heuristic method for solving optimization problems by evolving a quantum system toward the ground state of a problem Hamiltonian. 
-In the context of the Ising model, the optimization problem defined in Eq.~\ref{eq:ising} can be mapped to the ground-state search of a corresponding Hamiltonian.
+In the context of the Ising model, the optimization problem defined in Eq.~\ref{eq:ising} can be mapped to the ground state search of a corresponding Hamiltonian.
 Specifically, consider the time-dependent Hamiltonian
 \begin{equation}
     H(t) = \gamma(t) H_D + H_P
@@ -129,7 +127,7 @@ F(\boldsymbol{\theta}|\Gamma, \lambda, \varepsilon) &= \lambda \min_{\mathbf{z} 
 &= \lambda E_0(\boldsymbol{\theta}, \Gamma) + \varepsilon.
 \label{model}
 \end{align}
-In this formulation, input data are encoded into the spin biases $\boldsymbol{\theta} = (\theta_1, \ldots, \theta_n)$ of an Ising model, while the trainable parameters correspond to the couplings $\Gamma_{ij}$ determined by the topology of the underlying Ising machine. The model output is defined as the ground-state energy of the system, scaled and shifted through two additional parameters $\lambda$ and $\varepsilon$.
+In this formulation, input data are encoded into the spin biases $\boldsymbol{\theta} = (\theta_1, \ldots, \theta_n)$ of an Ising model, while the trainable parameters correspond to the couplings $\Gamma_{ij}$ determined by the topology of the underlying Ising machine. The model output is defined as the ground state energy of the system, scaled and shifted through two additional parameters $\lambda$ and $\varepsilon$.
 
 \subsubsection{Training Phase}
 
@@ -149,21 +147,21 @@ The objective is to perform this minimization task by using a gradient descent a
 where $\eta > 0$ is the learning rate controlling the optimization step size.
 
 
-This representation highlights a neural-like structure, where spins act as neurons and couplings as synaptic weights. Notably, the learning process does not require exact ground-state solutions; approximate energies produced by the Ising machine can be effectively integrated into the optimization, as their systematic deviations are absorbed by the parameter tuning process. This property makes the model practical and robust for real-world training scenarios.
+This representation highlights a neural-like structure, where spins act as neurons and couplings as synaptic weights. Notably, the learning process does not require exact ground state solutions; approximate energies produced by the Ising machine can be effectively integrated into the optimization, as their systematic deviations are absorbed by the parameter tuning process. This property makes the model practical and robust for real world training scenarios.
 
 
 \section{Proposal}\label{sec:proposal}
 \subsection{Quantum Ising Modules in Neural Networks}
 
-Integrating quantum-inspired optimization models within neural network architectures opens new avenues for solving complex, high-dimensional problems. In this work, we propose a framework where quantum Ising models are embedded as differentiable modules within a neural network, combining the combinatorial optimization capabilities of Ising machines with the function approximation power of deep learning.
+Integrating quantum inspired optimization models within neural network architectures opens new avenues for solving complex problems. In this work, we propose a framework where quantum Ising models are embedded as differentiable modules within a neural network, combining the combinatorial optimization capabilities of Ising machines with the power of deep learning.
 
 \subsubsection{Motivation}
 
-Standard neural networks rely on continuous differentiable mappings to propagate gradients during training. However, many real-world optimization problems are discrete in nature and can be naturally expressed as spin systems in the form of Ising Hamiltonians. Quantum annealers, or their classical simulations, provide a mechanism to efficiently explore the combinatorial space and approximate ground-state solutions of these Hamiltonians. Embedding such mechanisms into neural networks allows us to leverage this optimization power while retaining end-to-end differentiability for gradient-based learning.
+Standard neural networks rely on continuous differentiable mappings to propagate gradients during training. However, many real world optimization problems are discrete in nature and can be naturally expressed as spin systems in the form of Ising Hamiltonians. Quantum annealers, or their classical simulations, provide a mechanism to efficiently explore the combinatorial space and approximate ground state solutions of these Hamiltonians. Embedding such mechanisms into neural networks allows us to leverage this optimization power while retaining end-to-end differentiability for gradient based learning.
 
 \subsubsection{Differentiable Ising Energy Function}
 
-To integrate an Ising-based module within a neural network, we define a custom differentiable function that computes the ground-state energy of an Ising Hamiltonian given a batch of input biases. For each input vector $\theta$, representing a set of local fields on the spins, the module uses an annealing solver to find an approximate ground-state configuration \(z^*\) that minimizes the Hamiltonian:
+To integrate an Ising module within a neural network, we define a custom differentiable function that computes the ground state energy of an Ising Hamiltonian given a batch of input biases. For each input vector $\theta$, the module uses an annealing solver to find an approximate ground state configuration \(z^*\) that minimizes the Hamiltonian:
 
 \[
 E_0(\theta, \Gamma) = \min_{z \in \{-1,+1\}^n} \left( \sum_i \theta_i z_i + \sum_{i<j} \Gamma_{ij} z_i z_j \right),
@@ -175,7 +173,7 @@ where $\Gamma$ are the learnable couplings encoding the interactions between spi
 \frac{\partial E_0}{\partial \Gamma_{ij}} = z_i^* z_j^*.
 \]
 
-This design ensures that the module is fully compatible with automatic differentiation frameworks such as PyTorch, allowing seamless integration with larger neural network architectures.
+This design ensures that the module is fully compatible with automatic differentiation frameworks such as PyTorch, allowing integration with larger neural network architectures.
 
 \begin{algorithm}[H]
 \caption{Differentiable Ising Energy Function (Forward and Backward)}
@@ -203,7 +201,7 @@ This design ensures that the module is fully compatible with automatic different
 
 \subsubsection{Full Ising Module}
 
-While the differentiable Ising energy function computes the Ising ground-state energy, the \texttt{FullIsingModule} extends this functionality by introducing two additional learnable parameters: a scaling factor $\lambda$ and an energy offset. The module output is defined as:
+While the differentiable Ising energy function computes the Ising ground state energy, the \texttt{FullIsingModule} extends this functionality by introducing two additional learnable parameters: a scaling factor $\lambda$ and an energy offset. The module output is defined as:
 
 \[
 E_\text{out} = \lambda E_0 + \text{offset}.
@@ -222,17 +220,17 @@ This linear transformation allows the Ising module to match the scale of the tar
 
 \subsubsection{Parallelized Computation and Scalability}
 
-The computation of ground-state energies for a batch of inputs can be efficiently parallelized. By splitting the batch across multiple threads, each thread computes the annealing solution for a subset of inputs. This allows leveraging multicore CPUs or distributed systems for scalability, ensuring that the computational overhead of embedding an Ising solver within a neural network remains manageable even for moderately large spin systems.
+The computation of ground state energies for a batch of inputs can be efficiently parallelized. By splitting the batch across multiple threads, each thread computes the annealing solution for a subset of inputs. This allows leveraging multicore CPUs or distributed systems for scalability, ensuring that the computational overhead of embedding an Ising solver within a neural network remains manageable even for moderately large spin systems.
 
 \subsubsection{Integration into Neural Networks}
 Embedding the Full Ising Module in a neural network effectively creates a hybrid model where discrete combinatorial optimization is combined with continuous learning. The neural network can supply input biases to the Ising module, which then computes a structured, discrete representation of the energy landscape. Gradients flow backward from the loss function through the Ising module to update both the couplings and the scaling parameters. This enables the network to learn complex mappings that require both discrete reasoning and continuous function approximation.
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=0.9\textwidth]{plots/multiising_network.pdf}
+    \includegraphics[width=0.7\textwidth]{plots/multiising_network.pdf}
     \caption{Schematic of the \texttt{MultiIsingNetwork}. The input biases
     $\boldsymbol{\theta}$ are shared across $M=5$ parallel
-    \texttt{FullIsingModule} units, each one an Ising energy model whose
+    \texttt{FullIsingModule} units, each one an Ising model whose
     spins and pairwise couplings $\Gamma^{(m)}$ are drawn as a small fully
     connected graph. Every module returns a scalar
     $F^{(m)}=\lambda^{(m)}E_0+\varepsilon^{(m)}$, and the trainable linear
@@ -243,29 +241,29 @@ Embedding the Full Ising Module in a neural network effectively creates a hybrid
 \end{figure*}
 
 \subsubsection{The MultiIsingNetwork}\label{sec:singlelayer}
-In addition to a single \texttt{FullIsingModule}, we consider a shallow architecture, the \texttt{MultiIsingNetwork}, composed of $M$ parallel \texttt{FullIsingModule} units whose outputs are linearly combined. This structure can be interpreted as a single-layer neural network where each unit is an independent Ising-based energy model.
+In addition to a single \texttt{FullIsingModule}, we consider a shallow architecture, the \texttt{MultiIsingNetwork}, composed of $M$ parallel \texttt{FullIsingModule} units whose outputs are linearly combined. This structure can be interpreted as a single-layer neural network where each unit is an independent Ising model.
 
 Given an input vector $\boldsymbol{\theta}$, the $m$-th \texttt{FullIsingModule} produces an output
 \begin{equation}
 F^{(m)}(\boldsymbol{\theta}) \;=\; \lambda^{(m)} \, E_0\!\big(\boldsymbol{\theta}, \Gamma^{(m)}\big) \;+\; \varepsilon^{(m)},
 \label{eq:fullising_out}
 \end{equation}
-where $E_0(\boldsymbol{\theta}, \Gamma^{(m)})$ denotes the ground-state energy of the Ising Hamiltonian with input biases $\boldsymbol{\theta}$ and trainable couplings $\Gamma^{(m)}$, while $\lambda^{(m)}$ and $\varepsilon^{(m)}$ are learnable scaling and offset parameters.
+where $E_0(\boldsymbol{\theta}, \Gamma^{(m)})$ denotes the ground state energy of the Ising Hamiltonian with input biases $\boldsymbol{\theta}$ and trainable couplings $\Gamma^{(m)}$, while $\lambda^{(m)}$ and $\varepsilon^{(m)}$ are learnable scaling and offset parameters.
 
-The single-layer network with $M$ parallel modules aggregates their outputs through a linear readout:
+The single layer network with $M$ parallel modules aggregates their outputs through a linear readout:
 \begin{equation}
 F(\boldsymbol{\theta}) \;=\; b \;+\; \sum_{m=1}^{M} w_m \, F^{(m)}(\boldsymbol{\theta}),
 \label{eq:linear_comb_fullising}
 \end{equation}
 with $w_m$ and $b$ being additional trainable parameters.
 
-This architecture is analogous to a single fully connected layer in standard neural networks, with the key difference that each neuron is replaced by a structured Ising energy minimization block. The nonlinearity arises from the discrete ground-state computation within each module, while the outer linear combination enables flexible aggregation of multiple energy-based representations.
+This architecture is analogous to a single fully connected layer in standard neural networks, with the key difference that each neuron is replaced by an Ising Module. The nonlinearity arises from the discrete ground state computation within each module, while the outer linear combination enables flexible aggregation of multiple energy-based representations.
 
-Despite its shallow structure, this model increases expressive power compared to a single Ising module, as different modules can learn different coupling patterns, effectively acting as an ensemble of energy-based learners trained end-to-end.
+Despite its shallow structure, this model increases expressive power compared to a single Ising module, as different modules can learn different coupling patterns.
 
 \section{Empirical Evaluation}\label{sec:empirical}
 
-We compare the single \texttt{FullIsingModule} with the shallow
+We compare the single \texttt{FullIsingModule} with the
 \texttt{MultiIsingNetwork}, an ensemble of $M=5$ parallel
 \texttt{FullIsingModule}s aggregated through a linear readout. The
 evaluation is split in three blocks. The first uses nine UCI
@@ -328,18 +326,17 @@ in how the data fed to the cross-validation procedure is constructed.
 
 \paragraph{Original (imbalanced) datasets} Each UCI dataset is consumed
 in its native form, with the class distribution reported in
-Table~\ref{tab:datasets}. Stratified 5-fold cross-validation ($k=5$)
-preserves the original class ratios, so both training and test splits
+Table~\ref{tab:datasets}. Stratified 5-fold cross-validation preserves the original class ratios, so both training and test splits
 remain imbalanced. This form measures how the two architectures behave
 when no class-balancing intervention is applied.
 
 \paragraph{Pre-balanced fixed folds (random subsampling)} For each UCI
-dataset a class-balanced variant is pre-built by random undersampling
+dataset a class-balanced variant is prebuilt by random undersampling
 of the majority class, and the resulting CSV is stored on disk. The
-same stratified 5-fold splitter is then applied to the already-balanced
+same stratified 5-fold splitter is then applied to the already balanced
 files, so every fold contains an equal number of class~0 and class~1
 samples in both the training and the test split. Because the folds are
-produced from a fixed pre-balanced file and the random seed is fixed
+produced from a fixed file and the random seed is fixed
 (Table~\ref{tab:hyperparameters}), the splits are deterministic and
 shared across the two architectures.
 
@@ -372,8 +369,8 @@ hyperparameter gains.
 \begin{table}[H]
 \centering
 \caption{Hyperparameters used in all experiments. Values are shared
-between the \texttt{FullIsingModule} and the \texttt{MultiIsingNetwork}
-unless otherwise noted; the combiner learning rate applies to the
+between the \texttt{FullIsingModule} and the \texttt{MultiIsingNetwork};
+except the combiner learning rate applies to the
 \texttt{MultiIsingNetwork} only, and the K-Fold cross-validation is
 used on UCI benchmarks only.}
 \label{tab:hyperparameters}
@@ -421,12 +418,11 @@ Sweeps per $\beta$ step                         & 1 \\
 \subsubsection{Native (Imbalanced) UCI Benchmarks}\label{sec:res_imbalanced}
 
 Tables~\ref{tab:ising_uci_imbalanced} and~\ref{tab:nn_uci_imbalanced}
-collect the per-dataset metrics for the single module and the
+collect the dataset metrics for the single module and the
 ensemble. The overall trend is consistent across the suite: measured by
 AUC, the ensemble matches or exceeds the single module on every
 benchmark, with the widest gaps on breast cancer, banknote and heart
-failure. The decisive difference, however, is not in the headline
-accuracy but in how each model reaches it. On four of the datasets the
+failure. The decisive difference, however, is not in the final accuracy but in how each model reaches it. On four of the datasets the
 \texttt{FullIsingModule} stops separating the classes and collapses
 onto a single label. On breast cancer, haberman and heart failure it
 predicts almost exclusively the negative class, so precision, recall
@@ -434,7 +430,7 @@ and $F_1$ drop to zero while accuracy merely tracks the share of
 negative samples; on SPECTF the collapse goes the other way, with the
 module predicting only the positive class, which yields a recall of one
 and a precision equal to the positive class frequency. On haberman and
-heart failure this single-label behaviour even pushes the accuracy of
+heart failure this single label behaviour even pushes the accuracy of
 the module above that of the ensemble, although the classes are not
 actually separated. The ensemble does not exhibit this collapse on any
 of these datasets.
@@ -450,7 +446,7 @@ each model actually learns.
 
 \begin{table}[H]
 \centering
-\caption{\texttt{FullIsingModule} on UCI datasets in the native imbalanced form. 5-fold CV, mean $\pm$ std.}
+\caption{\texttt{FullIsingModule} on UCI datasets in the imbalanced form. 5-fold CV, mean $\pm$ std.}
 \label{tab:ising_uci_imbalanced}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{lccccc}
@@ -472,7 +468,7 @@ SPECTF                          & $0.79 \pm 0.00$ & $0.79 \pm 0.00$ & $1.00 \pm 
 
 \begin{table}[H]
 \centering
-\caption{\texttt{MultiIsingNetwork} on UCI datasets in the native imbalanced form. 5-fold CV, mean $\pm$ std.}
+\caption{\texttt{MultiIsingNetwork} on UCI datasets in the imbalanced form. 5-fold CV, mean $\pm$ std.}
 \label{tab:nn_uci_imbalanced}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{lccccc}
@@ -492,21 +488,19 @@ SPECTF                          & $0.80 \pm 0.03$ & $0.84 \pm 0.02$ & $0.92 \pm 
 \end{tabular}}
 \end{table}
 
-% Placeholder paragraph for the per-fold distribution.
 The fold-level dispersion is summarized in
 Figure~\ref{fig:boxplot_imbalanced}. The ensemble boxes sit at higher
 accuracy than those of the single module on most datasets, the clearest
-separations being on iris, banknote and breast cancer. On breast
-cancer, haberman, heart failure and SPECTF the single-module box
+separations being on iris, banknote and breast cancer. On haberman, heart failure and SPECTF the single-module box
 collapses to an almost flat line: the model predicts a near-constant
-label, so its fold-to-fold variance is artificially small and, on
+label, so its variance is small and, on
 haberman and heart failure, this constant prediction even sits above
 the ensemble.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{plots/uci_imbalanced_combined_boxplot.pdf}
-    \caption{Per-fold test accuracy on the native imbalanced UCI datasets.
+    \caption{Test accuracy on the imbalanced UCI datasets.
     Each box aggregates the five cross-validation folds for the
     \texttt{FullIsingModule} and the \texttt{MultiIsingNetwork}.}
     \label{fig:boxplot_imbalanced}
@@ -514,29 +508,23 @@ the ensemble.
 
 \subsubsection{Pre-balanced UCI Benchmarks}\label{sec:res_balanced}
 
-The same comparison is now repeated on the pre-balanced variant of the
-nine UCI sets, with everything else held fixed. Per-dataset metrics
+The same comparison is now repeated on the balanced variant of the
+nine UCI sets, with everything else held fixed. Per dataset metrics
 are reported in Tables~\ref{tab:ising_uci_balanced}
-and~\ref{tab:nn_uci_balanced}. Removing the class-prior shortcut
-brings the headline numbers down for both models, more pronouncedly
+and~\ref{tab:nn_uci_balanced}. Removing the class prior shortcut brings the headline numbers down for both models, more pronouncedly
 for the single module: \texttt{FullIsingModule} loses several points
 of accuracy on average, while the ensemble retains a clear margin on
-the harder benchmarks (breast cancer, ionosphere, heart failure,
+different benchmarks (breast cancer, ionosphere, heart failure,
 SPECTF). On the sets where the single module previously collapsed to a
 constant predictor, precision, recall and $F_1$ are now non-zero across
-the board: balancing removes the single-label behaviour and the
+the board: balancing removes the single label behaviour and the
 \texttt{MultiIsingNetwork} recovers a genuine decision boundary,
 improving the overall picture once the prior can no longer be exploited.
-The exception is haberman, where neither architecture exceeds chance.
-This is consistent with the literature, in which datasets with strongly
-overlapping classes are known to be intrinsically hard and to drive many
-classifiers toward the majority baseline regardless of the
-model~\cite{Garcia2007overlap}, so we read the haberman result as a
-property of the data rather than a shortcoming of either network.
+The exception is haberman, where neither architecture exceeds chance. This is consistent with the literature, where haberman is characterized as one of the most difficult UCI benchmarks, its minority class being dominated by borderline and rare examples lying in the class-overlap region rather than by safe ones, a configuration known to drive classifiers toward the majority baseline regardless of the model~\cite{Napierala2016types}. We therefore read the haberman result as a property of the data rather than a shortcoming of either network.
 
 \begin{table}[H]
 \centering
-\caption{\texttt{FullIsingModule} on the pre-balanced UCI variants. 5-fold CV on the balanced files, mean $\pm$ std.}
+\caption{\texttt{FullIsingModule} on the pre-balanced UCI datasets. 5-fold CV on the balanced files, mean $\pm$ std.}
 \label{tab:ising_uci_balanced}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{lccccc}
@@ -558,7 +546,7 @@ SPECTF                          & $0.39 \pm 0.06$ & $0.41 \pm 0.06$ & $0.58 \pm 
 
 \begin{table}[H]
 \centering
-\caption{\texttt{MultiIsingNetwork} on the pre-balanced UCI variants. 5-fold CV on the balanced files, mean $\pm$ std.}
+\caption{\texttt{MultiIsingNetwork} on the pre-balanced UCI datasets. 5-fold CV on the balanced files, mean $\pm$ std.}
 \label{tab:nn_uci_balanced}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{lccccc}
@@ -578,18 +566,16 @@ SPECTF                          & $0.63 \pm 0.07$ & $0.60 \pm 0.06$ & $0.70 \pm 
 \end{tabular}}
 \end{table}
 
-Figure~\ref{fig:boxplot_balanced} reports the fold-level distribution
+Figure~\ref{fig:boxplot_balanced} reports the fold level distribution
 on the balanced folds. With the class prior removed, the
-single-module boxes drop and widen on the datasets where they had
-previously collapsed to a flat line, while the \texttt{MultiIsingNetwork}\
+single module boxes drop on the datasets where they had previously collapsed to a flat line, while the \texttt{MultiIsingNetwork}\
 keeps higher and more stable accuracy on the harder benchmarks.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{plots/uci_balanced_combined_boxplot.pdf}
-    \caption{Per-fold test accuracy on the pre-balanced UCI datasets,
-    using the same splits and hyperparameters as
-    Fig.~\ref{fig:boxplot_imbalanced}.}
+    \caption{Test accuracy on the pre-balanced UCI datasets. Each box aggregates the five cross-validation folds for the
+    \texttt{FullIsingModule} and the \texttt{MultiIsingNetwork}.}
     \label{fig:boxplot_balanced}
 \end{figure}
 
@@ -666,34 +652,28 @@ which indicates that the additional units and the linear readout give
 the model enough capacity to separate the classes rather than to
 exploit their prior.
 
-The pre-balanced form confirms this reading. Once the class prior is
+The balanced version confirms this reading. Once the class prior is
 removed, the inflated accuracies of the single module disappear and its
 scores drop to or below chance on the hardest sets, while the ensemble
 keeps a clear margin on breast cancer, ionosphere, heart failure and
 SPECTF. The single module is therefore the architecture most sensitive
 to class imbalance, and the parallel composition is what restores a
 usable decision boundary. Haberman is the informative exception:
-neither model exceeds chance on it. This is in line with the
-literature, where datasets with strongly overlapping classes are
-repeatedly reported as intrinsically hard, with classifiers driven
-toward the majority baseline irrespective of the model
-family~\cite{Garcia2007overlap}. We therefore attribute the haberman
-result to the data rather than to the method.
+neither model exceeds chance on it. This is in line with the literature, where haberman is categorized among the hardest UCI sets, with its minority class composed mostly of unsafe (borderline, rare and outlier) examples lying in the overlap region, so that classifiers tend toward the majority baseline irrespective of the model family~\cite{Napierala2016types}. We therefore attribute the haberman result to the data rather than to the method.
 
 The synthetic XOR family isolates the same effect under controlled
-non-linearity. The single module already struggles in two dimensions
+non linearity. The single module already struggles in two dimensions
 and degrades toward chance as the dimension grows, since a single
 energy minimization cannot represent the parity structure on its own.
 The \texttt{MultiIsingNetwork} stays well above chance up to six
 dimensions, because the parallel modules learn complementary coupling
-patterns whose linear combination reconstructs the higher-order
+patterns whose linear combination reconstructs the higher order
 interactions. Since all runs share one hyperparameter set, this is the
 clearest evidence that the gain comes from the architecture and not
 from per-dataset tuning.
 
 A practical remark concerns cost. The dominant expense of the model is
-the annealing call, and a network of $M$ modules issues $M$ independent
-calls per forward pass. Because the modules act on disjoint spin sets,
+the annealing call. Because the modules act on disjoint spin sets,
 several of them can in principle be compiled onto a single physical
 annealer at once, packing independent Ising problems into different
 regions of the qubit graph. This would amortize the access latency of a
@@ -708,15 +688,14 @@ into PyTorch, together with the \texttt{MultiIsingNetwork}, a shallow
 architecture that composes several such modules through a trainable
 linear readout. The module exposes an analytic gradient for the
 couplings and behaves as a standard layer, so it can be trained
-end-to-end with ordinary gradient-based tooling.
+end-to-end with ordinary gradient based tooling.
 
 The empirical study supports two conclusions. The single module is
 expressive but fragile under class imbalance, where it tends to
 collapse onto a single class, whereas the \texttt{MultiIsingNetwork}
 removes this behaviour, improves the overall metrics and recovers a
-meaningful decision boundary on most datasets, with the genuinely hard
-haberman set as the documented exception. On the synthetic XOR problems
-the ensemble captures non-linear interactions up to six dimensions
+meaningful decision boundary on most datasets. On the synthetic XOR problems
+the ensemble captures non linear interactions up to six dimensions
 while the single module fails beyond the simplest cases.
 
 The main value of the approach is that an Ising solver becomes a
@@ -726,10 +705,7 @@ loss functions and learning rate schedulers. When placed inside such a
 network the module improves as one would expect from added capacity,
 which is encouraging for larger designs. The study also has limits: the
 architecture is shallow, performance relies on a single shared
-hyperparameter set rather than per-task tuning, and all runs use a
-simulated annealer. Future work will explore deeper architectures, the
-compilation of multiple modules onto a single physical annealer, and
-experiments on real quantum annealing hardware.
+hyperparameter set rather than per-task tuning, and all runs use a simulated annealer. Future work will explore deeper architectures, the compilation of multiple modules onto a single physical annealer, and experiments on real quantum annealing hardware.
 
 \bibliographystyle{IEEEtran}
 \bibliography{bibliography}
