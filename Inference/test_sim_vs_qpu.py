@@ -212,14 +212,16 @@ def run_sim_statistics(n_runs=5, num_nodes=NUM_NODES):
     mod_runs = {m: [] for m in METRICS}
     model_size = None
 
-    logger.info(f"\nRunning {n_runs} runs (seeds 0..{n_runs - 1})...")
-    for seed in range(n_runs):
+    seed = params['random_seed']
+    logger.info(f"\nRunning {n_runs} runs (fixed seed {seed}; data and weight init "
+                f"are identical, variation comes from the stochastic annealer)...")
+    for run_idx in range(n_runs):
         metrics_full, metrics_mod, model_size = _run_both_models(seed, params, num_nodes)
         for m in METRICS:
             full_runs[m].append(metrics_full[m])
             mod_runs[m].append(metrics_mod[m])
         logger.info(
-            f"  [run {seed + 1}/{n_runs} | seed {seed}] "
+            f"  [run {run_idx + 1}/{n_runs} | seed {seed}] "
             f"FullIsing acc={metrics_full['accuracy']:.3f} | "
             f"Modular({num_nodes}) acc={metrics_mod['accuracy']:.3f}"
         )

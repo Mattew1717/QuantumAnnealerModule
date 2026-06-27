@@ -28,6 +28,7 @@ Parameter configuration:
   test_size                    = 0.2
 
 Model size (annealer spins): 8
+
 FullIsingModule      | acc=0.7500 prec=0.7500 rec=0.7500 f1=0.7500 auc=0.8750
 ModularNetwork(3)    | acc=0.9375 prec=1.0000 rec=0.8750 f1=0.9333 auc=0.9844
 Diff(Modular-Single) acc: +0.1875
