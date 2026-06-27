@@ -1,0 +1,35 @@
+
+================================================================================
+2D XOR (quantum annealing) - FullIsingModule vs 3-node ModularNetwork
+================================================================================
+Annealer type: quantum
+Parameter configuration:
+  batch_size                   = 16
+  device                       = cpu
+  epochs                       = 25
+  hidden_nodes_offset_value    = -0.02
+  lambda_init                  = 1.0
+  lr_combiner                  = 0.02
+  lr_gamma                     = 0.01
+  lr_lambda                    = 0.02
+  lr_offset                    = 0.03
+  minimum_model_size           = 8
+  model_size                   = -1
+  n_samples_per_region         = 20
+  num_reads                    = 1
+  num_workers                  = 4
+  offset_init                  = 1.0
+  partition_input              = False
+  profile                      = defaults
+  random_seed                  = 42
+  sa_beta_range                = [1, 10]
+  sa_num_sweeps                = 1000
+  sa_sweeps_per_beta           = 1
+  test_size                    = 0.2
+
+Model size (annealer spins): 8
+FullIsingModule      | acc=0.7500 prec=0.7500 rec=0.7500 f1=0.7500 auc=0.8750
+ModularNetwork(3)    | acc=0.9375 prec=1.0000 rec=0.8750 f1=0.9333 auc=0.9844
+Diff(Modular-Single) acc: +0.1875
+
+Log saved to xor2d_20260627_105630

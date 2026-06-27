@@ -197,7 +197,6 @@ def train_modular_network(dim, X_train, y_train, X_test, y_test, params,
         num_workers=params['num_workers'],
         combiner_bias=True,
         partition_input=params['partition_input'],
-        random_seed=params['random_seed'],
     ).to(params['device'])
 
     logger.info(f"Model parameters: {sum(p.numel() for p in model.parameters())}")
@@ -214,6 +213,63 @@ def train_modular_network(dim, X_train, y_train, X_test, y_test, params,
 
     return _train_loop(model, optimizer, loss_fn, train_loader, X_te, y_test, params,
                        label=f'Modular/{dim}D')
+
+
+def run_xor_2d(num_nodes: int = 3,
+               annealer_type: AnnealerType = AnnealerType.QUANTUM):
+    """Train FullIsingModule and a `num_nodes`-node ModularNetwork on 2D XOR.
+
+    Uses simulated annealing by default. The full parameter configuration is
+    logged before any training starts. Returns the metrics dict of each model.
+    """
+    dim = 2
+    params = get_xor_params()
+    params['num_ising_perceptrons'] = num_nodes  # "rete a N nodi"
+    set_global_seed(params['random_seed'])
+    run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    out_dir = f'plots_xor_2d_{run_timestamp}'
+
+    global logger
+    logger = Logger(log_dir=out_dir)
+
+    # --- Parameter configuration ---
+    logger.info("\n" + "=" * 80)
+    logger.info(f"2D XOR - FullIsingModule vs {num_nodes}-node ModularNetwork")
+    logger.info("=" * 80)
+    logger.info(f"Annealer type: {annealer_type.value}")
+    logger.info("Parameter configuration:")
+    for key in sorted(params):
+        logger.info(f"  {key:<28} = {params[key]}")
+
+    # --- Data ---
+    X_train, X_test, y_train, y_test = prepare_xor_data(dim, params)
+
+    # --- FullIsingModule ---
+    _, _, _, probs_single = train_full_ising_model(
+        dim, X_train, y_train, X_test, y_test, params,
+        annealer_type=annealer_type,
+    )
+    ms = compute_metrics(y_test, probs_single)
+    logger.info(
+        f"FullIsingModule      | acc={ms['accuracy']:.4f} prec={ms['precision']:.4f} "
+        f"rec={ms['recall']:.4f} f1={ms['f1']:.4f} auc={ms['auc']:.4f}"
+    )
+
+    # --- num_nodes-node ModularNetwork ---
+    _, _, _, probs_modular = train_modular_network(
+        dim, X_train, y_train, X_test, y_test, params,
+        annealer_type=annealer_type,
+    )
+    mm = compute_metrics(y_test, probs_modular)
+    logger.info(
+        f"ModularNetwork({num_nodes})    | acc={mm['accuracy']:.4f} prec={mm['precision']:.4f} "
+        f"rec={mm['recall']:.4f} f1={mm['f1']:.4f} auc={mm['auc']:.4f}"
+    )
+
+    logger.info(f"Diff(Modular-Single): {mm['accuracy'] - ms['accuracy']:+.4f}")
+    logger.info(f"Run log saved to {out_dir}")
+    return ms, mm
 
 
 def compare_xor_models_all_dimensions():
@@ -337,4 +393,4 @@ def compare_xor_models_all_dimensions():
 
 
 if __name__ == '__main__':
-    compare_xor_models_all_dimensions()
+    run_xor_2d()

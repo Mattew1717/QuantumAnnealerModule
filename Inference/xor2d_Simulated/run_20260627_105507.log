@@ -1,0 +1,55 @@
+
+================================================================================
+2D XOR statistics (5 runs, simulated annealing) - FullIsingModule vs 3-node ModularNetwork
+================================================================================
+Annealer type: simulated
+Parameter configuration:
+  batch_size                   = 16
+  device                       = cpu
+  epochs                       = 25
+  hidden_nodes_offset_value    = -0.02
+  lambda_init                  = 1.0
+  lr_combiner                  = 0.02
+  lr_gamma                     = 0.01
+  lr_lambda                    = 0.02
+  lr_offset                    = 0.03
+  minimum_model_size           = 8
+  model_size                   = -1
+  n_samples_per_region         = 20
+  num_reads                    = 1
+  num_workers                  = 4
+  offset_init                  = 1.0
+  partition_input              = False
+  profile                      = defaults
+  random_seed                  = 42
+  sa_beta_range                = [1, 10]
+  sa_num_sweeps                = 1000
+  sa_sweeps_per_beta           = 1
+  test_size                    = 0.2
+
+Running 5 runs (seeds 0..4)...
+  [run 1/5 | seed 0] FullIsing acc=0.750 | Modular(3) acc=1.000
+  [run 2/5 | seed 1] FullIsing acc=0.875 | Modular(3) acc=1.000
+  [run 3/5 | seed 2] FullIsing acc=0.875 | Modular(3) acc=0.938
+  [run 4/5 | seed 3] FullIsing acc=0.812 | Modular(3) acc=1.000
+  [run 5/5 | seed 4] FullIsing acc=0.750 | Modular(3) acc=0.938
+
+Model size (annealer spins): 8
+
+================================================================================
+RESULTS over 5 runs (mean +/- std)
+================================================================================
+FullIsingModule
+  accuracy   mean=0.8125  std=0.0559  min=0.7500  max=0.8750
+  precision  mean=0.7989  std=0.1102  min=0.6667  max=1.0000
+  recall     mean=0.8750  std=0.1118  min=0.7500  max=1.0000
+  f1         mean=0.8239  std=0.0477  min=0.7500  max=0.8889
+  auc        mean=0.8688  std=0.0606  min=0.7812  max=0.9375
+ModularNetwork(3)
+  accuracy   mean=0.9750  std=0.0306  min=0.9375  max=1.0000
+  precision  mean=0.9556  std=0.0544  min=0.8889  max=1.0000
+  recall     mean=1.0000  std=0.0000  min=1.0000  max=1.0000
+  f1         mean=0.9765  std=0.0288  min=0.9412  max=1.0000
+  auc        mean=0.9969  std=0.0063  min=0.9844  max=1.0000
+
+Log saved to sim_stats_xor2d_20260627_105507
