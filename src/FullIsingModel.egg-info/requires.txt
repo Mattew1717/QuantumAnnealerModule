@@ -1,0 +1,8 @@
+torch>=2.0
+numpy>=1.24
+dimod>=0.12.0
+dwave-neal>=0.6.0
+networkx>=3.0
+
+[qpu]
+dwave-system>=1.30.0

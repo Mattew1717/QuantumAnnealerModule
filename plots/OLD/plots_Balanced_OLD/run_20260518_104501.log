@@ -1,0 +1,4104 @@
+
+[RUN 20260518_104501]
+Device: cuda | Batch: 32 | Epochs: 200 | K-Folds: 5
+Model: size=50, perceptrons=5, partition=False, workers=16
+LR: gamma=0.0010, lambda=0.0050, offset=0.0100, combiner=0.0050
+SA: beta=[1, 10], reads=1, sweeps=1000
+Init: lambda=1.0000, offset=1.0000
+
+Datasets directory: /root/global/QuantumAnnealerModule/Inference/Datasets/Datasets_balanced
+
+[Dataset 1/9: 00_iris_versicolor_virginica]
+Loading dataset from: /root/global/QuantumAnnealerModule/Inference/Datasets/Datasets_balanced/00_iris_versicolor_virginica.csv
+Dataset num features: X=(100, 4),
+Class distribution: [50 50]
+Running 5-Fold Cross Validation
+Fold 1/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 19.0078
+  Epoch 5/200 | Loss: 15.7613
+  Epoch 10/200 | Loss: 11.1129
+  Epoch 15/200 | Loss: 10.1771
+  Epoch 20/200 | Loss: 8.2712
+  Epoch 25/200 | Loss: 7.0470
+  Epoch 30/200 | Loss: 5.5653
+  Epoch 35/200 | Loss: 4.4729
+  Epoch 40/200 | Loss: 3.9795
+  Epoch 45/200 | Loss: 3.2073
+  Epoch 50/200 | Loss: 2.5806
+  Epoch 55/200 | Loss: 2.2954
+  Epoch 60/200 | Loss: 1.6578
+  Epoch 65/200 | Loss: 1.1993
+  Epoch 70/200 | Loss: 1.1252
+  Epoch 75/200 | Loss: 0.8565
+  Epoch 80/200 | Loss: 0.7519
+  Epoch 85/200 | Loss: 0.7188
+  Epoch 90/200 | Loss: 0.7262
+  Epoch 95/200 | Loss: 0.6843
+  Epoch 100/200 | Loss: 0.7439
+  Epoch 105/200 | Loss: 0.6527
+  Epoch 110/200 | Loss: 0.6311
+  Epoch 115/200 | Loss: 0.6314
+  Epoch 120/200 | Loss: 0.6259
+  Epoch 125/200 | Loss: 0.6144
+  Epoch 130/200 | Loss: 0.6491
+  Epoch 135/200 | Loss: 0.6206
+  Epoch 140/200 | Loss: 0.6199
+  Epoch 145/200 | Loss: 0.6148
+  Epoch 150/200 | Loss: 0.6306
+  Epoch 155/200 | Loss: 0.5990
+  Epoch 160/200 | Loss: 0.6011
+  Epoch 165/200 | Loss: 0.6278
+  Epoch 170/200 | Loss: 0.5969
+  Epoch 175/200 | Loss: 0.6268
+  Epoch 180/200 | Loss: 0.5924
+  Epoch 185/200 | Loss: 0.6143
+  Epoch 190/200 | Loss: 0.6026
+  Epoch 195/200 | Loss: 0.6094
+  Epoch 200/200 | Loss: 0.5956
+  Single  | acc=0.7000 prec=0.6429 rec=0.9000 f1=0.7500 auc=0.8300
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 1.5480
+  Epoch 5/200 | Loss: 0.7337
+  Epoch 10/200 | Loss: 0.6035
+  Epoch 15/200 | Loss: 0.5754
+  Epoch 20/200 | Loss: 0.5087
+  Epoch 25/200 | Loss: 0.4770
+  Epoch 30/200 | Loss: 0.4154
+  Epoch 35/200 | Loss: 0.3516
+  Epoch 40/200 | Loss: 0.3224
+  Epoch 45/200 | Loss: 0.2919
+  Epoch 50/200 | Loss: 0.2573
+  Epoch 55/200 | Loss: 0.2381
+  Epoch 60/200 | Loss: 0.2284
+  Epoch 65/200 | Loss: 0.1983
+  Epoch 70/200 | Loss: 0.1763
+  Epoch 75/200 | Loss: 0.1681
+  Epoch 80/200 | Loss: 0.1542
+  Epoch 85/200 | Loss: 0.1432
+  Epoch 90/200 | Loss: 0.1299
+  Epoch 95/200 | Loss: 0.1305
+  Epoch 100/200 | Loss: 0.1119
+  Epoch 105/200 | Loss: 0.1010
+  Epoch 110/200 | Loss: 0.1118
+  Epoch 115/200 | Loss: 0.0955
+  Epoch 120/200 | Loss: 0.0896
+  Epoch 125/200 | Loss: 0.0791
+  Epoch 130/200 | Loss: 0.0750
+  Epoch 135/200 | Loss: 0.0735
+  Epoch 140/200 | Loss: 0.0679
+  Epoch 145/200 | Loss: 0.0653
+  Epoch 150/200 | Loss: 0.0673
+  Epoch 155/200 | Loss: 0.0626
+  Epoch 160/200 | Loss: 0.0622
+  Epoch 165/200 | Loss: 0.0556
+  Epoch 170/200 | Loss: 0.0538
+  Epoch 175/200 | Loss: 0.0454
+  Epoch 180/200 | Loss: 0.0494
+  Epoch 185/200 | Loss: 0.0503
+  Epoch 190/200 | Loss: 0.0463
+  Epoch 195/200 | Loss: 0.0437
+  Epoch 200/200 | Loss: 0.0365
+  Modular | acc=1.0000 prec=1.0000 rec=1.0000 f1=1.0000 auc=1.0000
+Fold 2/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 18.4383
+  Epoch 5/200 | Loss: 15.2647
+  Epoch 10/200 | Loss: 11.7322
+  Epoch 15/200 | Loss: 10.3052
+  Epoch 20/200 | Loss: 8.0943
+  Epoch 25/200 | Loss: 6.3208
+  Epoch 30/200 | Loss: 5.2610
+  Epoch 35/200 | Loss: 4.5585
+  Epoch 40/200 | Loss: 3.8749
+  Epoch 45/200 | Loss: 3.1403
+  Epoch 50/200 | Loss: 2.5186
+  Epoch 55/200 | Loss: 1.7406
+  Epoch 60/200 | Loss: 1.3432
+  Epoch 65/200 | Loss: 1.1228
+  Epoch 70/200 | Loss: 0.8903
+  Epoch 75/200 | Loss: 0.7592
+  Epoch 80/200 | Loss: 0.7627
+  Epoch 85/200 | Loss: 0.7148
+  Epoch 90/200 | Loss: 0.6888
+  Epoch 95/200 | Loss: 0.6196
+  Epoch 100/200 | Loss: 0.6191
+  Epoch 105/200 | Loss: 0.6251
+  Epoch 110/200 | Loss: 0.6105
+  Epoch 115/200 | Loss: 0.6140
+  Epoch 120/200 | Loss: 0.5993
+  Epoch 125/200 | Loss: 0.5987
+  Epoch 130/200 | Loss: 0.6219
+  Epoch 135/200 | Loss: 0.5945
+  Epoch 140/200 | Loss: 0.5915
+  Epoch 145/200 | Loss: 0.5678
+  Epoch 150/200 | Loss: 0.5909
+  Epoch 155/200 | Loss: 0.5888
+  Epoch 160/200 | Loss: 0.5842
+  Epoch 165/200 | Loss: 0.5732
+  Epoch 170/200 | Loss: 0.5739
+  Epoch 175/200 | Loss: 0.5864
+  Epoch 180/200 | Loss: 0.5802
+  Epoch 185/200 | Loss: 0.5672
+  Epoch 190/200 | Loss: 0.5895
+  Epoch 195/200 | Loss: 0.5922
+  Epoch 200/200 | Loss: 0.5711
+  Single  | acc=0.9000 prec=0.8333 rec=1.0000 f1=0.9091 auc=0.9200
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 2.5575
+  Epoch 5/200 | Loss: 0.7175
+  Epoch 10/200 | Loss: 0.6205
+  Epoch 15/200 | Loss: 0.5587
+  Epoch 20/200 | Loss: 0.4897
+  Epoch 25/200 | Loss: 0.4321
+  Epoch 30/200 | Loss: 0.3842
+  Epoch 35/200 | Loss: 0.3637
+  Epoch 40/200 | Loss: 0.3208
+  Epoch 45/200 | Loss: 0.2962
+  Epoch 50/200 | Loss: 0.2544
+  Epoch 55/200 | Loss: 0.2366
+  Epoch 60/200 | Loss: 0.2341
+  Epoch 65/200 | Loss: 0.1987
+  Epoch 70/200 | Loss: 0.1911
+  Epoch 75/200 | Loss: 0.2061
+  Epoch 80/200 | Loss: 0.1756
+  Epoch 85/200 | Loss: 0.1564
+  Epoch 90/200 | Loss: 0.1428
+  Epoch 95/200 | Loss: 0.1332
+  Epoch 100/200 | Loss: 0.1168
+  Epoch 105/200 | Loss: 0.1175
+  Epoch 110/200 | Loss: 0.1213
+  Epoch 115/200 | Loss: 0.0961
+  Epoch 120/200 | Loss: 0.0954
+  Epoch 125/200 | Loss: 0.0838
+  Epoch 130/200 | Loss: 0.0859
+  Epoch 135/200 | Loss: 0.0805
+  Epoch 140/200 | Loss: 0.0725
+  Epoch 145/200 | Loss: 0.0723
+  Epoch 150/200 | Loss: 0.0680
+  Epoch 155/200 | Loss: 0.0668
+  Epoch 160/200 | Loss: 0.0664
+  Epoch 165/200 | Loss: 0.0612
+  Epoch 170/200 | Loss: 0.0547
+  Epoch 175/200 | Loss: 0.0561
+  Epoch 180/200 | Loss: 0.0571
+  Epoch 185/200 | Loss: 0.0477
+  Epoch 190/200 | Loss: 0.0454
+  Epoch 195/200 | Loss: 0.0454
+  Epoch 200/200 | Loss: 0.0419
+  Modular | acc=0.9000 prec=1.0000 rec=0.8000 f1=0.8889 auc=1.0000
+Fold 3/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 19.0238
+  Epoch 5/200 | Loss: 14.3751
+  Epoch 10/200 | Loss: 11.2295
+  Epoch 15/200 | Loss: 9.2474
+  Epoch 20/200 | Loss: 7.9436
+  Epoch 25/200 | Loss: 6.7946
+  Epoch 30/200 | Loss: 5.6236
+  Epoch 35/200 | Loss: 4.2110
+  Epoch 40/200 | Loss: 3.9308
+  Epoch 45/200 | Loss: 2.8518
+  Epoch 50/200 | Loss: 2.3656
+  Epoch 55/200 | Loss: 1.8074
+  Epoch 60/200 | Loss: 1.6393
+  Epoch 65/200 | Loss: 1.1397
+  Epoch 70/200 | Loss: 0.9882
+  Epoch 75/200 | Loss: 0.8403
+  Epoch 80/200 | Loss: 0.7543
+  Epoch 85/200 | Loss: 0.6860
+  Epoch 90/200 | Loss: 0.6762
+  Epoch 95/200 | Loss: 0.6662
+  Epoch 100/200 | Loss: 0.6429
+  Epoch 105/200 | Loss: 0.5968
+  Epoch 110/200 | Loss: 0.6032
+  Epoch 115/200 | Loss: 0.6263
+  Epoch 120/200 | Loss: 0.6261
+  Epoch 125/200 | Loss: 0.6196
+  Epoch 130/200 | Loss: 0.6038
+  Epoch 135/200 | Loss: 0.5970
+  Epoch 140/200 | Loss: 0.5907
+  Epoch 145/200 | Loss: 0.5964
+  Epoch 150/200 | Loss: 0.6024
+  Epoch 155/200 | Loss: 0.5865
+  Epoch 160/200 | Loss: 0.5876
+  Epoch 165/200 | Loss: 0.6049
+  Epoch 170/200 | Loss: 0.5972
+  Epoch 175/200 | Loss: 0.5970
+  Epoch 180/200 | Loss: 0.5903
+  Epoch 185/200 | Loss: 0.5701
+  Epoch 190/200 | Loss: 0.5941
+  Epoch 195/200 | Loss: 0.5798
+  Epoch 200/200 | Loss: 0.5740
+  Single  | acc=0.8000 prec=0.8000 rec=0.8000 f1=0.8000 auc=0.8500
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 10.0778
+  Epoch 5/200 | Loss: 1.4924
+  Epoch 10/200 | Loss: 0.9766
+  Epoch 15/200 | Loss: 0.5805
+  Epoch 20/200 | Loss: 0.4885
+  Epoch 25/200 | Loss: 0.4063
+  Epoch 30/200 | Loss: 0.3974
+  Epoch 35/200 | Loss: 0.3811
+  Epoch 40/200 | Loss: 0.3319
+  Epoch 45/200 | Loss: 0.3037
+  Epoch 50/200 | Loss: 0.2930
+  Epoch 55/200 | Loss: 0.2731
+  Epoch 60/200 | Loss: 0.2614
+  Epoch 65/200 | Loss: 0.2335
+  Epoch 70/200 | Loss: 0.2383
+  Epoch 75/200 | Loss: 0.2253
+  Epoch 80/200 | Loss: 0.2174
+  Epoch 85/200 | Loss: 0.1977
+  Epoch 90/200 | Loss: 0.1807
+  Epoch 95/200 | Loss: 0.1722
+  Epoch 100/200 | Loss: 0.1680
+  Epoch 105/200 | Loss: 0.1555
+  Epoch 110/200 | Loss: 0.1478
+  Epoch 115/200 | Loss: 0.1402
+  Epoch 120/200 | Loss: 0.1299
+  Epoch 125/200 | Loss: 0.1278
+  Epoch 130/200 | Loss: 0.1172
+  Epoch 135/200 | Loss: 0.1163
+  Epoch 140/200 | Loss: 0.1020
+  Epoch 145/200 | Loss: 0.1071
+  Epoch 150/200 | Loss: 0.0973
+  Epoch 155/200 | Loss: 0.1063
+  Epoch 160/200 | Loss: 0.1037
+  Epoch 165/200 | Loss: 0.0847
+  Epoch 170/200 | Loss: 0.0870
+  Epoch 175/200 | Loss: 0.0919
+  Epoch 180/200 | Loss: 0.0760
+  Epoch 185/200 | Loss: 0.0817
+  Epoch 190/200 | Loss: 0.0774
+  Epoch 195/200 | Loss: 0.0720
+  Epoch 200/200 | Loss: 0.0614
+  Modular | acc=0.9000 prec=0.8333 rec=1.0000 f1=0.9091 auc=0.8800
+Fold 4/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 16.3152
+  Epoch 5/200 | Loss: 13.4951
+  Epoch 10/200 | Loss: 10.7760
+  Epoch 15/200 | Loss: 10.6329
+  Epoch 20/200 | Loss: 7.8824
+  Epoch 25/200 | Loss: 6.5831
+  Epoch 30/200 | Loss: 5.4365
+  Epoch 35/200 | Loss: 3.8623
+  Epoch 40/200 | Loss: 3.2859
+  Epoch 45/200 | Loss: 3.3496
+  Epoch 50/200 | Loss: 2.2497
+  Epoch 55/200 | Loss: 1.8348
+  Epoch 60/200 | Loss: 1.3156
+  Epoch 65/200 | Loss: 1.0728
+  Epoch 70/200 | Loss: 0.8801
+  Epoch 75/200 | Loss: 0.7330
+  Epoch 80/200 | Loss: 0.7376
+  Epoch 85/200 | Loss: 0.6512
+  Epoch 90/200 | Loss: 0.6869
+  Epoch 95/200 | Loss: 0.6795
+  Epoch 100/200 | Loss: 0.6182
+  Epoch 105/200 | Loss: 0.6011
+  Epoch 110/200 | Loss: 0.6102
+  Epoch 115/200 | Loss: 0.5747
+  Epoch 120/200 | Loss: 0.6009
+  Epoch 125/200 | Loss: 0.5964
+  Epoch 130/200 | Loss: 0.6100
+  Epoch 135/200 | Loss: 0.5735
+  Epoch 140/200 | Loss: 0.5779
+  Epoch 145/200 | Loss: 0.5982
+  Epoch 150/200 | Loss: 0.5817
+  Epoch 155/200 | Loss: 0.5819
+  Epoch 160/200 | Loss: 0.6025
+  Epoch 165/200 | Loss: 0.5779
+  Epoch 170/200 | Loss: 0.5702
+  Epoch 175/200 | Loss: 0.5634
+  Epoch 180/200 | Loss: 0.5839
+  Epoch 185/200 | Loss: 0.5684
+  Epoch 190/200 | Loss: 0.5856
+  Epoch 195/200 | Loss: 0.5737
+  Epoch 200/200 | Loss: 0.5597
+  Single  | acc=0.6000 prec=0.6667 rec=0.4000 f1=0.5000 auc=0.5400
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 20.5685
+  Epoch 5/200 | Loss: 10.8143
+  Epoch 10/200 | Loss: 1.8174
+  Epoch 15/200 | Loss: 1.0758
+  Epoch 20/200 | Loss: 0.6701
+  Epoch 25/200 | Loss: 0.4488
+  Epoch 30/200 | Loss: 0.3471
+  Epoch 35/200 | Loss: 0.2933
+  Epoch 40/200 | Loss: 0.2932
+  Epoch 45/200 | Loss: 0.2512
+  Epoch 50/200 | Loss: 0.2300
+  Epoch 55/200 | Loss: 0.2114
+  Epoch 60/200 | Loss: 0.2037
+  Epoch 65/200 | Loss: 0.1922
+  Epoch 70/200 | Loss: 0.1846
+  Epoch 75/200 | Loss: 0.1721
+  Epoch 80/200 | Loss: 0.1608
+  Epoch 85/200 | Loss: 0.1568
+  Epoch 90/200 | Loss: 0.1486
+  Epoch 95/200 | Loss: 0.1475
+  Epoch 100/200 | Loss: 0.1340
+  Epoch 105/200 | Loss: 0.1284
+  Epoch 110/200 | Loss: 0.1262
+  Epoch 115/200 | Loss: 0.1190
+  Epoch 120/200 | Loss: 0.1103
+  Epoch 125/200 | Loss: 0.1026
+  Epoch 130/200 | Loss: 0.1011
+  Epoch 135/200 | Loss: 0.0979
+  Epoch 140/200 | Loss: 0.0940
+  Epoch 145/200 | Loss: 0.0850
+  Epoch 150/200 | Loss: 0.0840
+  Epoch 155/200 | Loss: 0.0782
+  Epoch 160/200 | Loss: 0.0774
+  Epoch 165/200 | Loss: 0.0702
+  Epoch 170/200 | Loss: 0.0684
+  Epoch 175/200 | Loss: 0.0642
+  Epoch 180/200 | Loss: 0.0640
+  Epoch 185/200 | Loss: 0.0636
+  Epoch 190/200 | Loss: 0.0620
+  Epoch 195/200 | Loss: 0.0599
+  Epoch 200/200 | Loss: 0.0594
+  Modular | acc=0.9000 prec=1.0000 rec=0.8000 f1=0.8889 auc=0.9200
+Fold 5/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 19.1992
+  Epoch 5/200 | Loss: 12.9798
+  Epoch 10/200 | Loss: 13.1953
+  Epoch 15/200 | Loss: 9.7372
+  Epoch 20/200 | Loss: 7.6117
+  Epoch 25/200 | Loss: 6.3538
+  Epoch 30/200 | Loss: 5.6019
+  Epoch 35/200 | Loss: 4.8021
+  Epoch 40/200 | Loss: 4.1832
+  Epoch 45/200 | Loss: 3.3401
+  Epoch 50/200 | Loss: 2.8928
+  Epoch 55/200 | Loss: 1.9218
+  Epoch 60/200 | Loss: 1.4047
+  Epoch 65/200 | Loss: 1.1437
+  Epoch 70/200 | Loss: 1.0285
+  Epoch 75/200 | Loss: 0.9174
+  Epoch 80/200 | Loss: 0.8138
+  Epoch 85/200 | Loss: 0.7924
+  Epoch 90/200 | Loss: 0.7605
+  Epoch 95/200 | Loss: 0.6738
+  Epoch 100/200 | Loss: 0.6841
+  Epoch 105/200 | Loss: 0.6288
+  Epoch 110/200 | Loss: 0.6410
+  Epoch 115/200 | Loss: 0.6508
+  Epoch 120/200 | Loss: 0.6019
+  Epoch 125/200 | Loss: 0.6327
+  Epoch 130/200 | Loss: 0.6304
+  Epoch 135/200 | Loss: 0.6098
+  Epoch 140/200 | Loss: 0.5949
+  Epoch 145/200 | Loss: 0.5875
+  Epoch 150/200 | Loss: 0.6057
+  Epoch 155/200 | Loss: 0.6091
+  Epoch 160/200 | Loss: 0.6123
+  Epoch 165/200 | Loss: 0.5886
+  Epoch 170/200 | Loss: 0.5879
+  Epoch 175/200 | Loss: 0.5900
+  Epoch 180/200 | Loss: 0.6076
+  Epoch 185/200 | Loss: 0.5809
+  Epoch 190/200 | Loss: 0.6324
+  Epoch 195/200 | Loss: 0.6044
+  Epoch 200/200 | Loss: 0.5966
+  Single  | acc=0.6000 prec=0.6000 rec=0.6000 f1=0.6000 auc=0.6900
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 3.9212
+  Epoch 5/200 | Loss: 1.0582
+  Epoch 10/200 | Loss: 0.6383
+  Epoch 15/200 | Loss: 0.4160
+  Epoch 20/200 | Loss: 0.3948
+  Epoch 25/200 | Loss: 0.3779
+  Epoch 30/200 | Loss: 0.3154
+  Epoch 35/200 | Loss: 0.2986
+  Epoch 40/200 | Loss: 0.2719
+  Epoch 45/200 | Loss: 0.2539
+  Epoch 50/200 | Loss: 0.2477
+  Epoch 55/200 | Loss: 0.2293
+  Epoch 60/200 | Loss: 0.2277
+  Epoch 65/200 | Loss: 0.1962
+  Epoch 70/200 | Loss: 0.1983
+  Epoch 75/200 | Loss: 0.1775
+  Epoch 80/200 | Loss: 0.1669
+  Epoch 85/200 | Loss: 0.1500
+  Epoch 90/200 | Loss: 0.1485
+  Epoch 95/200 | Loss: 0.1404
+  Epoch 100/200 | Loss: 0.1309
+  Epoch 105/200 | Loss: 0.1200
+  Epoch 110/200 | Loss: 0.1221
+  Epoch 115/200 | Loss: 0.1193
+  Epoch 120/200 | Loss: 0.1028
+  Epoch 125/200 | Loss: 0.0998
+  Epoch 130/200 | Loss: 0.0911
+  Epoch 135/200 | Loss: 0.0934
+  Epoch 140/200 | Loss: 0.0788
+  Epoch 145/200 | Loss: 0.0858
+  Epoch 150/200 | Loss: 0.0843
+  Epoch 155/200 | Loss: 0.0738
+  Epoch 160/200 | Loss: 0.0782
+  Epoch 165/200 | Loss: 0.0663
+  Epoch 170/200 | Loss: 0.0622
+  Epoch 175/200 | Loss: 0.0640
+  Epoch 180/200 | Loss: 0.0629
+  Epoch 185/200 | Loss: 0.0603
+  Epoch 190/200 | Loss: 0.0561
+  Epoch 195/200 | Loss: 0.0503
+  Epoch 200/200 | Loss: 0.0548
+  Modular | acc=0.9000 prec=0.8333 rec=1.0000 f1=0.9091 auc=0.9100
+
+Results | Single: 0.7200±0.1166 | Modular: 0.9200±0.0400 | Diff: +0.2000
+
+
+[Dataset 2/9: 01_vertebral_column]
+Loading dataset from: /root/global/QuantumAnnealerModule/Inference/Datasets/Datasets_balanced/01_vertebral_column.csv
+Dataset num features: X=(200, 6),
+Class distribution: [100 100]
+Running 5-Fold Cross Validation
+Fold 1/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 15.2576
+  Epoch 5/200 | Loss: 10.0517
+  Epoch 10/200 | Loss: 6.8857
+  Epoch 15/200 | Loss: 4.9892
+  Epoch 20/200 | Loss: 3.6014
+  Epoch 25/200 | Loss: 2.5613
+  Epoch 30/200 | Loss: 1.7511
+  Epoch 35/200 | Loss: 1.1613
+  Epoch 40/200 | Loss: 0.7910
+  Epoch 45/200 | Loss: 0.6283
+  Epoch 50/200 | Loss: 0.5718
+  Epoch 55/200 | Loss: 0.5584
+  Epoch 60/200 | Loss: 0.5503
+  Epoch 65/200 | Loss: 0.5473
+  Epoch 70/200 | Loss: 0.5399
+  Epoch 75/200 | Loss: 0.5385
+  Epoch 80/200 | Loss: 0.5333
+  Epoch 85/200 | Loss: 0.5366
+  Epoch 90/200 | Loss: 0.5331
+  Epoch 95/200 | Loss: 0.5328
+  Epoch 100/200 | Loss: 0.5274
+  Epoch 105/200 | Loss: 0.5270
+  Epoch 110/200 | Loss: 0.5265
+  Epoch 115/200 | Loss: 0.5240
+  Epoch 120/200 | Loss: 0.5244
+  Epoch 125/200 | Loss: 0.5230
+  Epoch 130/200 | Loss: 0.5205
+  Epoch 135/200 | Loss: 0.5199
+  Epoch 140/200 | Loss: 0.5166
+  Epoch 145/200 | Loss: 0.5190
+  Epoch 150/200 | Loss: 0.5136
+  Epoch 155/200 | Loss: 0.5129
+  Epoch 160/200 | Loss: 0.5151
+  Epoch 165/200 | Loss: 0.5131
+  Epoch 170/200 | Loss: 0.5114
+  Epoch 175/200 | Loss: 0.5110
+  Epoch 180/200 | Loss: 0.5111
+  Epoch 185/200 | Loss: 0.5075
+  Epoch 190/200 | Loss: 0.5067
+  Epoch 195/200 | Loss: 0.5051
+  Epoch 200/200 | Loss: 0.5036
+  Single  | acc=0.8000 prec=0.8333 rec=0.7500 f1=0.7895 auc=0.8925
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 2.6599
+  Epoch 5/200 | Loss: 0.7669
+  Epoch 10/200 | Loss: 0.5072
+  Epoch 15/200 | Loss: 0.4406
+  Epoch 20/200 | Loss: 0.4017
+  Epoch 25/200 | Loss: 0.3728
+  Epoch 30/200 | Loss: 0.3528
+  Epoch 35/200 | Loss: 0.3459
+  Epoch 40/200 | Loss: 0.3283
+  Epoch 45/200 | Loss: 0.3016
+  Epoch 50/200 | Loss: 0.2929
+  Epoch 55/200 | Loss: 0.2934
+  Epoch 60/200 | Loss: 0.2673
+  Epoch 65/200 | Loss: 0.2639
+  Epoch 70/200 | Loss: 0.2452
+  Epoch 75/200 | Loss: 0.2426
+  Epoch 80/200 | Loss: 0.2142
+  Epoch 85/200 | Loss: 0.2253
+  Epoch 90/200 | Loss: 0.2059
+  Epoch 95/200 | Loss: 0.2026
+  Epoch 100/200 | Loss: 0.1955
+  Epoch 105/200 | Loss: 0.1837
+  Epoch 110/200 | Loss: 0.1747
+  Epoch 115/200 | Loss: 0.1755
+  Epoch 120/200 | Loss: 0.1701
+  Epoch 125/200 | Loss: 0.1557
+  Epoch 130/200 | Loss: 0.1550
+  Epoch 135/200 | Loss: 0.1442
+  Epoch 140/200 | Loss: 0.1436
+  Epoch 145/200 | Loss: 0.1405
+  Epoch 150/200 | Loss: 0.1303
+  Epoch 155/200 | Loss: 0.1358
+  Epoch 160/200 | Loss: 0.1320
+  Epoch 165/200 | Loss: 0.1238
+  Epoch 170/200 | Loss: 0.1265
+  Epoch 175/200 | Loss: 0.1095
+  Epoch 180/200 | Loss: 0.1076
+  Epoch 185/200 | Loss: 0.1048
+  Epoch 190/200 | Loss: 0.1044
+  Epoch 195/200 | Loss: 0.1038
+  Epoch 200/200 | Loss: 0.1011
+  Modular | acc=0.7500 prec=0.7273 rec=0.8000 f1=0.7619 auc=0.8075
+Fold 2/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 15.0863
+  Epoch 5/200 | Loss: 10.0414
+  Epoch 10/200 | Loss: 6.8975
+  Epoch 15/200 | Loss: 4.9342
+  Epoch 20/200 | Loss: 3.5692
+  Epoch 25/200 | Loss: 2.5204
+  Epoch 30/200 | Loss: 1.6994
+  Epoch 35/200 | Loss: 1.1003
+  Epoch 40/200 | Loss: 0.7312
+  Epoch 45/200 | Loss: 0.5761
+  Epoch 50/200 | Loss: 0.5267
+  Epoch 55/200 | Loss: 0.5163
+  Epoch 60/200 | Loss: 0.5137
+  Epoch 65/200 | Loss: 0.5097
+  Epoch 70/200 | Loss: 0.5101
+  Epoch 75/200 | Loss: 0.5064
+  Epoch 80/200 | Loss: 0.5054
+  Epoch 85/200 | Loss: 0.5009
+  Epoch 90/200 | Loss: 0.5012
+  Epoch 95/200 | Loss: 0.4968
+  Epoch 100/200 | Loss: 0.4961
+  Epoch 105/200 | Loss: 0.4969
+  Epoch 110/200 | Loss: 0.4925
+  Epoch 115/200 | Loss: 0.4936
+  Epoch 120/200 | Loss: 0.4913
+  Epoch 125/200 | Loss: 0.4892
+  Epoch 130/200 | Loss: 0.4908
+  Epoch 135/200 | Loss: 0.4883
+  Epoch 140/200 | Loss: 0.4898
+  Epoch 145/200 | Loss: 0.4866
+  Epoch 150/200 | Loss: 0.4829
+  Epoch 155/200 | Loss: 0.4820
+  Epoch 160/200 | Loss: 0.4825
+  Epoch 165/200 | Loss: 0.4803
+  Epoch 170/200 | Loss: 0.4784
+  Epoch 175/200 | Loss: 0.4805
+  Epoch 180/200 | Loss: 0.4754
+  Epoch 185/200 | Loss: 0.4738
+  Epoch 190/200 | Loss: 0.4726
+  Epoch 195/200 | Loss: 0.4733
+  Epoch 200/200 | Loss: 0.4699
+  Single  | acc=0.6250 prec=0.6316 rec=0.6000 f1=0.6154 auc=0.7825
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 10.9751
+  Epoch 5/200 | Loss: 1.5729
+  Epoch 10/200 | Loss: 0.9259
+  Epoch 15/200 | Loss: 0.5488
+  Epoch 20/200 | Loss: 0.4511
+  Epoch 25/200 | Loss: 0.4138
+  Epoch 30/200 | Loss: 0.3928
+  Epoch 35/200 | Loss: 0.3783
+  Epoch 40/200 | Loss: 0.3714
+  Epoch 45/200 | Loss: 0.3545
+  Epoch 50/200 | Loss: 0.3400
+  Epoch 55/200 | Loss: 0.3296
+  Epoch 60/200 | Loss: 0.3182
+  Epoch 65/200 | Loss: 0.3118
+  Epoch 70/200 | Loss: 0.3061
+  Epoch 75/200 | Loss: 0.2909
+  Epoch 80/200 | Loss: 0.2804
+  Epoch 85/200 | Loss: 0.2710
+  Epoch 90/200 | Loss: 0.2567
+  Epoch 95/200 | Loss: 0.2530
+  Epoch 100/200 | Loss: 0.2464
+  Epoch 105/200 | Loss: 0.2394
+  Epoch 110/200 | Loss: 0.2223
+  Epoch 115/200 | Loss: 0.2224
+  Epoch 120/200 | Loss: 0.2071
+  Epoch 125/200 | Loss: 0.2106
+  Epoch 130/200 | Loss: 0.1916
+  Epoch 135/200 | Loss: 0.1899
+  Epoch 140/200 | Loss: 0.1799
+  Epoch 145/200 | Loss: 0.1923
+  Epoch 150/200 | Loss: 0.1665
+  Epoch 155/200 | Loss: 0.1660
+  Epoch 160/200 | Loss: 0.1791
+  Epoch 165/200 | Loss: 0.1600
+  Epoch 170/200 | Loss: 0.1531
+  Epoch 175/200 | Loss: 0.1357
+  Epoch 180/200 | Loss: 0.1371
+  Epoch 185/200 | Loss: 0.1363
+  Epoch 190/200 | Loss: 0.1483
+  Epoch 195/200 | Loss: 0.1286
+  Epoch 200/200 | Loss: 0.1226
+  Modular | acc=0.7750 prec=0.7619 rec=0.8000 f1=0.7805 auc=0.8675
+Fold 3/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 14.8239
+  Epoch 5/200 | Loss: 10.0013
+  Epoch 10/200 | Loss: 6.8399
+  Epoch 15/200 | Loss: 4.9168
+  Epoch 20/200 | Loss: 3.5841
+  Epoch 25/200 | Loss: 2.5610
+  Epoch 30/200 | Loss: 1.7248
+  Epoch 35/200 | Loss: 1.1395
+  Epoch 40/200 | Loss: 0.7651
+  Epoch 45/200 | Loss: 0.6041
+  Epoch 50/200 | Loss: 0.5558
+  Epoch 55/200 | Loss: 0.5376
+  Epoch 60/200 | Loss: 0.5316
+  Epoch 65/200 | Loss: 0.5280
+  Epoch 70/200 | Loss: 0.5216
+  Epoch 75/200 | Loss: 0.5178
+  Epoch 80/200 | Loss: 0.5188
+  Epoch 85/200 | Loss: 0.5166
+  Epoch 90/200 | Loss: 0.5136
+  Epoch 95/200 | Loss: 0.5140
+  Epoch 100/200 | Loss: 0.5117
+  Epoch 105/200 | Loss: 0.5101
+  Epoch 110/200 | Loss: 0.5091
+  Epoch 115/200 | Loss: 0.5101
+  Epoch 120/200 | Loss: 0.5080
+  Epoch 125/200 | Loss: 0.5036
+  Epoch 130/200 | Loss: 0.5040
+  Epoch 135/200 | Loss: 0.5021
+  Epoch 140/200 | Loss: 0.4993
+  Epoch 145/200 | Loss: 0.5000
+  Epoch 150/200 | Loss: 0.4976
+  Epoch 155/200 | Loss: 0.5001
+  Epoch 160/200 | Loss: 0.4980
+  Epoch 165/200 | Loss: 0.4949
+  Epoch 170/200 | Loss: 0.4943
+  Epoch 175/200 | Loss: 0.4939
+  Epoch 180/200 | Loss: 0.4917
+  Epoch 185/200 | Loss: 0.4919
+  Epoch 190/200 | Loss: 0.4890
+  Epoch 195/200 | Loss: 0.4916
+  Epoch 200/200 | Loss: 0.4862
+  Single  | acc=0.7250 prec=0.6667 rec=0.9000 f1=0.7660 auc=0.8075
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 1.0894
+  Epoch 5/200 | Loss: 0.5679
+  Epoch 10/200 | Loss: 0.4545
+  Epoch 15/200 | Loss: 0.3908
+  Epoch 20/200 | Loss: 0.3633
+  Epoch 25/200 | Loss: 0.3422
+  Epoch 30/200 | Loss: 0.3192
+  Epoch 35/200 | Loss: 0.3067
+  Epoch 40/200 | Loss: 0.2736
+  Epoch 45/200 | Loss: 0.2598
+  Epoch 50/200 | Loss: 0.2515
+  Epoch 55/200 | Loss: 0.2623
+  Epoch 60/200 | Loss: 0.2209
+  Epoch 65/200 | Loss: 0.2146
+  Epoch 70/200 | Loss: 0.2012
+  Epoch 75/200 | Loss: 0.2006
+  Epoch 80/200 | Loss: 0.1949
+  Epoch 85/200 | Loss: 0.1799
+  Epoch 90/200 | Loss: 0.2291
+  Epoch 95/200 | Loss: 0.1776
+  Epoch 100/200 | Loss: 0.1642
+  Epoch 105/200 | Loss: 0.1589
+  Epoch 110/200 | Loss: 0.1611
+  Epoch 115/200 | Loss: 0.1564
+  Epoch 120/200 | Loss: 0.1475
+  Epoch 125/200 | Loss: 0.1450
+  Epoch 130/200 | Loss: 0.1434
+  Epoch 135/200 | Loss: 0.1378
+  Epoch 140/200 | Loss: 0.1343
+  Epoch 145/200 | Loss: 0.1387
+  Epoch 150/200 | Loss: 0.1295
+  Epoch 155/200 | Loss: 0.1257
+  Epoch 160/200 | Loss: 0.1199
+  Epoch 165/200 | Loss: 0.1422
+  Epoch 170/200 | Loss: 0.1398
+  Epoch 175/200 | Loss: 0.1404
+  Epoch 180/200 | Loss: 0.1367
+  Epoch 185/200 | Loss: 0.1178
+  Epoch 190/200 | Loss: 0.1158
+  Epoch 195/200 | Loss: 0.1137
+  Epoch 200/200 | Loss: 0.1155
+  Modular | acc=0.8000 prec=0.8000 rec=0.8000 f1=0.8000 auc=0.8500
+Fold 4/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 16.0032
+  Epoch 5/200 | Loss: 10.6704
+  Epoch 10/200 | Loss: 7.4278
+  Epoch 15/200 | Loss: 5.3562
+  Epoch 20/200 | Loss: 3.9278
+  Epoch 25/200 | Loss: 2.7902
+  Epoch 30/200 | Loss: 1.9173
+  Epoch 35/200 | Loss: 1.2459
+  Epoch 40/200 | Loss: 0.8150
+  Epoch 45/200 | Loss: 0.6035
+  Epoch 50/200 | Loss: 0.5399
+  Epoch 55/200 | Loss: 0.5252
+  Epoch 60/200 | Loss: 0.5174
+  Epoch 65/200 | Loss: 0.5168
+  Epoch 70/200 | Loss: 0.5145
+  Epoch 75/200 | Loss: 0.5070
+  Epoch 80/200 | Loss: 0.5053
+  Epoch 85/200 | Loss: 0.5012
+  Epoch 90/200 | Loss: 0.5016
+  Epoch 95/200 | Loss: 0.4997
+  Epoch 100/200 | Loss: 0.4987
+  Epoch 105/200 | Loss: 0.4964
+  Epoch 110/200 | Loss: 0.4933
+  Epoch 115/200 | Loss: 0.4930
+  Epoch 120/200 | Loss: 0.4922
+  Epoch 125/200 | Loss: 0.4886
+  Epoch 130/200 | Loss: 0.4876
+  Epoch 135/200 | Loss: 0.4858
+  Epoch 140/200 | Loss: 0.4832
+  Epoch 145/200 | Loss: 0.4830
+  Epoch 150/200 | Loss: 0.4823
+  Epoch 155/200 | Loss: 0.4806
+  Epoch 160/200 | Loss: 0.4796
+  Epoch 165/200 | Loss: 0.4754
+  Epoch 170/200 | Loss: 0.4777
+  Epoch 175/200 | Loss: 0.4766
+  Epoch 180/200 | Loss: 0.4720
+  Epoch 185/200 | Loss: 0.4749
+  Epoch 190/200 | Loss: 0.4716
+  Epoch 195/200 | Loss: 0.4723
+  Epoch 200/200 | Loss: 0.4688
+  Single  | acc=0.7500 prec=0.7273 rec=0.8000 f1=0.7619 auc=0.7825
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 2.4672
+  Epoch 5/200 | Loss: 0.7052
+  Epoch 10/200 | Loss: 0.4635
+  Epoch 15/200 | Loss: 0.4196
+  Epoch 20/200 | Loss: 0.3784
+  Epoch 25/200 | Loss: 0.3360
+  Epoch 30/200 | Loss: 0.3290
+  Epoch 35/200 | Loss: 0.2915
+  Epoch 40/200 | Loss: 0.3029
+  Epoch 45/200 | Loss: 0.2684
+  Epoch 50/200 | Loss: 0.2487
+  Epoch 55/200 | Loss: 0.2473
+  Epoch 60/200 | Loss: 0.2329
+  Epoch 65/200 | Loss: 0.2189
+  Epoch 70/200 | Loss: 0.2234
+  Epoch 75/200 | Loss: 0.2211
+  Epoch 80/200 | Loss: 0.1955
+  Epoch 85/200 | Loss: 0.1883
+  Epoch 90/200 | Loss: 0.1840
+  Epoch 95/200 | Loss: 0.1767
+  Epoch 100/200 | Loss: 0.1759
+  Epoch 105/200 | Loss: 0.1668
+  Epoch 110/200 | Loss: 0.1713
+  Epoch 115/200 | Loss: 0.1586
+  Epoch 120/200 | Loss: 0.1479
+  Epoch 125/200 | Loss: 0.1595
+  Epoch 130/200 | Loss: 0.1421
+  Epoch 135/200 | Loss: 0.1409
+  Epoch 140/200 | Loss: 0.1481
+  Epoch 145/200 | Loss: 0.1342
+  Epoch 150/200 | Loss: 0.1335
+  Epoch 155/200 | Loss: 0.1379
+  Epoch 160/200 | Loss: 0.1821
+  Epoch 165/200 | Loss: 0.1431
+  Epoch 170/200 | Loss: 0.1304
+  Epoch 175/200 | Loss: 0.1155
+  Epoch 180/200 | Loss: 0.1133
+  Epoch 185/200 | Loss: 0.1171
+  Epoch 190/200 | Loss: 0.1210
+  Epoch 195/200 | Loss: 0.1074
+  Epoch 200/200 | Loss: 0.1006
+  Modular | acc=0.8250 prec=0.8421 rec=0.8000 f1=0.8205 auc=0.9150
+Fold 5/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 14.5582
+  Epoch 5/200 | Loss: 9.8005
+  Epoch 10/200 | Loss: 6.7206
+  Epoch 15/200 | Loss: 4.8357
+  Epoch 20/200 | Loss: 3.4900
+  Epoch 25/200 | Loss: 2.4775
+  Epoch 30/200 | Loss: 1.6837
+  Epoch 35/200 | Loss: 1.0944
+  Epoch 40/200 | Loss: 0.7331
+  Epoch 45/200 | Loss: 0.5782
+  Epoch 50/200 | Loss: 0.5247
+  Epoch 55/200 | Loss: 0.5114
+  Epoch 60/200 | Loss: 0.5093
+  Epoch 65/200 | Loss: 0.5050
+  Epoch 70/200 | Loss: 0.5011
+  Epoch 75/200 | Loss: 0.5024
+  Epoch 80/200 | Loss: 0.4963
+  Epoch 85/200 | Loss: 0.4916
+  Epoch 90/200 | Loss: 0.4893
+  Epoch 95/200 | Loss: 0.4905
+  Epoch 100/200 | Loss: 0.4873
+  Epoch 105/200 | Loss: 0.4840
+  Epoch 110/200 | Loss: 0.4852
+  Epoch 115/200 | Loss: 0.4846
+  Epoch 120/200 | Loss: 0.4828
+  Epoch 125/200 | Loss: 0.4786
+  Epoch 130/200 | Loss: 0.4777
+  Epoch 135/200 | Loss: 0.4770
+  Epoch 140/200 | Loss: 0.4756
+  Epoch 145/200 | Loss: 0.4755
+  Epoch 150/200 | Loss: 0.4748
+  Epoch 155/200 | Loss: 0.4715
+  Epoch 160/200 | Loss: 0.4718
+  Epoch 165/200 | Loss: 0.4705
+  Epoch 170/200 | Loss: 0.4687
+  Epoch 175/200 | Loss: 0.4673
+  Epoch 180/200 | Loss: 0.4668
+  Epoch 185/200 | Loss: 0.4669
+  Epoch 190/200 | Loss: 0.4659
+  Epoch 195/200 | Loss: 0.4639
+  Epoch 200/200 | Loss: 0.4642
+  Single  | acc=0.7250 prec=0.6800 rec=0.8500 f1=0.7556 auc=0.7475
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 3.1757
+  Epoch 5/200 | Loss: 0.8200
+  Epoch 10/200 | Loss: 0.4975
+  Epoch 15/200 | Loss: 0.4156
+  Epoch 20/200 | Loss: 0.3658
+  Epoch 25/200 | Loss: 0.3304
+  Epoch 30/200 | Loss: 0.3104
+  Epoch 35/200 | Loss: 0.2853
+  Epoch 40/200 | Loss: 0.2710
+  Epoch 45/200 | Loss: 0.2686
+  Epoch 50/200 | Loss: 0.2471
+  Epoch 55/200 | Loss: 0.2596
+  Epoch 60/200 | Loss: 0.2334
+  Epoch 65/200 | Loss: 0.2262
+  Epoch 70/200 | Loss: 0.2208
+  Epoch 75/200 | Loss: 0.2156
+  Epoch 80/200 | Loss: 0.2100
+  Epoch 85/200 | Loss: 0.1970
+  Epoch 90/200 | Loss: 0.1911
+  Epoch 95/200 | Loss: 0.1746
+  Epoch 100/200 | Loss: 0.1684
+  Epoch 105/200 | Loss: 0.1584
+  Epoch 110/200 | Loss: 0.1599
+  Epoch 115/200 | Loss: 0.1520
+  Epoch 120/200 | Loss: 0.1505
+  Epoch 125/200 | Loss: 0.1474
+  Epoch 130/200 | Loss: 0.1343
+  Epoch 135/200 | Loss: 0.1357
+  Epoch 140/200 | Loss: 0.1333
+  Epoch 145/200 | Loss: 0.1245
+  Epoch 150/200 | Loss: 0.1220
+  Epoch 155/200 | Loss: 0.1226
+  Epoch 160/200 | Loss: 0.1221
+  Epoch 165/200 | Loss: 0.1455
+  Epoch 170/200 | Loss: 0.1281
+  Epoch 175/200 | Loss: 0.1081
+  Epoch 180/200 | Loss: 0.1026
+  Epoch 185/200 | Loss: 0.1011
+  Epoch 190/200 | Loss: 0.1105
+  Epoch 195/200 | Loss: 0.1200
+  Epoch 200/200 | Loss: 0.0987
+  Modular | acc=0.7750 prec=0.8235 rec=0.7000 f1=0.7568 auc=0.8825
+
+Results | Single: 0.7250±0.0570 | Modular: 0.7850±0.0255 | Diff: +0.0600
+
+
+[Dataset 3/9: 02_banknote]
+Loading dataset from: /root/global/QuantumAnnealerModule/Inference/Datasets/Datasets_balanced/02_banknote.csv
+Dataset num features: X=(1220, 4),
+Class distribution: [610 610]
+Running 5-Fold Cross Validation
+Fold 1/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 16.6515
+  Epoch 5/200 | Loss: 3.3940
+  Epoch 10/200 | Loss: 0.7430
+  Epoch 15/200 | Loss: 0.6676
+  Epoch 20/200 | Loss: 0.6499
+  Epoch 25/200 | Loss: 0.6402
+  Epoch 30/200 | Loss: 0.6388
+  Epoch 35/200 | Loss: 0.6370
+  Epoch 40/200 | Loss: 0.6313
+  Epoch 45/200 | Loss: 0.6294
+  Epoch 50/200 | Loss: 0.6332
+  Epoch 55/200 | Loss: 0.6282
+  Epoch 60/200 | Loss: 0.6211
+  Epoch 65/200 | Loss: 0.6207
+  Epoch 70/200 | Loss: 0.6218
+  Epoch 75/200 | Loss: 0.6131
+  Epoch 80/200 | Loss: 0.6164
+  Epoch 85/200 | Loss: 0.6188
+  Epoch 90/200 | Loss: 0.6074
+  Epoch 95/200 | Loss: 0.6027
+  Epoch 100/200 | Loss: 0.5978
+  Epoch 105/200 | Loss: 0.6012
+  Epoch 110/200 | Loss: 0.5879
+  Epoch 115/200 | Loss: 0.5901
+  Epoch 120/200 | Loss: 0.5873
+  Epoch 125/200 | Loss: 0.5768
+  Epoch 130/200 | Loss: 0.5734
+  Epoch 135/200 | Loss: 0.5782
+  Epoch 140/200 | Loss: 0.5651
+  Epoch 145/200 | Loss: 0.5596
+  Epoch 150/200 | Loss: 0.5531
+  Epoch 155/200 | Loss: 0.5510
+  Epoch 160/200 | Loss: 0.5519
+  Epoch 165/200 | Loss: 0.5432
+  Epoch 170/200 | Loss: 0.5440
+  Epoch 175/200 | Loss: 0.5464
+  Epoch 180/200 | Loss: 0.5346
+  Epoch 185/200 | Loss: 0.5425
+  Epoch 190/200 | Loss: 0.5348
+  Epoch 195/200 | Loss: 0.5378
+  Epoch 200/200 | Loss: 0.5337
+  Single  | acc=0.8443 prec=0.8818 rec=0.7951 f1=0.8362 auc=0.8517
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 0.5920
+  Epoch 5/200 | Loss: 0.1734
+  Epoch 10/200 | Loss: 0.0722
+  Epoch 15/200 | Loss: 0.0497
+  Epoch 20/200 | Loss: 0.0507
+  Epoch 25/200 | Loss: 0.0351
+  Epoch 30/200 | Loss: 0.0279
+  Epoch 35/200 | Loss: 0.0249
+  Epoch 40/200 | Loss: 0.0291
+  Epoch 45/200 | Loss: 0.0213
+  Epoch 50/200 | Loss: 0.0205
+  Epoch 55/200 | Loss: 0.0207
+  Epoch 60/200 | Loss: 0.0396
+  Epoch 65/200 | Loss: 0.0254
+  Epoch 70/200 | Loss: 0.0173
+  Epoch 75/200 | Loss: 0.0128
+  Epoch 80/200 | Loss: 0.0200
+  Epoch 85/200 | Loss: 0.0106
+  Epoch 90/200 | Loss: 0.0209
+  Epoch 95/200 | Loss: 0.0070
+  Epoch 100/200 | Loss: 0.0071
+  Epoch 105/200 | Loss: 0.0054
+  Epoch 110/200 | Loss: 0.0243
+  Epoch 115/200 | Loss: 0.0047
+  Epoch 120/200 | Loss: 0.0043
+  Epoch 125/200 | Loss: 0.0041
+  Epoch 130/200 | Loss: 0.0065
+  Epoch 135/200 | Loss: 0.0174
+  Epoch 140/200 | Loss: 0.0066
+  Epoch 145/200 | Loss: 0.0286
+  Epoch 150/200 | Loss: 0.0036
+  Epoch 155/200 | Loss: 0.0051
+  Epoch 160/200 | Loss: 0.0547
+  Epoch 165/200 | Loss: 0.0029
+  Epoch 170/200 | Loss: 0.0061
+  Epoch 175/200 | Loss: 0.0024
+  Epoch 180/200 | Loss: 0.0079
+  Epoch 185/200 | Loss: 0.0115
+  Epoch 190/200 | Loss: 0.0032
+  Epoch 195/200 | Loss: 0.0039
+  Epoch 200/200 | Loss: 0.0024
+  Modular | acc=0.9877 prec=1.0000 rec=0.9754 f1=0.9876 auc=0.9999
+Fold 2/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 16.8866
+  Epoch 5/200 | Loss: 3.5179
+  Epoch 10/200 | Loss: 0.7578
+  Epoch 15/200 | Loss: 0.6724
+  Epoch 20/200 | Loss: 0.6547
+  Epoch 25/200 | Loss: 0.6520
+  Epoch 30/200 | Loss: 0.6464
+  Epoch 35/200 | Loss: 0.6646
+  Epoch 40/200 | Loss: 0.6540
+  Epoch 45/200 | Loss: 0.6447
+  Epoch 50/200 | Loss: 0.6456
+  Epoch 55/200 | Loss: 0.6531
+  Epoch 60/200 | Loss: 0.6463
+  Epoch 65/200 | Loss: 0.6451
+  Epoch 70/200 | Loss: 0.6427
+  Epoch 75/200 | Loss: 0.6480
+  Epoch 80/200 | Loss: 0.6454
+  Epoch 85/200 | Loss: 0.6438
+  Epoch 90/200 | Loss: 0.6457
+  Epoch 95/200 | Loss: 0.6451
+  Epoch 100/200 | Loss: 0.6462
+  Epoch 105/200 | Loss: 0.6366
+  Epoch 110/200 | Loss: 0.6394
+  Epoch 115/200 | Loss: 0.6308
+  Epoch 120/200 | Loss: 0.6458
+  Epoch 125/200 | Loss: 0.6365
+  Epoch 130/200 | Loss: 0.6292
+  Epoch 135/200 | Loss: 0.6421
+  Epoch 140/200 | Loss: 0.6261
+  Epoch 145/200 | Loss: 0.6225
+  Epoch 150/200 | Loss: 0.6221
+  Epoch 155/200 | Loss: 0.6135
+  Epoch 160/200 | Loss: 0.6122
+  Epoch 165/200 | Loss: 0.6146
+  Epoch 170/200 | Loss: 0.5986
+  Epoch 175/200 | Loss: 0.6280
+  Epoch 180/200 | Loss: 0.6164
+  Epoch 185/200 | Loss: 0.6026
+  Epoch 190/200 | Loss: 0.6051
+  Epoch 195/200 | Loss: 0.5962
+  Epoch 200/200 | Loss: 0.6017
+  Single  | acc=0.7336 prec=0.6939 rec=0.8361 f1=0.7584 auc=0.8267
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 4.8969
+  Epoch 5/200 | Loss: 0.2728
+  Epoch 10/200 | Loss: 0.1263
+  Epoch 15/200 | Loss: 0.0834
+  Epoch 20/200 | Loss: 0.0663
+  Epoch 25/200 | Loss: 0.0514
+  Epoch 30/200 | Loss: 0.0438
+  Epoch 35/200 | Loss: 0.0350
+  Epoch 40/200 | Loss: 0.0306
+  Epoch 45/200 | Loss: 0.0242
+  Epoch 50/200 | Loss: 0.0203
+  Epoch 55/200 | Loss: 0.0180
+  Epoch 60/200 | Loss: 0.0184
+  Epoch 65/200 | Loss: 0.0138
+  Epoch 70/200 | Loss: 0.0125
+  Epoch 75/200 | Loss: 0.0122
+  Epoch 80/200 | Loss: 0.0097
+  Epoch 85/200 | Loss: 0.0115
+  Epoch 90/200 | Loss: 0.0081
+  Epoch 95/200 | Loss: 0.0284
+  Epoch 100/200 | Loss: 0.0080
+  Epoch 105/200 | Loss: 0.0049
+  Epoch 110/200 | Loss: 0.0061
+  Epoch 115/200 | Loss: 0.0053
+  Epoch 120/200 | Loss: 0.0053
+  Epoch 125/200 | Loss: 0.0065
+  Epoch 130/200 | Loss: 0.0039
+  Epoch 135/200 | Loss: 0.0076
+  Epoch 140/200 | Loss: 0.0047
+  Epoch 145/200 | Loss: 0.0058
+  Epoch 150/200 | Loss: 0.0026
+  Epoch 155/200 | Loss: 0.0198
+  Epoch 160/200 | Loss: 0.0026
+  Epoch 165/200 | Loss: 0.0043
+  Epoch 170/200 | Loss: 0.0096
+  Epoch 175/200 | Loss: 0.0136
+  Epoch 180/200 | Loss: 0.0022
+  Epoch 185/200 | Loss: 0.0015
+  Epoch 190/200 | Loss: 0.0013
+  Epoch 195/200 | Loss: 0.0013
+  Epoch 200/200 | Loss: 0.0011
+  Modular | acc=1.0000 prec=1.0000 rec=1.0000 f1=1.0000 auc=1.0000
+Fold 3/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 16.4686
+  Epoch 5/200 | Loss: 3.3947
+  Epoch 10/200 | Loss: 0.7576
+  Epoch 15/200 | Loss: 0.6727
+  Epoch 20/200 | Loss: 0.6545
+  Epoch 25/200 | Loss: 0.6516
+  Epoch 30/200 | Loss: 0.6486
+  Epoch 35/200 | Loss: 0.6457
+  Epoch 40/200 | Loss: 0.6615
+  Epoch 45/200 | Loss: 0.6451
+  Epoch 50/200 | Loss: 0.6486
+  Epoch 55/200 | Loss: 0.6506
+  Epoch 60/200 | Loss: 0.6498
+  Epoch 65/200 | Loss: 0.6405
+  Epoch 70/200 | Loss: 0.6457
+  Epoch 75/200 | Loss: 0.6403
+  Epoch 80/200 | Loss: 0.6462
+  Epoch 85/200 | Loss: 0.6480
+  Epoch 90/200 | Loss: 0.6371
+  Epoch 95/200 | Loss: 0.6443
+  Epoch 100/200 | Loss: 0.6326
+  Epoch 105/200 | Loss: 0.6237
+  Epoch 110/200 | Loss: 0.6196
+  Epoch 115/200 | Loss: 0.6210
+  Epoch 120/200 | Loss: 0.6073
+  Epoch 125/200 | Loss: 0.6105
+  Epoch 130/200 | Loss: 0.6104
+  Epoch 135/200 | Loss: 0.5961
+  Epoch 140/200 | Loss: 0.5896
+  Epoch 145/200 | Loss: 0.5933
+  Epoch 150/200 | Loss: 0.5843
+  Epoch 155/200 | Loss: 0.5778
+  Epoch 160/200 | Loss: 0.5737
+  Epoch 165/200 | Loss: 0.5731
+  Epoch 170/200 | Loss: 0.5621
+  Epoch 175/200 | Loss: 0.5646
+  Epoch 180/200 | Loss: 0.5595
+  Epoch 185/200 | Loss: 0.5495
+  Epoch 190/200 | Loss: 0.5515
+  Epoch 195/200 | Loss: 0.5422
+  Epoch 200/200 | Loss: 0.5440
+  Single  | acc=0.8279 prec=0.8077 rec=0.8607 f1=0.8333 auc=0.8777
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 2.6272
+  Epoch 5/200 | Loss: 0.2942
+  Epoch 10/200 | Loss: 0.1394
+  Epoch 15/200 | Loss: 0.0870
+  Epoch 20/200 | Loss: 0.0544
+  Epoch 25/200 | Loss: 0.0382
+  Epoch 30/200 | Loss: 0.0272
+  Epoch 35/200 | Loss: 0.0206
+  Epoch 40/200 | Loss: 0.0182
+  Epoch 45/200 | Loss: 0.0145
+  Epoch 50/200 | Loss: 0.0118
+  Epoch 55/200 | Loss: 0.0113
+  Epoch 60/200 | Loss: 0.0083
+  Epoch 65/200 | Loss: 0.0145
+  Epoch 70/200 | Loss: 0.0128
+  Epoch 75/200 | Loss: 0.0058
+  Epoch 80/200 | Loss: 0.0065
+  Epoch 85/200 | Loss: 0.0056
+  Epoch 90/200 | Loss: 0.0056
+  Epoch 95/200 | Loss: 0.0054
+  Epoch 100/200 | Loss: 0.0632
+  Epoch 105/200 | Loss: 0.0041
+  Epoch 110/200 | Loss: 0.0031
+  Epoch 115/200 | Loss: 0.0049
+  Epoch 120/200 | Loss: 0.0038
+  Epoch 125/200 | Loss: 0.0050
+  Epoch 130/200 | Loss: 0.0050
+  Epoch 135/200 | Loss: 0.0037
+  Epoch 140/200 | Loss: 0.0046
+  Epoch 145/200 | Loss: 0.0027
+  Epoch 150/200 | Loss: 0.0136
+  Epoch 155/200 | Loss: 0.0015
+  Epoch 160/200 | Loss: 0.0030
+  Epoch 165/200 | Loss: 0.0020
+  Epoch 170/200 | Loss: 0.0023
+  Epoch 175/200 | Loss: 0.0010
+  Epoch 180/200 | Loss: 0.0022
+  Epoch 185/200 | Loss: 0.0040
+  Epoch 190/200 | Loss: 0.0015
+  Epoch 195/200 | Loss: 0.0008
+  Epoch 200/200 | Loss: 0.0010
+  Modular | acc=1.0000 prec=1.0000 rec=1.0000 f1=1.0000 auc=1.0000
+Fold 4/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 16.4262
+  Epoch 5/200 | Loss: 3.3052
+  Epoch 10/200 | Loss: 0.7447
+  Epoch 15/200 | Loss: 0.6704
+  Epoch 20/200 | Loss: 0.6508
+  Epoch 25/200 | Loss: 0.6464
+  Epoch 30/200 | Loss: 0.6420
+  Epoch 35/200 | Loss: 0.6421
+  Epoch 40/200 | Loss: 0.6344
+  Epoch 45/200 | Loss: 0.6322
+  Epoch 50/200 | Loss: 0.6280
+  Epoch 55/200 | Loss: 0.6351
+  Epoch 60/200 | Loss: 0.6271
+  Epoch 65/200 | Loss: 0.6218
+  Epoch 70/200 | Loss: 0.6176
+  Epoch 75/200 | Loss: 0.6181
+  Epoch 80/200 | Loss: 0.6149
+  Epoch 85/200 | Loss: 0.6100
+  Epoch 90/200 | Loss: 0.6129
+  Epoch 95/200 | Loss: 0.6002
+  Epoch 100/200 | Loss: 0.6205
+  Epoch 105/200 | Loss: 0.5998
+  Epoch 110/200 | Loss: 0.6020
+  Epoch 115/200 | Loss: 0.5848
+  Epoch 120/200 | Loss: 0.5915
+  Epoch 125/200 | Loss: 0.5863
+  Epoch 130/200 | Loss: 0.5682
+  Epoch 135/200 | Loss: 0.5639
+  Epoch 140/200 | Loss: 0.5606
+  Epoch 145/200 | Loss: 0.5582
+  Epoch 150/200 | Loss: 0.5510
+  Epoch 155/200 | Loss: 0.5418
+  Epoch 160/200 | Loss: 0.5485
+  Epoch 165/200 | Loss: 0.5398
+  Epoch 170/200 | Loss: 0.5292
+  Epoch 175/200 | Loss: 0.5327
+  Epoch 180/200 | Loss: 0.5339
+  Epoch 185/200 | Loss: 0.5320
+  Epoch 190/200 | Loss: 0.5270
+  Epoch 195/200 | Loss: 0.5313
+  Epoch 200/200 | Loss: 0.5206
+  Single  | acc=0.8197 prec=0.8545 rec=0.7705 f1=0.8103 auc=0.8359
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 0.6308
+  Epoch 5/200 | Loss: 0.1472
+  Epoch 10/200 | Loss: 0.0771
+  Epoch 15/200 | Loss: 0.0497
+  Epoch 20/200 | Loss: 0.0583
+  Epoch 25/200 | Loss: 0.0309
+  Epoch 30/200 | Loss: 0.0285
+  Epoch 35/200 | Loss: 0.0279
+  Epoch 40/200 | Loss: 0.0249
+  Epoch 45/200 | Loss: 0.0202
+  Epoch 50/200 | Loss: 0.0256
+  Epoch 55/200 | Loss: 0.0302
+  Epoch 60/200 | Loss: 0.0158
+  Epoch 65/200 | Loss: 0.0158
+  Epoch 70/200 | Loss: 0.0108
+  Epoch 75/200 | Loss: 0.0167
+  Epoch 80/200 | Loss: 0.0103
+  Epoch 85/200 | Loss: 0.0068
+  Epoch 90/200 | Loss: 0.0090
+  Epoch 95/200 | Loss: 0.0390
+  Epoch 100/200 | Loss: 0.0134
+  Epoch 105/200 | Loss: 0.0067
+  Epoch 110/200 | Loss: 0.0411
+  Epoch 115/200 | Loss: 0.0032
+  Epoch 120/200 | Loss: 0.0039
+  Epoch 125/200 | Loss: 0.0038
+  Epoch 130/200 | Loss: 0.0044
+  Epoch 135/200 | Loss: 0.0033
+  Epoch 140/200 | Loss: 0.0081
+  Epoch 145/200 | Loss: 0.0073
+  Epoch 150/200 | Loss: 0.0114
+  Epoch 155/200 | Loss: 0.0068
+  Epoch 160/200 | Loss: 0.0067
+  Epoch 165/200 | Loss: 0.0209
+  Epoch 170/200 | Loss: 0.0034
+  Epoch 175/200 | Loss: 0.0150
+  Epoch 180/200 | Loss: 0.0040
+  Epoch 185/200 | Loss: 0.0027
+  Epoch 190/200 | Loss: 0.0030
+  Epoch 195/200 | Loss: 0.0019
+  Epoch 200/200 | Loss: 0.0045
+  Modular | acc=1.0000 prec=1.0000 rec=1.0000 f1=1.0000 auc=1.0000
+Fold 5/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 16.1271
+  Epoch 5/200 | Loss: 3.2891
+  Epoch 10/200 | Loss: 0.7428
+  Epoch 15/200 | Loss: 0.6676
+  Epoch 20/200 | Loss: 0.6450
+  Epoch 25/200 | Loss: 0.6390
+  Epoch 30/200 | Loss: 0.6384
+  Epoch 35/200 | Loss: 0.6397
+  Epoch 40/200 | Loss: 0.6350
+  Epoch 45/200 | Loss: 0.6304
+  Epoch 50/200 | Loss: 0.6271
+  Epoch 55/200 | Loss: 0.6202
+  Epoch 60/200 | Loss: 0.6303
+  Epoch 65/200 | Loss: 0.6184
+  Epoch 70/200 | Loss: 0.6157
+  Epoch 75/200 | Loss: 0.6108
+  Epoch 80/200 | Loss: 0.6109
+  Epoch 85/200 | Loss: 0.6058
+  Epoch 90/200 | Loss: 0.6018
+  Epoch 95/200 | Loss: 0.5961
+  Epoch 100/200 | Loss: 0.5971
+  Epoch 105/200 | Loss: 0.6080
+  Epoch 110/200 | Loss: 0.5919
+  Epoch 115/200 | Loss: 0.5845
+  Epoch 120/200 | Loss: 0.5783
+  Epoch 125/200 | Loss: 0.5719
+  Epoch 130/200 | Loss: 0.5713
+  Epoch 135/200 | Loss: 0.5620
+  Epoch 140/200 | Loss: 0.5618
+  Epoch 145/200 | Loss: 0.5593
+  Epoch 150/200 | Loss: 0.5493
+  Epoch 155/200 | Loss: 0.5419
+  Epoch 160/200 | Loss: 0.5438
+  Epoch 165/200 | Loss: 0.5401
+  Epoch 170/200 | Loss: 0.5429
+  Epoch 175/200 | Loss: 0.5276
+  Epoch 180/200 | Loss: 0.5330
+  Epoch 185/200 | Loss: 0.5265
+  Epoch 190/200 | Loss: 0.5291
+  Epoch 195/200 | Loss: 0.5215
+  Epoch 200/200 | Loss: 0.5253
+  Single  | acc=0.7951 prec=0.8750 rec=0.6885 f1=0.7706 auc=0.8351
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 1.9075
+  Epoch 5/200 | Loss: 0.2790
+  Epoch 10/200 | Loss: 0.1351
+  Epoch 15/200 | Loss: 0.0824
+  Epoch 20/200 | Loss: 0.0624
+  Epoch 25/200 | Loss: 0.0452
+  Epoch 30/200 | Loss: 0.0349
+  Epoch 35/200 | Loss: 0.0305
+  Epoch 40/200 | Loss: 0.0257
+  Epoch 45/200 | Loss: 0.0225
+  Epoch 50/200 | Loss: 0.0192
+  Epoch 55/200 | Loss: 0.0178
+  Epoch 60/200 | Loss: 0.0183
+  Epoch 65/200 | Loss: 0.0110
+  Epoch 70/200 | Loss: 0.0116
+  Epoch 75/200 | Loss: 0.0133
+  Epoch 80/200 | Loss: 0.0128
+  Epoch 85/200 | Loss: 0.0099
+  Epoch 90/200 | Loss: 0.0088
+  Epoch 95/200 | Loss: 0.0058
+  Epoch 100/200 | Loss: 0.0215
+  Epoch 105/200 | Loss: 0.0036
+  Epoch 110/200 | Loss: 0.0040
+  Epoch 115/200 | Loss: 0.0049
+  Epoch 120/200 | Loss: 0.0060
+  Epoch 125/200 | Loss: 0.0055
+  Epoch 130/200 | Loss: 0.0028
+  Epoch 135/200 | Loss: 0.0030
+  Epoch 140/200 | Loss: 0.0030
+  Epoch 145/200 | Loss: 0.0028
+  Epoch 150/200 | Loss: 0.0067
+  Epoch 155/200 | Loss: 0.0030
+  Epoch 160/200 | Loss: 0.0057
+  Epoch 165/200 | Loss: 0.0017
+  Epoch 170/200 | Loss: 0.0038
+  Epoch 175/200 | Loss: 0.0019
+  Epoch 180/200 | Loss: 0.0015
+  Epoch 185/200 | Loss: 0.0012
+  Epoch 190/200 | Loss: 0.0012
+  Epoch 195/200 | Loss: 0.0010
+  Epoch 200/200 | Loss: 0.0009
+  Modular | acc=1.0000 prec=1.0000 rec=1.0000 f1=1.0000 auc=1.0000
+
+Results | Single: 0.8041±0.0387 | Modular: 0.9975±0.0049 | Diff: +0.1934
+
+
+[Dataset 4/9: 03_breast_cancer]
+Loading dataset from: /root/global/QuantumAnnealerModule/Inference/Datasets/Datasets_balanced/03_breast_cancer.csv
+Dataset num features: X=(424, 30),
+Class distribution: [212 212]
+Running 5-Fold Cross Validation
+Fold 1/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 17.2249
+  Epoch 5/200 | Loss: 10.9314
+  Epoch 10/200 | Loss: 6.1401
+  Epoch 15/200 | Loss: 2.4880
+  Epoch 20/200 | Loss: 0.9525
+  Epoch 25/200 | Loss: 0.9000
+  Epoch 30/200 | Loss: 0.8426
+  Epoch 35/200 | Loss: 0.7900
+  Epoch 40/200 | Loss: 0.7505
+  Epoch 45/200 | Loss: 0.7303
+  Epoch 50/200 | Loss: 0.7212
+  Epoch 55/200 | Loss: 0.7156
+  Epoch 60/200 | Loss: 0.7119
+  Epoch 65/200 | Loss: 0.7019
+  Epoch 70/200 | Loss: 0.7031
+  Epoch 75/200 | Loss: 0.6983
+  Epoch 80/200 | Loss: 0.6930
+  Epoch 85/200 | Loss: 0.6945
+  Epoch 90/200 | Loss: 0.6924
+  Epoch 95/200 | Loss: 0.6905
+  Epoch 100/200 | Loss: 0.6929
+  Epoch 105/200 | Loss: 0.6915
+  Epoch 110/200 | Loss: 0.6860
+  Epoch 115/200 | Loss: 0.6903
+  Epoch 120/200 | Loss: 0.6887
+  Epoch 125/200 | Loss: 0.6883
+  Epoch 130/200 | Loss: 0.6920
+  Epoch 135/200 | Loss: 0.6841
+  Epoch 140/200 | Loss: 0.6844
+  Epoch 145/200 | Loss: 0.6893
+  Epoch 150/200 | Loss: 0.6928
+  Epoch 155/200 | Loss: 0.6902
+  Epoch 160/200 | Loss: 0.6849
+  Epoch 165/200 | Loss: 0.6862
+  Epoch 170/200 | Loss: 0.6846
+  Epoch 175/200 | Loss: 0.6913
+  Epoch 180/200 | Loss: 0.6823
+  Epoch 185/200 | Loss: 0.6882
+  Epoch 190/200 | Loss: 0.6819
+  Epoch 195/200 | Loss: 0.6896
+  Epoch 200/200 | Loss: 0.6893
+  Single  | acc=0.6118 prec=0.6098 rec=0.5952 f1=0.6024 auc=0.6002
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 5.3913
+  Epoch 5/200 | Loss: 0.5654
+  Epoch 10/200 | Loss: 0.4811
+  Epoch 15/200 | Loss: 0.4537
+  Epoch 20/200 | Loss: 0.3967
+  Epoch 25/200 | Loss: 0.4017
+  Epoch 30/200 | Loss: 0.3240
+  Epoch 35/200 | Loss: 0.2842
+  Epoch 40/200 | Loss: 0.2479
+  Epoch 45/200 | Loss: 0.2545
+  Epoch 50/200 | Loss: 0.2006
+  Epoch 55/200 | Loss: 0.1686
+  Epoch 60/200 | Loss: 0.1453
+  Epoch 65/200 | Loss: 0.1279
+  Epoch 70/200 | Loss: 0.1110
+  Epoch 75/200 | Loss: 0.0992
+  Epoch 80/200 | Loss: 0.1051
+  Epoch 85/200 | Loss: 0.0773
+  Epoch 90/200 | Loss: 0.0684
+  Epoch 95/200 | Loss: 0.0559
+  Epoch 100/200 | Loss: 0.0530
+  Epoch 105/200 | Loss: 0.0460
+  Epoch 110/200 | Loss: 0.0416
+  Epoch 115/200 | Loss: 0.0402
+  Epoch 120/200 | Loss: 0.0366
+  Epoch 125/200 | Loss: 0.0300
+  Epoch 130/200 | Loss: 0.0266
+  Epoch 135/200 | Loss: 0.0281
+  Epoch 140/200 | Loss: 0.0231
+  Epoch 145/200 | Loss: 0.0207
+  Epoch 150/200 | Loss: 0.0193
+  Epoch 155/200 | Loss: 0.0175
+  Epoch 160/200 | Loss: 0.0173
+  Epoch 165/200 | Loss: 0.0140
+  Epoch 170/200 | Loss: 0.0165
+  Epoch 175/200 | Loss: 0.0118
+  Epoch 180/200 | Loss: 0.0112
+  Epoch 185/200 | Loss: 0.0121
+  Epoch 190/200 | Loss: 0.0107
+  Epoch 195/200 | Loss: 0.0094
+  Epoch 200/200 | Loss: 0.0085
+  Modular | acc=0.8353 prec=0.8889 rec=0.7619 f1=0.8205 auc=0.9103
+Fold 2/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 17.3848
+  Epoch 5/200 | Loss: 10.7096
+  Epoch 10/200 | Loss: 6.1043
+  Epoch 15/200 | Loss: 2.5547
+  Epoch 20/200 | Loss: 1.0063
+  Epoch 25/200 | Loss: 0.9149
+  Epoch 30/200 | Loss: 0.8450
+  Epoch 35/200 | Loss: 0.7995
+  Epoch 40/200 | Loss: 0.7588
+  Epoch 45/200 | Loss: 0.7369
+  Epoch 50/200 | Loss: 0.7299
+  Epoch 55/200 | Loss: 0.7202
+  Epoch 60/200 | Loss: 0.7118
+  Epoch 65/200 | Loss: 0.7085
+  Epoch 70/200 | Loss: 0.7032
+  Epoch 75/200 | Loss: 0.7037
+  Epoch 80/200 | Loss: 0.6940
+  Epoch 85/200 | Loss: 0.7017
+  Epoch 90/200 | Loss: 0.6954
+  Epoch 95/200 | Loss: 0.6921
+  Epoch 100/200 | Loss: 0.6937
+  Epoch 105/200 | Loss: 0.7038
+  Epoch 110/200 | Loss: 0.6872
+  Epoch 115/200 | Loss: 0.6918
+  Epoch 120/200 | Loss: 0.6969
+  Epoch 125/200 | Loss: 0.6914
+  Epoch 130/200 | Loss: 0.7056
+  Epoch 135/200 | Loss: 0.6948
+  Epoch 140/200 | Loss: 0.7062
+  Epoch 145/200 | Loss: 0.6992
+  Epoch 150/200 | Loss: 0.6963
+  Epoch 155/200 | Loss: 0.7009
+  Epoch 160/200 | Loss: 0.7106
+  Epoch 165/200 | Loss: 0.7103
+  Epoch 170/200 | Loss: 0.7288
+  Epoch 175/200 | Loss: 0.7034
+  Epoch 180/200 | Loss: 0.7045
+  Epoch 185/200 | Loss: 0.6946
+  Epoch 190/200 | Loss: 0.7173
+  Epoch 195/200 | Loss: 0.7104
+  Epoch 200/200 | Loss: 0.7100
+  Single  | acc=0.5176 prec=0.5068 rec=0.8810 f1=0.6435 auc=0.5066
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 9.1690
+  Epoch 5/200 | Loss: 0.7606
+  Epoch 10/200 | Loss: 0.4098
+  Epoch 15/200 | Loss: 0.3418
+  Epoch 20/200 | Loss: 0.3022
+  Epoch 25/200 | Loss: 0.2821
+  Epoch 30/200 | Loss: 0.2461
+  Epoch 35/200 | Loss: 0.2098
+  Epoch 40/200 | Loss: 0.2004
+  Epoch 45/200 | Loss: 0.1764
+  Epoch 50/200 | Loss: 0.1574
+  Epoch 55/200 | Loss: 0.1458
+  Epoch 60/200 | Loss: 0.1264
+  Epoch 65/200 | Loss: 0.1134
+  Epoch 70/200 | Loss: 0.1061
+  Epoch 75/200 | Loss: 0.0951
+  Epoch 80/200 | Loss: 0.0872
+  Epoch 85/200 | Loss: 0.0782
+  Epoch 90/200 | Loss: 0.0724
+  Epoch 95/200 | Loss: 0.0626
+  Epoch 100/200 | Loss: 0.0572
+  Epoch 105/200 | Loss: 0.0572
+  Epoch 110/200 | Loss: 0.0513
+  Epoch 115/200 | Loss: 0.0574
+  Epoch 120/200 | Loss: 0.0431
+  Epoch 125/200 | Loss: 0.0385
+  Epoch 130/200 | Loss: 0.0383
+  Epoch 135/200 | Loss: 0.0337
+  Epoch 140/200 | Loss: 0.0308
+  Epoch 145/200 | Loss: 0.0267
+  Epoch 150/200 | Loss: 0.0256
+  Epoch 155/200 | Loss: 0.0235
+  Epoch 160/200 | Loss: 0.0220
+  Epoch 165/200 | Loss: 0.0212
+  Epoch 170/200 | Loss: 0.0193
+  Epoch 175/200 | Loss: 0.0181
+  Epoch 180/200 | Loss: 0.0168
+  Epoch 185/200 | Loss: 0.0163
+  Epoch 190/200 | Loss: 0.0153
+  Epoch 195/200 | Loss: 0.0142
+  Epoch 200/200 | Loss: 0.0130
+  Modular | acc=0.8118 prec=0.7826 rec=0.8571 f1=0.8182 auc=0.8594
+Fold 3/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 17.7026
+  Epoch 5/200 | Loss: 10.6121
+  Epoch 10/200 | Loss: 6.1523
+  Epoch 15/200 | Loss: 2.5064
+  Epoch 20/200 | Loss: 0.9504
+  Epoch 25/200 | Loss: 0.8865
+  Epoch 30/200 | Loss: 0.8369
+  Epoch 35/200 | Loss: 0.7995
+  Epoch 40/200 | Loss: 0.7567
+  Epoch 45/200 | Loss: 0.7316
+  Epoch 50/200 | Loss: 0.7239
+  Epoch 55/200 | Loss: 0.7086
+  Epoch 60/200 | Loss: 0.7048
+  Epoch 65/200 | Loss: 0.7005
+  Epoch 70/200 | Loss: 0.7003
+  Epoch 75/200 | Loss: 0.7000
+  Epoch 80/200 | Loss: 0.7027
+  Epoch 85/200 | Loss: 0.6930
+  Epoch 90/200 | Loss: 0.7031
+  Epoch 95/200 | Loss: 0.6917
+  Epoch 100/200 | Loss: 0.6957
+  Epoch 105/200 | Loss: 0.6950
+  Epoch 110/200 | Loss: 0.6942
+  Epoch 115/200 | Loss: 0.6943
+  Epoch 120/200 | Loss: 0.6908
+  Epoch 125/200 | Loss: 0.7027
+  Epoch 130/200 | Loss: 0.6868
+  Epoch 135/200 | Loss: 0.6909
+  Epoch 140/200 | Loss: 0.6937
+  Epoch 145/200 | Loss: 0.6990
+  Epoch 150/200 | Loss: 0.6939
+  Epoch 155/200 | Loss: 0.6933
+  Epoch 160/200 | Loss: 0.6967
+  Epoch 165/200 | Loss: 0.6922
+  Epoch 170/200 | Loss: 0.6886
+  Epoch 175/200 | Loss: 0.6951
+  Epoch 180/200 | Loss: 0.6906
+  Epoch 185/200 | Loss: 0.6880
+  Epoch 190/200 | Loss: 0.6973
+  Epoch 195/200 | Loss: 0.6956
+  Epoch 200/200 | Loss: 0.6939
+  Single  | acc=0.5765 prec=0.6000 rec=0.4884 f1=0.5385 auc=0.5421
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 2.8032
+  Epoch 5/200 | Loss: 0.5197
+  Epoch 10/200 | Loss: 0.4024
+  Epoch 15/200 | Loss: 0.3718
+  Epoch 20/200 | Loss: 0.3173
+  Epoch 25/200 | Loss: 0.2745
+  Epoch 30/200 | Loss: 0.2506
+  Epoch 35/200 | Loss: 0.2084
+  Epoch 40/200 | Loss: 0.1945
+  Epoch 45/200 | Loss: 0.1516
+  Epoch 50/200 | Loss: 0.1330
+  Epoch 55/200 | Loss: 0.1190
+  Epoch 60/200 | Loss: 0.1077
+  Epoch 65/200 | Loss: 0.0898
+  Epoch 70/200 | Loss: 0.0785
+  Epoch 75/200 | Loss: 0.0690
+  Epoch 80/200 | Loss: 0.0625
+  Epoch 85/200 | Loss: 0.0542
+  Epoch 90/200 | Loss: 0.0513
+  Epoch 95/200 | Loss: 0.0460
+  Epoch 100/200 | Loss: 0.0426
+  Epoch 105/200 | Loss: 0.0374
+  Epoch 110/200 | Loss: 0.0322
+  Epoch 115/200 | Loss: 0.0274
+  Epoch 120/200 | Loss: 0.0262
+  Epoch 125/200 | Loss: 0.0249
+  Epoch 130/200 | Loss: 0.0209
+  Epoch 135/200 | Loss: 0.0210
+  Epoch 140/200 | Loss: 0.0180
+  Epoch 145/200 | Loss: 0.0163
+  Epoch 150/200 | Loss: 0.0162
+  Epoch 155/200 | Loss: 0.0139
+  Epoch 160/200 | Loss: 0.0136
+  Epoch 165/200 | Loss: 0.0124
+  Epoch 170/200 | Loss: 0.0113
+  Epoch 175/200 | Loss: 0.0120
+  Epoch 180/200 | Loss: 0.0103
+  Epoch 185/200 | Loss: 0.0104
+  Epoch 190/200 | Loss: 0.0088
+  Epoch 195/200 | Loss: 0.0082
+  Epoch 200/200 | Loss: 0.0075
+  Modular | acc=0.8353 prec=0.8372 rec=0.8372 f1=0.8372 auc=0.9081
+Fold 4/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 17.4693
+  Epoch 5/200 | Loss: 11.1896
+  Epoch 10/200 | Loss: 6.1946
+  Epoch 15/200 | Loss: 2.5648
+  Epoch 20/200 | Loss: 0.9739
+  Epoch 25/200 | Loss: 0.8954
+  Epoch 30/200 | Loss: 0.8379
+  Epoch 35/200 | Loss: 0.7892
+  Epoch 40/200 | Loss: 0.7483
+  Epoch 45/200 | Loss: 0.7268
+  Epoch 50/200 | Loss: 0.7172
+  Epoch 55/200 | Loss: 0.7109
+  Epoch 60/200 | Loss: 0.7081
+  Epoch 65/200 | Loss: 0.7005
+  Epoch 70/200 | Loss: 0.7009
+  Epoch 75/200 | Loss: 0.6977
+  Epoch 80/200 | Loss: 0.6988
+  Epoch 85/200 | Loss: 0.6988
+  Epoch 90/200 | Loss: 0.6982
+  Epoch 95/200 | Loss: 0.6903
+  Epoch 100/200 | Loss: 0.6941
+  Epoch 105/200 | Loss: 0.6872
+  Epoch 110/200 | Loss: 0.6962
+  Epoch 115/200 | Loss: 0.6965
+  Epoch 120/200 | Loss: 0.6900
+  Epoch 125/200 | Loss: 0.6854
+  Epoch 130/200 | Loss: 0.6871
+  Epoch 135/200 | Loss: 0.6905
+  Epoch 140/200 | Loss: 0.6908
+  Epoch 145/200 | Loss: 0.6908
+  Epoch 150/200 | Loss: 0.6881
+  Epoch 155/200 | Loss: 0.6946
+  Epoch 160/200 | Loss: 0.6871
+  Epoch 165/200 | Loss: 0.6880
+  Epoch 170/200 | Loss: 0.6888
+  Epoch 175/200 | Loss: 0.6977
+  Epoch 180/200 | Loss: 0.6849
+  Epoch 185/200 | Loss: 0.6893
+  Epoch 190/200 | Loss: 0.6967
+  Epoch 195/200 | Loss: 0.6938
+  Epoch 200/200 | Loss: 0.6972
+  Single  | acc=0.5647 prec=0.5882 rec=0.4651 f1=0.5195 auc=0.5537
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 12.5660
+  Epoch 5/200 | Loss: 0.8287
+  Epoch 10/200 | Loss: 0.4566
+  Epoch 15/200 | Loss: 0.3894
+  Epoch 20/200 | Loss: 0.3487
+  Epoch 25/200 | Loss: 0.3008
+  Epoch 30/200 | Loss: 0.2620
+  Epoch 35/200 | Loss: 0.2286
+  Epoch 40/200 | Loss: 0.2067
+  Epoch 45/200 | Loss: 0.1706
+  Epoch 50/200 | Loss: 0.1417
+  Epoch 55/200 | Loss: 0.1208
+  Epoch 60/200 | Loss: 0.1079
+  Epoch 65/200 | Loss: 0.0940
+  Epoch 70/200 | Loss: 0.0814
+  Epoch 75/200 | Loss: 0.0713
+  Epoch 80/200 | Loss: 0.0666
+  Epoch 85/200 | Loss: 0.0593
+  Epoch 90/200 | Loss: 0.0513
+  Epoch 95/200 | Loss: 0.0441
+  Epoch 100/200 | Loss: 0.0405
+  Epoch 105/200 | Loss: 0.0337
+  Epoch 110/200 | Loss: 0.0315
+  Epoch 115/200 | Loss: 0.0280
+  Epoch 120/200 | Loss: 0.0269
+  Epoch 125/200 | Loss: 0.0237
+  Epoch 130/200 | Loss: 0.0220
+  Epoch 135/200 | Loss: 0.0187
+  Epoch 140/200 | Loss: 0.0194
+  Epoch 145/200 | Loss: 0.0162
+  Epoch 150/200 | Loss: 0.0159
+  Epoch 155/200 | Loss: 0.0138
+  Epoch 160/200 | Loss: 0.0130
+  Epoch 165/200 | Loss: 0.0117
+  Epoch 170/200 | Loss: 0.0107
+  Epoch 175/200 | Loss: 0.0121
+  Epoch 180/200 | Loss: 0.0094
+  Epoch 185/200 | Loss: 0.0097
+  Epoch 190/200 | Loss: 0.0089
+  Epoch 195/200 | Loss: 0.0081
+  Epoch 200/200 | Loss: 0.0082
+  Modular | acc=0.8000 prec=0.8095 rec=0.7907 f1=0.8000 auc=0.8865
+Fold 5/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 17.4997
+  Epoch 5/200 | Loss: 10.7146
+  Epoch 10/200 | Loss: 6.1270
+  Epoch 15/200 | Loss: 2.4589
+  Epoch 20/200 | Loss: 0.9605
+  Epoch 25/200 | Loss: 0.9065
+  Epoch 30/200 | Loss: 0.8314
+  Epoch 35/200 | Loss: 0.7763
+  Epoch 40/200 | Loss: 0.7425
+  Epoch 45/200 | Loss: 0.7243
+  Epoch 50/200 | Loss: 0.7164
+  Epoch 55/200 | Loss: 0.7121
+  Epoch 60/200 | Loss: 0.7054
+  Epoch 65/200 | Loss: 0.7097
+  Epoch 70/200 | Loss: 0.6997
+  Epoch 75/200 | Loss: 0.6975
+  Epoch 80/200 | Loss: 0.7001
+  Epoch 85/200 | Loss: 0.6937
+  Epoch 90/200 | Loss: 0.7023
+  Epoch 95/200 | Loss: 0.6923
+  Epoch 100/200 | Loss: 0.6920
+  Epoch 105/200 | Loss: 0.6934
+  Epoch 110/200 | Loss: 0.6869
+  Epoch 115/200 | Loss: 0.6902
+  Epoch 120/200 | Loss: 0.6903
+  Epoch 125/200 | Loss: 0.6936
+  Epoch 130/200 | Loss: 0.6916
+  Epoch 135/200 | Loss: 0.6839
+  Epoch 140/200 | Loss: 0.6961
+  Epoch 145/200 | Loss: 0.6953
+  Epoch 150/200 | Loss: 0.6918
+  Epoch 155/200 | Loss: 0.6980
+  Epoch 160/200 | Loss: 0.6983
+  Epoch 165/200 | Loss: 0.6979
+  Epoch 170/200 | Loss: 0.6936
+  Epoch 175/200 | Loss: 0.7066
+  Epoch 180/200 | Loss: 0.7078
+  Epoch 185/200 | Loss: 0.7005
+  Epoch 190/200 | Loss: 0.7005
+  Epoch 195/200 | Loss: 0.6962
+  Epoch 200/200 | Loss: 0.7087
+  Single  | acc=0.5595 prec=0.5385 rec=0.8333 f1=0.6542 auc=0.5935
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 2.7870
+  Epoch 5/200 | Loss: 0.5468
+  Epoch 10/200 | Loss: 0.4304
+  Epoch 15/200 | Loss: 0.3631
+  Epoch 20/200 | Loss: 0.3552
+  Epoch 25/200 | Loss: 0.2914
+  Epoch 30/200 | Loss: 0.2610
+  Epoch 35/200 | Loss: 0.2347
+  Epoch 40/200 | Loss: 0.2080
+  Epoch 45/200 | Loss: 0.1851
+  Epoch 50/200 | Loss: 0.1589
+  Epoch 55/200 | Loss: 0.1437
+  Epoch 60/200 | Loss: 0.1309
+  Epoch 65/200 | Loss: 0.1137
+  Epoch 70/200 | Loss: 0.1076
+  Epoch 75/200 | Loss: 0.0833
+  Epoch 80/200 | Loss: 0.0744
+  Epoch 85/200 | Loss: 0.0691
+  Epoch 90/200 | Loss: 0.0592
+  Epoch 95/200 | Loss: 0.0515
+  Epoch 100/200 | Loss: 0.0451
+  Epoch 105/200 | Loss: 0.0416
+  Epoch 110/200 | Loss: 0.0386
+  Epoch 115/200 | Loss: 0.0380
+  Epoch 120/200 | Loss: 0.0319
+  Epoch 125/200 | Loss: 0.0292
+  Epoch 130/200 | Loss: 0.0265
+  Epoch 135/200 | Loss: 0.0243
+  Epoch 140/200 | Loss: 0.0227
+  Epoch 145/200 | Loss: 0.0207
+  Epoch 150/200 | Loss: 0.0191
+  Epoch 155/200 | Loss: 0.0184
+  Epoch 160/200 | Loss: 0.0157
+  Epoch 165/200 | Loss: 0.0149
+  Epoch 170/200 | Loss: 0.0143
+  Epoch 175/200 | Loss: 0.0124
+  Epoch 180/200 | Loss: 0.0118
+  Epoch 185/200 | Loss: 0.0118
+  Epoch 190/200 | Loss: 0.0103
+  Epoch 195/200 | Loss: 0.0097
+  Epoch 200/200 | Loss: 0.0096
+  Modular | acc=0.8333 prec=0.8182 rec=0.8571 f1=0.8372 auc=0.9070
+
+Results | Single: 0.5660±0.0303 | Modular: 0.8231±0.0146 | Diff: +0.2571
+
+
+[Dataset 5/9: 04_contraceptive_method]
+Loading dataset from: /root/global/QuantumAnnealerModule/Inference/Datasets/Datasets_balanced/04_contraceptive_method.csv
+Dataset num features: X=(666, 9),
+Class distribution: [333 333]
+Running 5-Fold Cross Validation
+Fold 1/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 16.0868
+  Epoch 5/200 | Loss: 7.7656
+  Epoch 10/200 | Loss: 2.1350
+  Epoch 15/200 | Loss: 0.6585
+  Epoch 20/200 | Loss: 0.6508
+  Epoch 25/200 | Loss: 0.6397
+  Epoch 30/200 | Loss: 0.6275
+  Epoch 35/200 | Loss: 0.6185
+  Epoch 40/200 | Loss: 0.6138
+  Epoch 45/200 | Loss: 0.6088
+  Epoch 50/200 | Loss: 0.6076
+  Epoch 55/200 | Loss: 0.6058
+  Epoch 60/200 | Loss: 0.5991
+  Epoch 65/200 | Loss: 0.6020
+  Epoch 70/200 | Loss: 0.5995
+  Epoch 75/200 | Loss: 0.5965
+  Epoch 80/200 | Loss: 0.5950
+  Epoch 85/200 | Loss: 0.5939
+  Epoch 90/200 | Loss: 0.5947
+  Epoch 95/200 | Loss: 0.5932
+  Epoch 100/200 | Loss: 0.5895
+  Epoch 105/200 | Loss: 0.5964
+  Epoch 110/200 | Loss: 0.5898
+  Epoch 115/200 | Loss: 0.5945
+  Epoch 120/200 | Loss: 0.5922
+  Epoch 125/200 | Loss: 0.5889
+  Epoch 130/200 | Loss: 0.5877
+  Epoch 135/200 | Loss: 0.5819
+  Epoch 140/200 | Loss: 0.5817
+  Epoch 145/200 | Loss: 0.5844
+  Epoch 150/200 | Loss: 0.5830
+  Epoch 155/200 | Loss: 0.5793
+  Epoch 160/200 | Loss: 0.5788
+  Epoch 165/200 | Loss: 0.5776
+  Epoch 170/200 | Loss: 0.5782
+  Epoch 175/200 | Loss: 0.5804
+  Epoch 180/200 | Loss: 0.5779
+  Epoch 185/200 | Loss: 0.5772
+  Epoch 190/200 | Loss: 0.5742
+  Epoch 195/200 | Loss: 0.5736
+  Epoch 200/200 | Loss: 0.5740
+  Single  | acc=0.7015 prec=0.6957 rec=0.7164 f1=0.7059 auc=0.7536
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 1.5252
+  Epoch 5/200 | Loss: 0.5859
+  Epoch 10/200 | Loss: 0.5630
+  Epoch 15/200 | Loss: 0.5232
+  Epoch 20/200 | Loss: 0.5266
+  Epoch 25/200 | Loss: 0.4850
+  Epoch 30/200 | Loss: 0.4808
+  Epoch 35/200 | Loss: 0.4876
+  Epoch 40/200 | Loss: 0.4586
+  Epoch 45/200 | Loss: 0.4423
+  Epoch 50/200 | Loss: 0.4226
+  Epoch 55/200 | Loss: 0.4102
+  Epoch 60/200 | Loss: 0.4098
+  Epoch 65/200 | Loss: 0.3865
+  Epoch 70/200 | Loss: 0.3698
+  Epoch 75/200 | Loss: 0.3515
+  Epoch 80/200 | Loss: 0.3591
+  Epoch 85/200 | Loss: 0.3408
+  Epoch 90/200 | Loss: 0.3532
+  Epoch 95/200 | Loss: 0.3183
+  Epoch 100/200 | Loss: 0.3135
+  Epoch 105/200 | Loss: 0.3165
+  Epoch 110/200 | Loss: 0.3072
+  Epoch 115/200 | Loss: 0.3279
+  Epoch 120/200 | Loss: 0.2868
+  Epoch 125/200 | Loss: 0.3012
+  Epoch 130/200 | Loss: 0.3075
+  Epoch 135/200 | Loss: 0.2557
+  Epoch 140/200 | Loss: 0.2570
+  Epoch 145/200 | Loss: 0.2810
+  Epoch 150/200 | Loss: 0.2562
+  Epoch 155/200 | Loss: 0.2461
+  Epoch 160/200 | Loss: 0.2472
+  Epoch 165/200 | Loss: 0.2689
+  Epoch 170/200 | Loss: 0.2317
+  Epoch 175/200 | Loss: 0.2957
+  Epoch 180/200 | Loss: 0.2638
+  Epoch 185/200 | Loss: 0.2230
+  Epoch 190/200 | Loss: 0.2456
+  Epoch 195/200 | Loss: 0.2302
+  Epoch 200/200 | Loss: 0.2182
+  Modular | acc=0.7313 prec=0.7818 rec=0.6418 f1=0.7049 auc=0.7879
+Fold 2/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 16.1784
+  Epoch 5/200 | Loss: 7.7897
+  Epoch 10/200 | Loss: 2.1491
+  Epoch 15/200 | Loss: 0.6432
+  Epoch 20/200 | Loss: 0.6295
+  Epoch 25/200 | Loss: 0.6170
+  Epoch 30/200 | Loss: 0.6100
+  Epoch 35/200 | Loss: 0.6053
+  Epoch 40/200 | Loss: 0.5987
+  Epoch 45/200 | Loss: 0.5929
+  Epoch 50/200 | Loss: 0.5938
+  Epoch 55/200 | Loss: 0.5894
+  Epoch 60/200 | Loss: 0.5876
+  Epoch 65/200 | Loss: 0.5840
+  Epoch 70/200 | Loss: 0.5846
+  Epoch 75/200 | Loss: 0.5832
+  Epoch 80/200 | Loss: 0.5806
+  Epoch 85/200 | Loss: 0.5801
+  Epoch 90/200 | Loss: 0.5813
+  Epoch 95/200 | Loss: 0.5767
+  Epoch 100/200 | Loss: 0.5752
+  Epoch 105/200 | Loss: 0.5756
+  Epoch 110/200 | Loss: 0.5726
+  Epoch 115/200 | Loss: 0.5745
+  Epoch 120/200 | Loss: 0.5750
+  Epoch 125/200 | Loss: 0.5750
+  Epoch 130/200 | Loss: 0.5732
+  Epoch 135/200 | Loss: 0.5682
+  Epoch 140/200 | Loss: 0.5737
+  Epoch 145/200 | Loss: 0.5665
+  Epoch 150/200 | Loss: 0.5682
+  Epoch 155/200 | Loss: 0.5633
+  Epoch 160/200 | Loss: 0.5615
+  Epoch 165/200 | Loss: 0.5591
+  Epoch 170/200 | Loss: 0.5642
+  Epoch 175/200 | Loss: 0.5618
+  Epoch 180/200 | Loss: 0.5598
+  Epoch 185/200 | Loss: 0.5583
+  Epoch 190/200 | Loss: 0.5593
+  Epoch 195/200 | Loss: 0.5584
+  Epoch 200/200 | Loss: 0.5550
+  Single  | acc=0.6316 prec=0.6184 rec=0.7015 f1=0.6573 auc=0.6903
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 2.6565
+  Epoch 5/200 | Loss: 0.5556
+  Epoch 10/200 | Loss: 0.5134
+  Epoch 15/200 | Loss: 0.5117
+  Epoch 20/200 | Loss: 0.4878
+  Epoch 25/200 | Loss: 0.4820
+  Epoch 30/200 | Loss: 0.4626
+  Epoch 35/200 | Loss: 0.4606
+  Epoch 40/200 | Loss: 0.4262
+  Epoch 45/200 | Loss: 0.4637
+  Epoch 50/200 | Loss: 0.4120
+  Epoch 55/200 | Loss: 0.3923
+  Epoch 60/200 | Loss: 0.3950
+  Epoch 65/200 | Loss: 0.4171
+  Epoch 70/200 | Loss: 0.4245
+  Epoch 75/200 | Loss: 0.3609
+  Epoch 80/200 | Loss: 0.3543
+  Epoch 85/200 | Loss: 0.3653
+  Epoch 90/200 | Loss: 0.3593
+  Epoch 95/200 | Loss: 0.3424
+  Epoch 100/200 | Loss: 0.3286
+  Epoch 105/200 | Loss: 0.3148
+  Epoch 110/200 | Loss: 0.3085
+  Epoch 115/200 | Loss: 0.2908
+  Epoch 120/200 | Loss: 0.3305
+  Epoch 125/200 | Loss: 0.2899
+  Epoch 130/200 | Loss: 0.3047
+  Epoch 135/200 | Loss: 0.3061
+  Epoch 140/200 | Loss: 0.2737
+  Epoch 145/200 | Loss: 0.2898
+  Epoch 150/200 | Loss: 0.2681
+  Epoch 155/200 | Loss: 0.2636
+  Epoch 160/200 | Loss: 0.2510
+  Epoch 165/200 | Loss: 0.2835
+  Epoch 170/200 | Loss: 0.2587
+  Epoch 175/200 | Loss: 0.2510
+  Epoch 180/200 | Loss: 0.2745
+  Epoch 185/200 | Loss: 0.2378
+  Epoch 190/200 | Loss: 0.2504
+  Epoch 195/200 | Loss: 0.2216
+  Epoch 200/200 | Loss: 0.2533
+  Modular | acc=0.6767 prec=0.7143 rec=0.5970 f1=0.6504 auc=0.7175
+Fold 3/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 16.2144
+  Epoch 5/200 | Loss: 7.7216
+  Epoch 10/200 | Loss: 2.1241
+  Epoch 15/200 | Loss: 0.6736
+  Epoch 20/200 | Loss: 0.6622
+  Epoch 25/200 | Loss: 0.6499
+  Epoch 30/200 | Loss: 0.6429
+  Epoch 35/200 | Loss: 0.6283
+  Epoch 40/200 | Loss: 0.6272
+  Epoch 45/200 | Loss: 0.6211
+  Epoch 50/200 | Loss: 0.6165
+  Epoch 55/200 | Loss: 0.6189
+  Epoch 60/200 | Loss: 0.6135
+  Epoch 65/200 | Loss: 0.6113
+  Epoch 70/200 | Loss: 0.6102
+  Epoch 75/200 | Loss: 0.6107
+  Epoch 80/200 | Loss: 0.6089
+  Epoch 85/200 | Loss: 0.6079
+  Epoch 90/200 | Loss: 0.6070
+  Epoch 95/200 | Loss: 0.6110
+  Epoch 100/200 | Loss: 0.6078
+  Epoch 105/200 | Loss: 0.6030
+  Epoch 110/200 | Loss: 0.6073
+  Epoch 115/200 | Loss: 0.5971
+  Epoch 120/200 | Loss: 0.6013
+  Epoch 125/200 | Loss: 0.6036
+  Epoch 130/200 | Loss: 0.5970
+  Epoch 135/200 | Loss: 0.5957
+  Epoch 140/200 | Loss: 0.5932
+  Epoch 145/200 | Loss: 0.5952
+  Epoch 150/200 | Loss: 0.5908
+  Epoch 155/200 | Loss: 0.5926
+  Epoch 160/200 | Loss: 0.5936
+  Epoch 165/200 | Loss: 0.5931
+  Epoch 170/200 | Loss: 0.5935
+  Epoch 175/200 | Loss: 0.5891
+  Epoch 180/200 | Loss: 0.5900
+  Epoch 185/200 | Loss: 0.5874
+  Epoch 190/200 | Loss: 0.5835
+  Epoch 195/200 | Loss: 0.5968
+  Epoch 200/200 | Loss: 0.5868
+  Single  | acc=0.6992 prec=0.7077 rec=0.6866 f1=0.6970 auc=0.7644
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 3.7022
+  Epoch 5/200 | Loss: 0.5858
+  Epoch 10/200 | Loss: 0.5418
+  Epoch 15/200 | Loss: 0.5176
+  Epoch 20/200 | Loss: 0.5036
+  Epoch 25/200 | Loss: 0.4922
+  Epoch 30/200 | Loss: 0.4697
+  Epoch 35/200 | Loss: 0.4858
+  Epoch 40/200 | Loss: 0.4296
+  Epoch 45/200 | Loss: 0.4214
+  Epoch 50/200 | Loss: 0.4073
+  Epoch 55/200 | Loss: 0.4457
+  Epoch 60/200 | Loss: 0.4049
+  Epoch 65/200 | Loss: 0.3557
+  Epoch 70/200 | Loss: 0.3411
+  Epoch 75/200 | Loss: 0.3706
+  Epoch 80/200 | Loss: 0.3446
+  Epoch 85/200 | Loss: 0.3246
+  Epoch 90/200 | Loss: 0.3111
+  Epoch 95/200 | Loss: 0.3179
+  Epoch 100/200 | Loss: 0.3279
+  Epoch 105/200 | Loss: 0.3363
+  Epoch 110/200 | Loss: 0.2797
+  Epoch 115/200 | Loss: 0.3216
+  Epoch 120/200 | Loss: 0.2756
+  Epoch 125/200 | Loss: 0.2806
+  Epoch 130/200 | Loss: 0.2733
+  Epoch 135/200 | Loss: 0.2597
+  Epoch 140/200 | Loss: 0.2548
+  Epoch 145/200 | Loss: 0.2599
+  Epoch 150/200 | Loss: 0.2503
+  Epoch 155/200 | Loss: 0.2435
+  Epoch 160/200 | Loss: 0.2651
+  Epoch 165/200 | Loss: 0.2589
+  Epoch 170/200 | Loss: 0.2690
+  Epoch 175/200 | Loss: 0.2366
+  Epoch 180/200 | Loss: 0.2299
+  Epoch 185/200 | Loss: 0.2644
+  Epoch 190/200 | Loss: 0.2370
+  Epoch 195/200 | Loss: 0.2162
+  Epoch 200/200 | Loss: 0.2475
+  Modular | acc=0.6917 prec=0.6806 rec=0.7313 f1=0.7050 auc=0.7546
+Fold 4/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 15.8627
+  Epoch 5/200 | Loss: 7.6441
+  Epoch 10/200 | Loss: 2.0914
+  Epoch 15/200 | Loss: 0.6427
+  Epoch 20/200 | Loss: 0.6367
+  Epoch 25/200 | Loss: 0.6227
+  Epoch 30/200 | Loss: 0.6093
+  Epoch 35/200 | Loss: 0.6055
+  Epoch 40/200 | Loss: 0.5976
+  Epoch 45/200 | Loss: 0.5994
+  Epoch 50/200 | Loss: 0.5963
+  Epoch 55/200 | Loss: 0.5930
+  Epoch 60/200 | Loss: 0.5925
+  Epoch 65/200 | Loss: 0.5888
+  Epoch 70/200 | Loss: 0.5879
+  Epoch 75/200 | Loss: 0.5886
+  Epoch 80/200 | Loss: 0.5824
+  Epoch 85/200 | Loss: 0.5820
+  Epoch 90/200 | Loss: 0.5820
+  Epoch 95/200 | Loss: 0.5847
+  Epoch 100/200 | Loss: 0.5788
+  Epoch 105/200 | Loss: 0.5820
+  Epoch 110/200 | Loss: 0.5764
+  Epoch 115/200 | Loss: 0.5748
+  Epoch 120/200 | Loss: 0.5762
+  Epoch 125/200 | Loss: 0.5724
+  Epoch 130/200 | Loss: 0.5760
+  Epoch 135/200 | Loss: 0.5754
+  Epoch 140/200 | Loss: 0.5784
+  Epoch 145/200 | Loss: 0.5751
+  Epoch 150/200 | Loss: 0.5726
+  Epoch 155/200 | Loss: 0.5808
+  Epoch 160/200 | Loss: 0.5766
+  Epoch 165/200 | Loss: 0.5711
+  Epoch 170/200 | Loss: 0.5664
+  Epoch 175/200 | Loss: 0.5690
+  Epoch 180/200 | Loss: 0.5682
+  Epoch 185/200 | Loss: 0.5667
+  Epoch 190/200 | Loss: 0.5670
+  Epoch 195/200 | Loss: 0.5617
+  Epoch 200/200 | Loss: 0.5624
+  Single  | acc=0.5564 prec=0.5538 rec=0.5455 f1=0.5496 auc=0.6253
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 0.8934
+  Epoch 5/200 | Loss: 0.5734
+  Epoch 10/200 | Loss: 0.5204
+  Epoch 15/200 | Loss: 0.4827
+  Epoch 20/200 | Loss: 0.4659
+  Epoch 25/200 | Loss: 0.4574
+  Epoch 30/200 | Loss: 0.4408
+  Epoch 35/200 | Loss: 0.4345
+  Epoch 40/200 | Loss: 0.4494
+  Epoch 45/200 | Loss: 0.4054
+  Epoch 50/200 | Loss: 0.4043
+  Epoch 55/200 | Loss: 0.4014
+  Epoch 60/200 | Loss: 0.3684
+  Epoch 65/200 | Loss: 0.3612
+  Epoch 70/200 | Loss: 0.3540
+  Epoch 75/200 | Loss: 0.3765
+  Epoch 80/200 | Loss: 0.3433
+  Epoch 85/200 | Loss: 0.3429
+  Epoch 90/200 | Loss: 0.3335
+  Epoch 95/200 | Loss: 0.3190
+  Epoch 100/200 | Loss: 0.3313
+  Epoch 105/200 | Loss: 0.3366
+  Epoch 110/200 | Loss: 0.2970
+  Epoch 115/200 | Loss: 0.3007
+  Epoch 120/200 | Loss: 0.3363
+  Epoch 125/200 | Loss: 0.2696
+  Epoch 130/200 | Loss: 0.2981
+  Epoch 135/200 | Loss: 0.3230
+  Epoch 140/200 | Loss: 0.2960
+  Epoch 145/200 | Loss: 0.2634
+  Epoch 150/200 | Loss: 0.2651
+  Epoch 155/200 | Loss: 0.2590
+  Epoch 160/200 | Loss: 0.2808
+  Epoch 165/200 | Loss: 0.2509
+  Epoch 170/200 | Loss: 0.3048
+  Epoch 175/200 | Loss: 0.2730
+  Epoch 180/200 | Loss: 0.2424
+  Epoch 185/200 | Loss: 0.2802
+  Epoch 190/200 | Loss: 0.2607
+  Epoch 195/200 | Loss: 0.2461
+  Epoch 200/200 | Loss: 0.2917
+  Modular | acc=0.5940 prec=0.5811 rec=0.6515 f1=0.6143 auc=0.7196
+Fold 5/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 16.2755
+  Epoch 5/200 | Loss: 7.7950
+  Epoch 10/200 | Loss: 2.1224
+  Epoch 15/200 | Loss: 0.6671
+  Epoch 20/200 | Loss: 0.6540
+  Epoch 25/200 | Loss: 0.6437
+  Epoch 30/200 | Loss: 0.6297
+  Epoch 35/200 | Loss: 0.6205
+  Epoch 40/200 | Loss: 0.6147
+  Epoch 45/200 | Loss: 0.6128
+  Epoch 50/200 | Loss: 0.6109
+  Epoch 55/200 | Loss: 0.6097
+  Epoch 60/200 | Loss: 0.6075
+  Epoch 65/200 | Loss: 0.6087
+  Epoch 70/200 | Loss: 0.6067
+  Epoch 75/200 | Loss: 0.6043
+  Epoch 80/200 | Loss: 0.6027
+  Epoch 85/200 | Loss: 0.5995
+  Epoch 90/200 | Loss: 0.5993
+  Epoch 95/200 | Loss: 0.5963
+  Epoch 100/200 | Loss: 0.5979
+  Epoch 105/200 | Loss: 0.5921
+  Epoch 110/200 | Loss: 0.5933
+  Epoch 115/200 | Loss: 0.5955
+  Epoch 120/200 | Loss: 0.5894
+  Epoch 125/200 | Loss: 0.5960
+  Epoch 130/200 | Loss: 0.5922
+  Epoch 135/200 | Loss: 0.6031
+  Epoch 140/200 | Loss: 0.5856
+  Epoch 145/200 | Loss: 0.5862
+  Epoch 150/200 | Loss: 0.5881
+  Epoch 155/200 | Loss: 0.5858
+  Epoch 160/200 | Loss: 0.5850
+  Epoch 165/200 | Loss: 0.5793
+  Epoch 170/200 | Loss: 0.5817
+  Epoch 175/200 | Loss: 0.5787
+  Epoch 180/200 | Loss: 0.5801
+  Epoch 185/200 | Loss: 0.5806
+  Epoch 190/200 | Loss: 0.5758
+  Epoch 195/200 | Loss: 0.5775
+  Epoch 200/200 | Loss: 0.5732
+  Single  | acc=0.6541 prec=0.6613 rec=0.6212 f1=0.6406 auc=0.7390
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 4.4124
+  Epoch 5/200 | Loss: 0.5777
+  Epoch 10/200 | Loss: 0.5179
+  Epoch 15/200 | Loss: 0.5033
+  Epoch 20/200 | Loss: 0.4813
+  Epoch 25/200 | Loss: 0.4580
+  Epoch 30/200 | Loss: 0.4303
+  Epoch 35/200 | Loss: 0.4307
+  Epoch 40/200 | Loss: 0.4002
+  Epoch 45/200 | Loss: 0.3907
+  Epoch 50/200 | Loss: 0.3649
+  Epoch 55/200 | Loss: 0.3753
+  Epoch 60/200 | Loss: 0.3576
+  Epoch 65/200 | Loss: 0.3372
+  Epoch 70/200 | Loss: 0.3581
+  Epoch 75/200 | Loss: 0.3278
+  Epoch 80/200 | Loss: 0.3140
+  Epoch 85/200 | Loss: 0.3269
+  Epoch 90/200 | Loss: 0.3123
+  Epoch 95/200 | Loss: 0.2979
+  Epoch 100/200 | Loss: 0.2946
+  Epoch 105/200 | Loss: 0.2804
+  Epoch 110/200 | Loss: 0.3662
+  Epoch 115/200 | Loss: 0.3027
+  Epoch 120/200 | Loss: 0.2850
+  Epoch 125/200 | Loss: 0.2598
+  Epoch 130/200 | Loss: 0.2604
+  Epoch 135/200 | Loss: 0.2451
+  Epoch 140/200 | Loss: 0.2662
+  Epoch 145/200 | Loss: 0.2536
+  Epoch 150/200 | Loss: 0.2328
+  Epoch 155/200 | Loss: 0.2492
+  Epoch 160/200 | Loss: 0.2426
+  Epoch 165/200 | Loss: 0.2541
+  Epoch 170/200 | Loss: 0.2936
+  Epoch 175/200 | Loss: 0.2356
+  Epoch 180/200 | Loss: 0.2159
+  Epoch 185/200 | Loss: 0.2120
+  Epoch 190/200 | Loss: 0.2172
+  Epoch 195/200 | Loss: 0.2097
+  Epoch 200/200 | Loss: 0.2263
+  Modular | acc=0.6917 prec=0.7049 rec=0.6515 f1=0.6772 auc=0.7488
+
+Results | Single: 0.6486±0.0533 | Modular: 0.6771±0.0453 | Diff: +0.0285
+
+
+[Dataset 6/9: 05_haberman_Survival]
+Loading dataset from: /root/global/QuantumAnnealerModule/Inference/Datasets/Datasets_balanced/05_haberman_Survival.csv
+Dataset num features: X=(162, 3),
+Class distribution: [81 81]
+Running 5-Fold Cross Validation
+Fold 1/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 16.1537
+  Epoch 5/200 | Loss: 12.3550
+  Epoch 10/200 | Loss: 9.0194
+  Epoch 15/200 | Loss: 11.3444
+  Epoch 20/200 | Loss: 5.0306
+  Epoch 25/200 | Loss: 3.7121
+  Epoch 30/200 | Loss: 4.2206
+  Epoch 35/200 | Loss: 2.1142
+  Epoch 40/200 | Loss: 1.2595
+  Epoch 45/200 | Loss: 1.1109
+  Epoch 50/200 | Loss: 1.2741
+  Epoch 55/200 | Loss: 0.8603
+  Epoch 60/200 | Loss: 0.8795
+  Epoch 65/200 | Loss: 0.9671
+  Epoch 70/200 | Loss: 1.0706
+  Epoch 75/200 | Loss: 0.7907
+  Epoch 80/200 | Loss: 0.9095
+  Epoch 85/200 | Loss: 0.8560
+  Epoch 90/200 | Loss: 0.6679
+  Epoch 95/200 | Loss: 0.8102
+  Epoch 100/200 | Loss: 0.6915
+  Epoch 105/200 | Loss: 0.8915
+  Epoch 110/200 | Loss: 0.7283
+  Epoch 115/200 | Loss: 0.6704
+  Epoch 120/200 | Loss: 0.7417
+  Epoch 125/200 | Loss: 0.7025
+  Epoch 130/200 | Loss: 0.8007
+  Epoch 135/200 | Loss: 0.7255
+  Epoch 140/200 | Loss: 0.8468
+  Epoch 145/200 | Loss: 0.7136
+  Epoch 150/200 | Loss: 0.6879
+  Epoch 155/200 | Loss: 0.6698
+  Epoch 160/200 | Loss: 0.7290
+  Epoch 165/200 | Loss: 0.6982
+  Epoch 170/200 | Loss: 0.6946
+  Epoch 175/200 | Loss: 0.7389
+  Epoch 180/200 | Loss: 0.7106
+  Epoch 185/200 | Loss: 0.7137
+  Epoch 190/200 | Loss: 0.8589
+  Epoch 195/200 | Loss: 0.7196
+  Epoch 200/200 | Loss: 0.6773
+  Single  | acc=0.6061 prec=0.7500 rec=0.3529 f1=0.4800 auc=0.4559
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 1.8413
+  Epoch 5/200 | Loss: 0.7000
+  Epoch 10/200 | Loss: 0.6855
+  Epoch 15/200 | Loss: 0.6165
+  Epoch 20/200 | Loss: 0.7646
+  Epoch 25/200 | Loss: 0.5970
+  Epoch 30/200 | Loss: 0.6074
+  Epoch 35/200 | Loss: 0.9357
+  Epoch 40/200 | Loss: 0.7692
+  Epoch 45/200 | Loss: 0.6514
+  Epoch 50/200 | Loss: 1.1029
+  Epoch 55/200 | Loss: 0.5677
+  Epoch 60/200 | Loss: 0.5283
+  Epoch 65/200 | Loss: 0.5757
+  Epoch 70/200 | Loss: 0.6486
+  Epoch 75/200 | Loss: 0.7896
+  Epoch 80/200 | Loss: 0.5952
+  Epoch 85/200 | Loss: 0.6720
+  Epoch 90/200 | Loss: 0.7724
+  Epoch 95/200 | Loss: 0.5747
+  Epoch 100/200 | Loss: 0.6606
+  Epoch 105/200 | Loss: 0.7305
+  Epoch 110/200 | Loss: 0.4799
+  Epoch 115/200 | Loss: 0.7793
+  Epoch 120/200 | Loss: 0.5507
+  Epoch 125/200 | Loss: 0.5442
+  Epoch 130/200 | Loss: 0.5631
+  Epoch 135/200 | Loss: 0.7269
+  Epoch 140/200 | Loss: 0.4628
+  Epoch 145/200 | Loss: 0.6604
+  Epoch 150/200 | Loss: 0.5609
+  Epoch 155/200 | Loss: 0.7290
+  Epoch 160/200 | Loss: 0.6413
+  Epoch 165/200 | Loss: 0.5888
+  Epoch 170/200 | Loss: 0.5022
+  Epoch 175/200 | Loss: 0.4124
+  Epoch 180/200 | Loss: 0.5340
+  Epoch 185/200 | Loss: 0.8040
+  Epoch 190/200 | Loss: 1.2882
+  Epoch 195/200 | Loss: 0.6155
+  Epoch 200/200 | Loss: 0.5486
+  Modular | acc=0.6970 prec=0.7059 rec=0.7059 f1=0.7059 auc=0.6544
+Fold 2/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 26.0461
+  Epoch 5/200 | Loss: 12.7905
+  Epoch 10/200 | Loss: 11.0790
+  Epoch 15/200 | Loss: 10.2299
+  Epoch 20/200 | Loss: 5.3607
+  Epoch 25/200 | Loss: 4.4876
+  Epoch 30/200 | Loss: 4.7078
+  Epoch 35/200 | Loss: 2.1388
+  Epoch 40/200 | Loss: 1.5378
+  Epoch 45/200 | Loss: 1.2065
+  Epoch 50/200 | Loss: 0.9650
+  Epoch 55/200 | Loss: 0.9382
+  Epoch 60/200 | Loss: 1.0577
+  Epoch 65/200 | Loss: 0.8390
+  Epoch 70/200 | Loss: 0.7920
+  Epoch 75/200 | Loss: 0.8399
+  Epoch 80/200 | Loss: 0.8404
+  Epoch 85/200 | Loss: 0.8306
+  Epoch 90/200 | Loss: 0.7958
+  Epoch 95/200 | Loss: 0.8306
+  Epoch 100/200 | Loss: 0.8664
+  Epoch 105/200 | Loss: 0.7398
+  Epoch 110/200 | Loss: 0.8155
+  Epoch 115/200 | Loss: 0.7091
+  Epoch 120/200 | Loss: 0.7029
+  Epoch 125/200 | Loss: 0.6985
+  Epoch 130/200 | Loss: 0.7409
+  Epoch 135/200 | Loss: 0.7854
+  Epoch 140/200 | Loss: 0.7843
+  Epoch 145/200 | Loss: 0.9463
+  Epoch 150/200 | Loss: 0.7028
+  Epoch 155/200 | Loss: 0.7744
+  Epoch 160/200 | Loss: 0.7965
+  Epoch 165/200 | Loss: 0.7197
+  Epoch 170/200 | Loss: 0.6962
+  Epoch 175/200 | Loss: 0.8195
+  Epoch 180/200 | Loss: 0.7150
+  Epoch 185/200 | Loss: 0.7521
+  Epoch 190/200 | Loss: 0.7720
+  Epoch 195/200 | Loss: 0.6885
+  Epoch 200/200 | Loss: 0.8539
+  Single  | acc=0.4848 prec=0.4848 rec=1.0000 f1=0.6531 auc=0.6324
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 2.2148
+  Epoch 5/200 | Loss: 1.1849
+  Epoch 10/200 | Loss: 0.6347
+  Epoch 15/200 | Loss: 0.6043
+  Epoch 20/200 | Loss: 0.7680
+  Epoch 25/200 | Loss: 0.6586
+  Epoch 30/200 | Loss: 0.6746
+  Epoch 35/200 | Loss: 0.8611
+  Epoch 40/200 | Loss: 0.7016
+  Epoch 45/200 | Loss: 0.5475
+  Epoch 50/200 | Loss: 0.5447
+  Epoch 55/200 | Loss: 0.5808
+  Epoch 60/200 | Loss: 1.1686
+  Epoch 65/200 | Loss: 0.7147
+  Epoch 70/200 | Loss: 0.6448
+  Epoch 75/200 | Loss: 0.4899
+  Epoch 80/200 | Loss: 0.5962
+  Epoch 85/200 | Loss: 0.5417
+  Epoch 90/200 | Loss: 0.5788
+  Epoch 95/200 | Loss: 0.6623
+  Epoch 100/200 | Loss: 0.5202
+  Epoch 105/200 | Loss: 0.5113
+  Epoch 110/200 | Loss: 0.5126
+  Epoch 115/200 | Loss: 0.5133
+  Epoch 120/200 | Loss: 0.6782
+  Epoch 125/200 | Loss: 0.7282
+  Epoch 130/200 | Loss: 0.4814
+  Epoch 135/200 | Loss: 0.4640
+  Epoch 140/200 | Loss: 0.4559
+  Epoch 145/200 | Loss: 0.5652
+  Epoch 150/200 | Loss: 0.4942
+  Epoch 155/200 | Loss: 0.6236
+  Epoch 160/200 | Loss: 0.4149
+  Epoch 165/200 | Loss: 0.6600
+  Epoch 170/200 | Loss: 0.5684
+  Epoch 175/200 | Loss: 0.6709
+  Epoch 180/200 | Loss: 0.7006
+  Epoch 185/200 | Loss: 0.4612
+  Epoch 190/200 | Loss: 0.5451
+  Epoch 195/200 | Loss: 0.4596
+  Epoch 200/200 | Loss: 0.5534
+  Modular | acc=0.4545 prec=0.4375 rec=0.4375 f1=0.4375 auc=0.5037
+Fold 3/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 16.5828
+  Epoch 5/200 | Loss: 12.6364
+  Epoch 10/200 | Loss: 10.7997
+  Epoch 15/200 | Loss: 8.2173
+  Epoch 20/200 | Loss: 4.8257
+  Epoch 25/200 | Loss: 3.5360
+  Epoch 30/200 | Loss: 5.4153
+  Epoch 35/200 | Loss: 1.8343
+  Epoch 40/200 | Loss: 1.8114
+  Epoch 45/200 | Loss: 0.9659
+  Epoch 50/200 | Loss: 1.0696
+  Epoch 55/200 | Loss: 1.3976
+  Epoch 60/200 | Loss: 0.8609
+  Epoch 65/200 | Loss: 0.8415
+  Epoch 70/200 | Loss: 0.7345
+  Epoch 75/200 | Loss: 0.8153
+  Epoch 80/200 | Loss: 0.8069
+  Epoch 85/200 | Loss: 0.7903
+  Epoch 90/200 | Loss: 0.7206
+  Epoch 95/200 | Loss: 0.6976
+  Epoch 100/200 | Loss: 0.7487
+  Epoch 105/200 | Loss: 0.7868
+  Epoch 110/200 | Loss: 0.6730
+  Epoch 115/200 | Loss: 0.7109
+  Epoch 120/200 | Loss: 0.7324
+  Epoch 125/200 | Loss: 0.7487
+  Epoch 130/200 | Loss: 0.6866
+  Epoch 135/200 | Loss: 0.7114
+  Epoch 140/200 | Loss: 0.6961
+  Epoch 145/200 | Loss: 0.7055
+  Epoch 150/200 | Loss: 0.6826
+  Epoch 155/200 | Loss: 0.6965
+  Epoch 160/200 | Loss: 0.7786
+  Epoch 165/200 | Loss: 0.7087
+  Epoch 170/200 | Loss: 0.6729
+  Epoch 175/200 | Loss: 0.7103
+  Epoch 180/200 | Loss: 0.7028
+  Epoch 185/200 | Loss: 0.7139
+  Epoch 190/200 | Loss: 0.7495
+  Epoch 195/200 | Loss: 0.7334
+  Epoch 200/200 | Loss: 0.7268
+  Single  | acc=0.4688 prec=0.4737 rec=0.5625 f1=0.5143 auc=0.5020
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 5.1233
+  Epoch 5/200 | Loss: 0.9553
+  Epoch 10/200 | Loss: 0.8263
+  Epoch 15/200 | Loss: 0.6701
+  Epoch 20/200 | Loss: 0.6475
+  Epoch 25/200 | Loss: 0.7215
+  Epoch 30/200 | Loss: 0.7426
+  Epoch 35/200 | Loss: 0.6154
+  Epoch 40/200 | Loss: 0.5695
+  Epoch 45/200 | Loss: 0.5783
+  Epoch 50/200 | Loss: 0.5612
+  Epoch 55/200 | Loss: 0.6321
+  Epoch 60/200 | Loss: 0.6300
+  Epoch 65/200 | Loss: 0.6919
+  Epoch 70/200 | Loss: 0.6386
+  Epoch 75/200 | Loss: 0.5779
+  Epoch 80/200 | Loss: 0.5885
+  Epoch 85/200 | Loss: 0.5379
+  Epoch 90/200 | Loss: 0.5182
+  Epoch 95/200 | Loss: 0.6739
+  Epoch 100/200 | Loss: 0.6849
+  Epoch 105/200 | Loss: 0.5092
+  Epoch 110/200 | Loss: 0.4629
+  Epoch 115/200 | Loss: 0.4779
+  Epoch 120/200 | Loss: 0.4893
+  Epoch 125/200 | Loss: 0.4828
+  Epoch 130/200 | Loss: 0.5898
+  Epoch 135/200 | Loss: 0.4657
+  Epoch 140/200 | Loss: 0.4590
+  Epoch 145/200 | Loss: 0.6613
+  Epoch 150/200 | Loss: 0.5054
+  Epoch 155/200 | Loss: 0.5250
+  Epoch 160/200 | Loss: 0.5794
+  Epoch 165/200 | Loss: 0.5215
+  Epoch 170/200 | Loss: 0.6907
+  Epoch 175/200 | Loss: 0.4423
+  Epoch 180/200 | Loss: 0.3929
+  Epoch 185/200 | Loss: 0.4168
+  Epoch 190/200 | Loss: 0.4145
+  Epoch 195/200 | Loss: 0.5605
+  Epoch 200/200 | Loss: 0.5021
+  Modular | acc=0.6250 prec=0.6000 rec=0.7500 f1=0.6667 auc=0.6680
+Fold 4/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 26.9416
+  Epoch 5/200 | Loss: 16.3240
+  Epoch 10/200 | Loss: 9.3231
+  Epoch 15/200 | Loss: 9.4814
+  Epoch 20/200 | Loss: 6.0220
+  Epoch 25/200 | Loss: 5.0535
+  Epoch 30/200 | Loss: 3.2570
+  Epoch 35/200 | Loss: 2.5490
+  Epoch 40/200 | Loss: 1.4964
+  Epoch 45/200 | Loss: 1.4222
+  Epoch 50/200 | Loss: 0.9929
+  Epoch 55/200 | Loss: 0.8950
+  Epoch 60/200 | Loss: 0.8309
+  Epoch 65/200 | Loss: 0.8407
+  Epoch 70/200 | Loss: 1.7227
+  Epoch 75/200 | Loss: 0.8186
+  Epoch 80/200 | Loss: 0.7532
+  Epoch 85/200 | Loss: 0.8089
+  Epoch 90/200 | Loss: 0.8074
+  Epoch 95/200 | Loss: 0.7552
+  Epoch 100/200 | Loss: 0.7736
+  Epoch 105/200 | Loss: 0.7391
+  Epoch 110/200 | Loss: 0.7732
+  Epoch 115/200 | Loss: 0.7544
+  Epoch 120/200 | Loss: 0.7340
+  Epoch 125/200 | Loss: 0.7319
+  Epoch 130/200 | Loss: 0.7102
+  Epoch 135/200 | Loss: 0.7474
+  Epoch 140/200 | Loss: 0.7080
+  Epoch 145/200 | Loss: 0.7131
+  Epoch 150/200 | Loss: 0.7708
+  Epoch 155/200 | Loss: 0.7321
+  Epoch 160/200 | Loss: 0.7179
+  Epoch 165/200 | Loss: 0.7144
+  Epoch 170/200 | Loss: 0.7137
+  Epoch 175/200 | Loss: 0.7425
+  Epoch 180/200 | Loss: 0.7151
+  Epoch 185/200 | Loss: 0.7112
+  Epoch 190/200 | Loss: 0.9425
+  Epoch 195/200 | Loss: 0.6907
+  Epoch 200/200 | Loss: 0.7001
+  Single  | acc=0.4688 prec=0.4706 rec=0.5000 f1=0.4848 auc=0.4766
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 6.2680
+  Epoch 5/200 | Loss: 1.1619
+  Epoch 10/200 | Loss: 0.8619
+  Epoch 15/200 | Loss: 0.7210
+  Epoch 20/200 | Loss: 0.6432
+  Epoch 25/200 | Loss: 0.6274
+  Epoch 30/200 | Loss: 0.7548
+  Epoch 35/200 | Loss: 0.6458
+  Epoch 40/200 | Loss: 0.7296
+  Epoch 45/200 | Loss: 0.5747
+  Epoch 50/200 | Loss: 0.6066
+  Epoch 55/200 | Loss: 0.5626
+  Epoch 60/200 | Loss: 0.5955
+  Epoch 65/200 | Loss: 0.5104
+  Epoch 70/200 | Loss: 0.4977
+  Epoch 75/200 | Loss: 0.6458
+  Epoch 80/200 | Loss: 0.4716
+  Epoch 85/200 | Loss: 0.4600
+  Epoch 90/200 | Loss: 0.4385
+  Epoch 95/200 | Loss: 0.4604
+  Epoch 100/200 | Loss: 0.5046
+  Epoch 105/200 | Loss: 0.5633
+  Epoch 110/200 | Loss: 0.5948
+  Epoch 115/200 | Loss: 0.5169
+  Epoch 120/200 | Loss: 0.5275
+  Epoch 125/200 | Loss: 0.4102
+  Epoch 130/200 | Loss: 0.3872
+  Epoch 135/200 | Loss: 0.5900
+  Epoch 140/200 | Loss: 0.3974
+  Epoch 145/200 | Loss: 0.4072
+  Epoch 150/200 | Loss: 0.4334
+  Epoch 155/200 | Loss: 0.4440
+  Epoch 160/200 | Loss: 0.4246
+  Epoch 165/200 | Loss: 0.3482
+  Epoch 170/200 | Loss: 0.5987
+  Epoch 175/200 | Loss: 0.3862
+  Epoch 180/200 | Loss: 0.3564
+  Epoch 185/200 | Loss: 0.3568
+  Epoch 190/200 | Loss: 0.4466
+  Epoch 195/200 | Loss: 0.4945
+  Epoch 200/200 | Loss: 0.4602
+  Modular | acc=0.5312 prec=0.5333 rec=0.5000 f1=0.5161 auc=0.5195
+Fold 5/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 20.3662
+  Epoch 5/200 | Loss: 12.7550
+  Epoch 10/200 | Loss: 8.8029
+  Epoch 15/200 | Loss: 8.0630
+  Epoch 20/200 | Loss: 4.9233
+  Epoch 25/200 | Loss: 4.3043
+  Epoch 30/200 | Loss: 3.8892
+  Epoch 35/200 | Loss: 3.2072
+  Epoch 40/200 | Loss: 1.5138
+  Epoch 45/200 | Loss: 1.2831
+  Epoch 50/200 | Loss: 1.1400
+  Epoch 55/200 | Loss: 1.0471
+  Epoch 60/200 | Loss: 0.9447
+  Epoch 65/200 | Loss: 0.8476
+  Epoch 70/200 | Loss: 0.8787
+  Epoch 75/200 | Loss: 0.7613
+  Epoch 80/200 | Loss: 0.7681
+  Epoch 85/200 | Loss: 0.6943
+  Epoch 90/200 | Loss: 0.7749
+  Epoch 95/200 | Loss: 0.7249
+  Epoch 100/200 | Loss: 0.9333
+  Epoch 105/200 | Loss: 0.7353
+  Epoch 110/200 | Loss: 0.7394
+  Epoch 115/200 | Loss: 0.6995
+  Epoch 120/200 | Loss: 0.7134
+  Epoch 125/200 | Loss: 1.2142
+  Epoch 130/200 | Loss: 0.6905
+  Epoch 135/200 | Loss: 0.7375
+  Epoch 140/200 | Loss: 0.7195
+  Epoch 145/200 | Loss: 0.7164
+  Epoch 150/200 | Loss: 0.6791
+  Epoch 155/200 | Loss: 0.6934
+  Epoch 160/200 | Loss: 0.7295
+  Epoch 165/200 | Loss: 0.6692
+  Epoch 170/200 | Loss: 0.6688
+  Epoch 175/200 | Loss: 0.6783
+  Epoch 180/200 | Loss: 0.7020
+  Epoch 185/200 | Loss: 0.7676
+  Epoch 190/200 | Loss: 0.6802
+  Epoch 195/200 | Loss: 0.7185
+  Epoch 200/200 | Loss: 0.6801
+  Single  | acc=0.2812 prec=0.3333 rec=0.4375 f1=0.3784 auc=0.3711
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 0.8196
+  Epoch 5/200 | Loss: 0.7300
+  Epoch 10/200 | Loss: 0.7490
+  Epoch 15/200 | Loss: 0.8506
+  Epoch 20/200 | Loss: 0.7400
+  Epoch 25/200 | Loss: 0.6126
+  Epoch 30/200 | Loss: 0.6808
+  Epoch 35/200 | Loss: 0.6459
+  Epoch 40/200 | Loss: 0.7064
+  Epoch 45/200 | Loss: 0.6187
+  Epoch 50/200 | Loss: 0.5691
+  Epoch 55/200 | Loss: 0.7146
+  Epoch 60/200 | Loss: 0.6916
+  Epoch 65/200 | Loss: 0.7199
+  Epoch 70/200 | Loss: 0.5449
+  Epoch 75/200 | Loss: 0.5975
+  Epoch 80/200 | Loss: 0.7157
+  Epoch 85/200 | Loss: 0.5231
+  Epoch 90/200 | Loss: 0.4966
+  Epoch 95/200 | Loss: 0.6968
+  Epoch 100/200 | Loss: 0.6192
+  Epoch 105/200 | Loss: 0.5435
+  Epoch 110/200 | Loss: 0.4392
+  Epoch 115/200 | Loss: 0.4421
+  Epoch 120/200 | Loss: 0.5472
+  Epoch 125/200 | Loss: 0.7295
+  Epoch 130/200 | Loss: 0.4592
+  Epoch 135/200 | Loss: 0.6209
+  Epoch 140/200 | Loss: 0.8323
+  Epoch 145/200 | Loss: 0.5461
+  Epoch 150/200 | Loss: 0.4225
+  Epoch 155/200 | Loss: 0.3903
+  Epoch 160/200 | Loss: 0.4872
+  Epoch 165/200 | Loss: 0.4799
+  Epoch 170/200 | Loss: 0.4065
+  Epoch 175/200 | Loss: 0.4517
+  Epoch 180/200 | Loss: 0.5601
+  Epoch 185/200 | Loss: 0.4537
+  Epoch 190/200 | Loss: 0.5113
+  Epoch 195/200 | Loss: 0.4396
+  Epoch 200/200 | Loss: 0.5249
+  Modular | acc=0.7188 prec=0.6842 rec=0.8125 f1=0.7429 auc=0.6875
+
+Results | Single: 0.4619±0.1040 | Modular: 0.6053±0.0999 | Diff: +0.1434
+
+
+[Dataset 7/9: 06_heart_failure]
+Loading dataset from: /root/global/QuantumAnnealerModule/Inference/Datasets/Datasets_balanced/06_heart_failure.csv
+Dataset num features: X=(192, 12),
+Class distribution: [96 96]
+Running 5-Fold Cross Validation
+Fold 1/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 20.6233
+  Epoch 5/200 | Loss: 17.4805
+  Epoch 10/200 | Loss: 14.0675
+  Epoch 15/200 | Loss: 11.0886
+  Epoch 20/200 | Loss: 8.6075
+  Epoch 25/200 | Loss: 6.2079
+  Epoch 30/200 | Loss: 3.9869
+  Epoch 35/200 | Loss: 2.0565
+  Epoch 40/200 | Loss: 0.8401
+  Epoch 45/200 | Loss: 0.7965
+  Epoch 50/200 | Loss: 0.7767
+  Epoch 55/200 | Loss: 0.7674
+  Epoch 60/200 | Loss: 0.7585
+  Epoch 65/200 | Loss: 0.7534
+  Epoch 70/200 | Loss: 0.7422
+  Epoch 75/200 | Loss: 0.7373
+  Epoch 80/200 | Loss: 0.7353
+  Epoch 85/200 | Loss: 0.7252
+  Epoch 90/200 | Loss: 0.7242
+  Epoch 95/200 | Loss: 0.7152
+  Epoch 100/200 | Loss: 0.7086
+  Epoch 105/200 | Loss: 0.7032
+  Epoch 110/200 | Loss: 0.7033
+  Epoch 115/200 | Loss: 0.6998
+  Epoch 120/200 | Loss: 0.6942
+  Epoch 125/200 | Loss: 0.6911
+  Epoch 130/200 | Loss: 0.6945
+  Epoch 135/200 | Loss: 0.6857
+  Epoch 140/200 | Loss: 0.6875
+  Epoch 145/200 | Loss: 0.6824
+  Epoch 150/200 | Loss: 0.6809
+  Epoch 155/200 | Loss: 0.6751
+  Epoch 160/200 | Loss: 0.6778
+  Epoch 165/200 | Loss: 0.6755
+  Epoch 170/200 | Loss: 0.6731
+  Epoch 175/200 | Loss: 0.6723
+  Epoch 180/200 | Loss: 0.6689
+  Epoch 185/200 | Loss: 0.6658
+  Epoch 190/200 | Loss: 0.6643
+  Epoch 195/200 | Loss: 0.6686
+  Epoch 200/200 | Loss: 0.6665
+  Single  | acc=0.3846 prec=0.4167 rec=0.5000 f1=0.4545 auc=0.4237
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 10.5555
+  Epoch 5/200 | Loss: 1.3328
+  Epoch 10/200 | Loss: 0.4430
+  Epoch 15/200 | Loss: 0.3564
+  Epoch 20/200 | Loss: 0.3146
+  Epoch 25/200 | Loss: 0.2800
+  Epoch 30/200 | Loss: 0.2534
+  Epoch 35/200 | Loss: 0.2335
+  Epoch 40/200 | Loss: 0.2070
+  Epoch 45/200 | Loss: 0.1934
+  Epoch 50/200 | Loss: 0.1738
+  Epoch 55/200 | Loss: 0.1602
+  Epoch 60/200 | Loss: 0.1490
+  Epoch 65/200 | Loss: 0.1385
+  Epoch 70/200 | Loss: 0.1310
+  Epoch 75/200 | Loss: 0.1213
+  Epoch 80/200 | Loss: 0.1135
+  Epoch 85/200 | Loss: 0.1077
+  Epoch 90/200 | Loss: 0.0950
+  Epoch 95/200 | Loss: 0.0945
+  Epoch 100/200 | Loss: 0.0872
+  Epoch 105/200 | Loss: 0.0783
+  Epoch 110/200 | Loss: 0.0739
+  Epoch 115/200 | Loss: 0.0695
+  Epoch 120/200 | Loss: 0.0640
+  Epoch 125/200 | Loss: 0.0605
+  Epoch 130/200 | Loss: 0.0567
+  Epoch 135/200 | Loss: 0.0533
+  Epoch 140/200 | Loss: 0.0495
+  Epoch 145/200 | Loss: 0.0486
+  Epoch 150/200 | Loss: 0.0444
+  Epoch 155/200 | Loss: 0.0412
+  Epoch 160/200 | Loss: 0.0420
+  Epoch 165/200 | Loss: 0.0368
+  Epoch 170/200 | Loss: 0.0377
+  Epoch 175/200 | Loss: 0.0382
+  Epoch 180/200 | Loss: 0.0313
+  Epoch 185/200 | Loss: 0.0303
+  Epoch 190/200 | Loss: 0.0284
+  Epoch 195/200 | Loss: 0.0272
+  Epoch 200/200 | Loss: 0.0282
+  Modular | acc=0.5641 prec=0.5714 rec=0.6000 f1=0.5854 auc=0.6053
+Fold 2/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 21.3322
+  Epoch 5/200 | Loss: 17.5971
+  Epoch 10/200 | Loss: 14.1414
+  Epoch 15/200 | Loss: 11.1865
+  Epoch 20/200 | Loss: 8.5499
+  Epoch 25/200 | Loss: 6.2933
+  Epoch 30/200 | Loss: 4.0434
+  Epoch 35/200 | Loss: 2.0717
+  Epoch 40/200 | Loss: 0.8666
+  Epoch 45/200 | Loss: 0.8101
+  Epoch 50/200 | Loss: 0.7908
+  Epoch 55/200 | Loss: 0.7888
+  Epoch 60/200 | Loss: 0.7742
+  Epoch 65/200 | Loss: 0.7743
+  Epoch 70/200 | Loss: 0.7607
+  Epoch 75/200 | Loss: 0.7549
+  Epoch 80/200 | Loss: 0.7516
+  Epoch 85/200 | Loss: 0.7463
+  Epoch 90/200 | Loss: 0.7355
+  Epoch 95/200 | Loss: 0.7258
+  Epoch 100/200 | Loss: 0.7253
+  Epoch 105/200 | Loss: 0.7174
+  Epoch 110/200 | Loss: 0.7166
+  Epoch 115/200 | Loss: 0.7127
+  Epoch 120/200 | Loss: 0.7102
+  Epoch 125/200 | Loss: 0.7028
+  Epoch 130/200 | Loss: 0.6996
+  Epoch 135/200 | Loss: 0.7018
+  Epoch 140/200 | Loss: 0.6971
+  Epoch 145/200 | Loss: 0.6954
+  Epoch 150/200 | Loss: 0.6932
+  Epoch 155/200 | Loss: 0.6875
+  Epoch 160/200 | Loss: 0.6847
+  Epoch 165/200 | Loss: 0.6846
+  Epoch 170/200 | Loss: 0.6861
+  Epoch 175/200 | Loss: 0.6886
+  Epoch 180/200 | Loss: 0.6825
+  Epoch 185/200 | Loss: 0.6825
+  Epoch 190/200 | Loss: 0.6799
+  Epoch 195/200 | Loss: 0.6771
+  Epoch 200/200 | Loss: 0.6771
+  Single  | acc=0.4359 prec=0.4400 rec=0.5789 f1=0.5000 auc=0.4868
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 2.9937
+  Epoch 5/200 | Loss: 0.7525
+  Epoch 10/200 | Loss: 0.4379
+  Epoch 15/200 | Loss: 0.3705
+  Epoch 20/200 | Loss: 0.3271
+  Epoch 25/200 | Loss: 0.2849
+  Epoch 30/200 | Loss: 0.2471
+  Epoch 35/200 | Loss: 0.2158
+  Epoch 40/200 | Loss: 0.1990
+  Epoch 45/200 | Loss: 0.1801
+  Epoch 50/200 | Loss: 0.1635
+  Epoch 55/200 | Loss: 0.1522
+  Epoch 60/200 | Loss: 0.1404
+  Epoch 65/200 | Loss: 0.1280
+  Epoch 70/200 | Loss: 0.1244
+  Epoch 75/200 | Loss: 0.1116
+  Epoch 80/200 | Loss: 0.1061
+  Epoch 85/200 | Loss: 0.0959
+  Epoch 90/200 | Loss: 0.0911
+  Epoch 95/200 | Loss: 0.0831
+  Epoch 100/200 | Loss: 0.0831
+  Epoch 105/200 | Loss: 0.0723
+  Epoch 110/200 | Loss: 0.0689
+  Epoch 115/200 | Loss: 0.0647
+  Epoch 120/200 | Loss: 0.0602
+  Epoch 125/200 | Loss: 0.0572
+  Epoch 130/200 | Loss: 0.0528
+  Epoch 135/200 | Loss: 0.0498
+  Epoch 140/200 | Loss: 0.0495
+  Epoch 145/200 | Loss: 0.0437
+  Epoch 150/200 | Loss: 0.0412
+  Epoch 155/200 | Loss: 0.0405
+  Epoch 160/200 | Loss: 0.0384
+  Epoch 165/200 | Loss: 0.0361
+  Epoch 170/200 | Loss: 0.0352
+  Epoch 175/200 | Loss: 0.0323
+  Epoch 180/200 | Loss: 0.0314
+  Epoch 185/200 | Loss: 0.0295
+  Epoch 190/200 | Loss: 0.0291
+  Epoch 195/200 | Loss: 0.0271
+  Epoch 200/200 | Loss: 0.0260
+  Modular | acc=0.7179 prec=0.7222 rec=0.6842 f1=0.7027 auc=0.7737
+Fold 3/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 21.0131
+  Epoch 5/200 | Loss: 17.7787
+  Epoch 10/200 | Loss: 14.0316
+  Epoch 15/200 | Loss: 11.1724
+  Epoch 20/200 | Loss: 8.5149
+  Epoch 25/200 | Loss: 6.2757
+  Epoch 30/200 | Loss: 4.0436
+  Epoch 35/200 | Loss: 2.0750
+  Epoch 40/200 | Loss: 0.8546
+  Epoch 45/200 | Loss: 0.7931
+  Epoch 50/200 | Loss: 0.7763
+  Epoch 55/200 | Loss: 0.7736
+  Epoch 60/200 | Loss: 0.7682
+  Epoch 65/200 | Loss: 0.7614
+  Epoch 70/200 | Loss: 0.7502
+  Epoch 75/200 | Loss: 0.7436
+  Epoch 80/200 | Loss: 0.7340
+  Epoch 85/200 | Loss: 0.7282
+  Epoch 90/200 | Loss: 0.7276
+  Epoch 95/200 | Loss: 0.7228
+  Epoch 100/200 | Loss: 0.7144
+  Epoch 105/200 | Loss: 0.7122
+  Epoch 110/200 | Loss: 0.7065
+  Epoch 115/200 | Loss: 0.7056
+  Epoch 120/200 | Loss: 0.6935
+  Epoch 125/200 | Loss: 0.6969
+  Epoch 130/200 | Loss: 0.6977
+  Epoch 135/200 | Loss: 0.6901
+  Epoch 140/200 | Loss: 0.6894
+  Epoch 145/200 | Loss: 0.6865
+  Epoch 150/200 | Loss: 0.6838
+  Epoch 155/200 | Loss: 0.6797
+  Epoch 160/200 | Loss: 0.6810
+  Epoch 165/200 | Loss: 0.6808
+  Epoch 170/200 | Loss: 0.6766
+  Epoch 175/200 | Loss: 0.6770
+  Epoch 180/200 | Loss: 0.6740
+  Epoch 185/200 | Loss: 0.6711
+  Epoch 190/200 | Loss: 0.6683
+  Epoch 195/200 | Loss: 0.6708
+  Epoch 200/200 | Loss: 0.6674
+  Single  | acc=0.4474 prec=0.4000 rec=0.2105 f1=0.2759 auc=0.4626
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 1.9233
+  Epoch 5/200 | Loss: 0.5184
+  Epoch 10/200 | Loss: 0.3443
+  Epoch 15/200 | Loss: 0.2726
+  Epoch 20/200 | Loss: 0.2277
+  Epoch 25/200 | Loss: 0.2000
+  Epoch 30/200 | Loss: 0.1715
+  Epoch 35/200 | Loss: 0.1468
+  Epoch 40/200 | Loss: 0.1398
+  Epoch 45/200 | Loss: 0.1121
+  Epoch 50/200 | Loss: 0.0995
+  Epoch 55/200 | Loss: 0.0897
+  Epoch 60/200 | Loss: 0.0780
+  Epoch 65/200 | Loss: 0.0723
+  Epoch 70/200 | Loss: 0.0635
+  Epoch 75/200 | Loss: 0.0590
+  Epoch 80/200 | Loss: 0.0562
+  Epoch 85/200 | Loss: 0.0500
+  Epoch 90/200 | Loss: 0.0473
+  Epoch 95/200 | Loss: 0.0464
+  Epoch 100/200 | Loss: 0.0415
+  Epoch 105/200 | Loss: 0.0368
+  Epoch 110/200 | Loss: 0.0364
+  Epoch 115/200 | Loss: 0.0340
+  Epoch 120/200 | Loss: 0.0309
+  Epoch 125/200 | Loss: 0.0313
+  Epoch 130/200 | Loss: 0.0278
+  Epoch 135/200 | Loss: 0.0269
+  Epoch 140/200 | Loss: 0.0254
+  Epoch 145/200 | Loss: 0.0230
+  Epoch 150/200 | Loss: 0.0222
+  Epoch 155/200 | Loss: 0.0199
+  Epoch 160/200 | Loss: 0.0206
+  Epoch 165/200 | Loss: 0.0186
+  Epoch 170/200 | Loss: 0.0185
+  Epoch 175/200 | Loss: 0.0182
+  Epoch 180/200 | Loss: 0.0163
+  Epoch 185/200 | Loss: 0.0170
+  Epoch 190/200 | Loss: 0.0163
+  Epoch 195/200 | Loss: 0.0156
+  Epoch 200/200 | Loss: 0.0145
+  Modular | acc=0.5263 prec=0.5294 rec=0.4737 f1=0.5000 auc=0.6177
+Fold 4/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 20.8077
+  Epoch 5/200 | Loss: 17.2988
+  Epoch 10/200 | Loss: 13.9718
+  Epoch 15/200 | Loss: 10.9873
+  Epoch 20/200 | Loss: 8.4866
+  Epoch 25/200 | Loss: 6.1383
+  Epoch 30/200 | Loss: 3.9679
+  Epoch 35/200 | Loss: 2.0021
+  Epoch 40/200 | Loss: 0.8452
+  Epoch 45/200 | Loss: 0.7958
+  Epoch 50/200 | Loss: 0.7760
+  Epoch 55/200 | Loss: 0.7709
+  Epoch 60/200 | Loss: 0.7624
+  Epoch 65/200 | Loss: 0.7575
+  Epoch 70/200 | Loss: 0.7475
+  Epoch 75/200 | Loss: 0.7392
+  Epoch 80/200 | Loss: 0.7368
+  Epoch 85/200 | Loss: 0.7323
+  Epoch 90/200 | Loss: 0.7255
+  Epoch 95/200 | Loss: 0.7200
+  Epoch 100/200 | Loss: 0.7115
+  Epoch 105/200 | Loss: 0.7103
+  Epoch 110/200 | Loss: 0.7093
+  Epoch 115/200 | Loss: 0.7085
+  Epoch 120/200 | Loss: 0.7034
+  Epoch 125/200 | Loss: 0.7005
+  Epoch 130/200 | Loss: 0.6983
+  Epoch 135/200 | Loss: 0.6981
+  Epoch 140/200 | Loss: 0.6962
+  Epoch 145/200 | Loss: 0.6914
+  Epoch 150/200 | Loss: 0.6935
+  Epoch 155/200 | Loss: 0.6910
+  Epoch 160/200 | Loss: 0.6896
+  Epoch 165/200 | Loss: 0.6837
+  Epoch 170/200 | Loss: 0.6877
+  Epoch 175/200 | Loss: 0.6857
+  Epoch 180/200 | Loss: 0.6814
+  Epoch 185/200 | Loss: 0.6820
+  Epoch 190/200 | Loss: 0.6792
+  Epoch 195/200 | Loss: 0.6754
+  Epoch 200/200 | Loss: 0.6808
+  Single  | acc=0.5000 prec=0.5000 rec=0.5263 f1=0.5128 auc=0.4515
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 20.3998
+  Epoch 5/200 | Loss: 5.0070
+  Epoch 10/200 | Loss: 0.7988
+  Epoch 15/200 | Loss: 0.5189
+  Epoch 20/200 | Loss: 0.4059
+  Epoch 25/200 | Loss: 0.3440
+  Epoch 30/200 | Loss: 0.3070
+  Epoch 35/200 | Loss: 0.2753
+  Epoch 40/200 | Loss: 0.2458
+  Epoch 45/200 | Loss: 0.2252
+  Epoch 50/200 | Loss: 0.2047
+  Epoch 55/200 | Loss: 0.1879
+  Epoch 60/200 | Loss: 0.1784
+  Epoch 65/200 | Loss: 0.1649
+  Epoch 70/200 | Loss: 0.1539
+  Epoch 75/200 | Loss: 0.1420
+  Epoch 80/200 | Loss: 0.1333
+  Epoch 85/200 | Loss: 0.1232
+  Epoch 90/200 | Loss: 0.1192
+  Epoch 95/200 | Loss: 0.1102
+  Epoch 100/200 | Loss: 0.1029
+  Epoch 105/200 | Loss: 0.0971
+  Epoch 110/200 | Loss: 0.0923
+  Epoch 115/200 | Loss: 0.0848
+  Epoch 120/200 | Loss: 0.0792
+  Epoch 125/200 | Loss: 0.0755
+  Epoch 130/200 | Loss: 0.0721
+  Epoch 135/200 | Loss: 0.0676
+  Epoch 140/200 | Loss: 0.0628
+  Epoch 145/200 | Loss: 0.0600
+  Epoch 150/200 | Loss: 0.0552
+  Epoch 155/200 | Loss: 0.0523
+  Epoch 160/200 | Loss: 0.0499
+  Epoch 165/200 | Loss: 0.0473
+  Epoch 170/200 | Loss: 0.0454
+  Epoch 175/200 | Loss: 0.0435
+  Epoch 180/200 | Loss: 0.0412
+  Epoch 185/200 | Loss: 0.0387
+  Epoch 190/200 | Loss: 0.0372
+  Epoch 195/200 | Loss: 0.0352
+  Epoch 200/200 | Loss: 0.0332
+  Modular | acc=0.7105 prec=0.7857 rec=0.5789 f1=0.6667 auc=0.7147
+Fold 5/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 20.6732
+  Epoch 5/200 | Loss: 17.4604
+  Epoch 10/200 | Loss: 13.9523
+  Epoch 15/200 | Loss: 10.9424
+  Epoch 20/200 | Loss: 8.4530
+  Epoch 25/200 | Loss: 6.0462
+  Epoch 30/200 | Loss: 3.9522
+  Epoch 35/200 | Loss: 1.9751
+  Epoch 40/200 | Loss: 0.8186
+  Epoch 45/200 | Loss: 0.7732
+  Epoch 50/200 | Loss: 0.7621
+  Epoch 55/200 | Loss: 0.7565
+  Epoch 60/200 | Loss: 0.7499
+  Epoch 65/200 | Loss: 0.7453
+  Epoch 70/200 | Loss: 0.7391
+  Epoch 75/200 | Loss: 0.7300
+  Epoch 80/200 | Loss: 0.7262
+  Epoch 85/200 | Loss: 0.7191
+  Epoch 90/200 | Loss: 0.7201
+  Epoch 95/200 | Loss: 0.7107
+  Epoch 100/200 | Loss: 0.7039
+  Epoch 105/200 | Loss: 0.7025
+  Epoch 110/200 | Loss: 0.7020
+  Epoch 115/200 | Loss: 0.6954
+  Epoch 120/200 | Loss: 0.6944
+  Epoch 125/200 | Loss: 0.6885
+  Epoch 130/200 | Loss: 0.6903
+  Epoch 135/200 | Loss: 0.6882
+  Epoch 140/200 | Loss: 0.6884
+  Epoch 145/200 | Loss: 0.6855
+  Epoch 150/200 | Loss: 0.6801
+  Epoch 155/200 | Loss: 0.6826
+  Epoch 160/200 | Loss: 0.6765
+  Epoch 165/200 | Loss: 0.6805
+  Epoch 170/200 | Loss: 0.6762
+  Epoch 175/200 | Loss: 0.6764
+  Epoch 180/200 | Loss: 0.6744
+  Epoch 185/200 | Loss: 0.6736
+  Epoch 190/200 | Loss: 0.6709
+  Epoch 195/200 | Loss: 0.6694
+  Epoch 200/200 | Loss: 0.6679
+  Single  | acc=0.4474 prec=0.4583 rec=0.5789 f1=0.5116 auc=0.3601
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 7.6438
+  Epoch 5/200 | Loss: 1.4670
+  Epoch 10/200 | Loss: 0.5704
+  Epoch 15/200 | Loss: 0.4607
+  Epoch 20/200 | Loss: 0.4073
+  Epoch 25/200 | Loss: 0.3715
+  Epoch 30/200 | Loss: 0.3409
+  Epoch 35/200 | Loss: 0.3080
+  Epoch 40/200 | Loss: 0.2827
+  Epoch 45/200 | Loss: 0.2521
+  Epoch 50/200 | Loss: 0.2355
+  Epoch 55/200 | Loss: 0.2220
+  Epoch 60/200 | Loss: 0.2032
+  Epoch 65/200 | Loss: 0.1882
+  Epoch 70/200 | Loss: 0.1720
+  Epoch 75/200 | Loss: 0.1642
+  Epoch 80/200 | Loss: 0.1445
+  Epoch 85/200 | Loss: 0.1355
+  Epoch 90/200 | Loss: 0.1248
+  Epoch 95/200 | Loss: 0.1146
+  Epoch 100/200 | Loss: 0.1094
+  Epoch 105/200 | Loss: 0.1011
+  Epoch 110/200 | Loss: 0.0915
+  Epoch 115/200 | Loss: 0.0847
+  Epoch 120/200 | Loss: 0.0827
+  Epoch 125/200 | Loss: 0.0767
+  Epoch 130/200 | Loss: 0.0706
+  Epoch 135/200 | Loss: 0.0654
+  Epoch 140/200 | Loss: 0.0605
+  Epoch 145/200 | Loss: 0.0573
+  Epoch 150/200 | Loss: 0.0550
+  Epoch 155/200 | Loss: 0.0490
+  Epoch 160/200 | Loss: 0.0479
+  Epoch 165/200 | Loss: 0.0480
+  Epoch 170/200 | Loss: 0.0431
+  Epoch 175/200 | Loss: 0.0402
+  Epoch 180/200 | Loss: 0.0381
+  Epoch 185/200 | Loss: 0.0382
+  Epoch 190/200 | Loss: 0.0340
+  Epoch 195/200 | Loss: 0.0327
+  Epoch 200/200 | Loss: 0.0325
+  Modular | acc=0.6579 prec=0.6500 rec=0.6842 f1=0.6667 auc=0.6981
+
+Results | Single: 0.4430±0.0367 | Modular: 0.6354±0.0774 | Diff: +0.1923
+
+
+[Dataset 8/9: 07_Ionosphere]
+Loading dataset from: /root/global/QuantumAnnealerModule/Inference/Datasets/Datasets_balanced/07_Ionosphere.csv
+Dataset num features: X=(252, 34),
+Class distribution: [126 126]
+Running 5-Fold Cross Validation
+Fold 1/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 20.2146
+  Epoch 5/200 | Loss: 17.1372
+  Epoch 10/200 | Loss: 12.1501
+  Epoch 15/200 | Loss: 9.1523
+  Epoch 20/200 | Loss: 5.4773
+  Epoch 25/200 | Loss: 2.6119
+  Epoch 30/200 | Loss: 1.1121
+  Epoch 35/200 | Loss: 1.0407
+  Epoch 40/200 | Loss: 0.9346
+  Epoch 45/200 | Loss: 0.8632
+  Epoch 50/200 | Loss: 0.8251
+  Epoch 55/200 | Loss: 0.7709
+  Epoch 60/200 | Loss: 0.7302
+  Epoch 65/200 | Loss: 0.7088
+  Epoch 70/200 | Loss: 0.7022
+  Epoch 75/200 | Loss: 0.6834
+  Epoch 80/200 | Loss: 0.6775
+  Epoch 85/200 | Loss: 0.6703
+  Epoch 90/200 | Loss: 0.6628
+  Epoch 95/200 | Loss: 0.6741
+  Epoch 100/200 | Loss: 0.6652
+  Epoch 105/200 | Loss: 0.6825
+  Epoch 110/200 | Loss: 0.6659
+  Epoch 115/200 | Loss: 0.6610
+  Epoch 120/200 | Loss: 0.6879
+  Epoch 125/200 | Loss: 0.6558
+  Epoch 130/200 | Loss: 0.6630
+  Epoch 135/200 | Loss: 0.6750
+  Epoch 140/200 | Loss: 0.6683
+  Epoch 145/200 | Loss: 0.6696
+  Epoch 150/200 | Loss: 0.6677
+  Epoch 155/200 | Loss: 0.6675
+  Epoch 160/200 | Loss: 0.6482
+  Epoch 165/200 | Loss: 0.6630
+  Epoch 170/200 | Loss: 0.6589
+  Epoch 175/200 | Loss: 0.6577
+  Epoch 180/200 | Loss: 0.6771
+  Epoch 185/200 | Loss: 0.6594
+  Epoch 190/200 | Loss: 0.6602
+  Epoch 195/200 | Loss: 0.6605
+  Epoch 200/200 | Loss: 0.6640
+  Single  | acc=0.6667 prec=0.6538 rec=0.6800 f1=0.6667 auc=0.6092
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 7.2716
+  Epoch 5/200 | Loss: 0.3993
+  Epoch 10/200 | Loss: 0.2116
+  Epoch 15/200 | Loss: 0.1183
+  Epoch 20/200 | Loss: 0.1005
+  Epoch 25/200 | Loss: 0.0893
+  Epoch 30/200 | Loss: 0.0760
+  Epoch 35/200 | Loss: 0.0655
+  Epoch 40/200 | Loss: 0.0708
+  Epoch 45/200 | Loss: 0.0490
+  Epoch 50/200 | Loss: 0.0483
+  Epoch 55/200 | Loss: 0.0465
+  Epoch 60/200 | Loss: 0.0535
+  Epoch 65/200 | Loss: 0.0353
+  Epoch 70/200 | Loss: 0.0328
+  Epoch 75/200 | Loss: 0.0320
+  Epoch 80/200 | Loss: 0.0256
+  Epoch 85/200 | Loss: 0.0268
+  Epoch 90/200 | Loss: 0.0231
+  Epoch 95/200 | Loss: 0.0228
+  Epoch 100/200 | Loss: 0.0237
+  Epoch 105/200 | Loss: 0.0202
+  Epoch 110/200 | Loss: 0.0179
+  Epoch 115/200 | Loss: 0.0161
+  Epoch 120/200 | Loss: 0.0161
+  Epoch 125/200 | Loss: 0.0142
+  Epoch 130/200 | Loss: 0.0158
+  Epoch 135/200 | Loss: 0.0140
+  Epoch 140/200 | Loss: 0.0135
+  Epoch 145/200 | Loss: 0.0215
+  Epoch 150/200 | Loss: 0.0118
+  Epoch 155/200 | Loss: 0.0123
+  Epoch 160/200 | Loss: 0.0112
+  Epoch 165/200 | Loss: 0.0169
+  Epoch 170/200 | Loss: 0.0099
+  Epoch 175/200 | Loss: 0.0096
+  Epoch 180/200 | Loss: 0.0201
+  Epoch 185/200 | Loss: 0.0157
+  Epoch 190/200 | Loss: 0.0102
+  Epoch 195/200 | Loss: 0.0077
+  Epoch 200/200 | Loss: 0.0168
+  Modular | acc=0.8824 prec=0.8800 rec=0.8800 f1=0.8800 auc=0.9769
+Fold 2/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 20.4840
+  Epoch 5/200 | Loss: 15.6897
+  Epoch 10/200 | Loss: 12.1750
+  Epoch 15/200 | Loss: 9.0291
+  Epoch 20/200 | Loss: 5.8318
+  Epoch 25/200 | Loss: 3.0313
+  Epoch 30/200 | Loss: 1.1359
+  Epoch 35/200 | Loss: 1.0305
+  Epoch 40/200 | Loss: 0.9370
+  Epoch 45/200 | Loss: 0.8669
+  Epoch 50/200 | Loss: 0.8272
+  Epoch 55/200 | Loss: 0.7839
+  Epoch 60/200 | Loss: 0.7630
+  Epoch 65/200 | Loss: 0.7221
+  Epoch 70/200 | Loss: 0.7081
+  Epoch 75/200 | Loss: 0.6977
+  Epoch 80/200 | Loss: 0.6807
+  Epoch 85/200 | Loss: 0.6884
+  Epoch 90/200 | Loss: 0.6754
+  Epoch 95/200 | Loss: 0.6795
+  Epoch 100/200 | Loss: 0.6660
+  Epoch 105/200 | Loss: 0.6947
+  Epoch 110/200 | Loss: 0.6710
+  Epoch 115/200 | Loss: 0.6753
+  Epoch 120/200 | Loss: 0.6783
+  Epoch 125/200 | Loss: 0.6982
+  Epoch 130/200 | Loss: 0.6783
+  Epoch 135/200 | Loss: 0.6798
+  Epoch 140/200 | Loss: 0.6683
+  Epoch 145/200 | Loss: 0.6781
+  Epoch 150/200 | Loss: 0.6772
+  Epoch 155/200 | Loss: 0.6788
+  Epoch 160/200 | Loss: 0.6852
+  Epoch 165/200 | Loss: 0.6866
+  Epoch 170/200 | Loss: 0.6662
+  Epoch 175/200 | Loss: 0.6695
+  Epoch 180/200 | Loss: 0.6716
+  Epoch 185/200 | Loss: 0.6749
+  Epoch 190/200 | Loss: 0.6708
+  Epoch 195/200 | Loss: 0.6608
+  Epoch 200/200 | Loss: 0.6630
+  Single  | acc=0.5294 prec=0.6000 rec=0.2308 f1=0.3333 auc=0.5969
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 0.6806
+  Epoch 5/200 | Loss: 0.2086
+  Epoch 10/200 | Loss: 0.1221
+  Epoch 15/200 | Loss: 0.0932
+  Epoch 20/200 | Loss: 0.0741
+  Epoch 25/200 | Loss: 0.0638
+  Epoch 30/200 | Loss: 0.0506
+  Epoch 35/200 | Loss: 0.0415
+  Epoch 40/200 | Loss: 0.0392
+  Epoch 45/200 | Loss: 0.0322
+  Epoch 50/200 | Loss: 0.0281
+  Epoch 55/200 | Loss: 0.0265
+  Epoch 60/200 | Loss: 0.0265
+  Epoch 65/200 | Loss: 0.0242
+  Epoch 70/200 | Loss: 0.0224
+  Epoch 75/200 | Loss: 0.0199
+  Epoch 80/200 | Loss: 0.0156
+  Epoch 85/200 | Loss: 0.0136
+  Epoch 90/200 | Loss: 0.0132
+  Epoch 95/200 | Loss: 0.0127
+  Epoch 100/200 | Loss: 0.0113
+  Epoch 105/200 | Loss: 0.0245
+  Epoch 110/200 | Loss: 0.0107
+  Epoch 115/200 | Loss: 0.0121
+  Epoch 120/200 | Loss: 0.0134
+  Epoch 125/200 | Loss: 0.0080
+  Epoch 130/200 | Loss: 0.0100
+  Epoch 135/200 | Loss: 0.0068
+  Epoch 140/200 | Loss: 0.0065
+  Epoch 145/200 | Loss: 0.0055
+  Epoch 150/200 | Loss: 0.0060
+  Epoch 155/200 | Loss: 0.0049
+  Epoch 160/200 | Loss: 0.0048
+  Epoch 165/200 | Loss: 0.0045
+  Epoch 170/200 | Loss: 0.0043
+  Epoch 175/200 | Loss: 0.0041
+  Epoch 180/200 | Loss: 0.0060
+  Epoch 185/200 | Loss: 0.0045
+  Epoch 190/200 | Loss: 0.0046
+  Epoch 195/200 | Loss: 0.0037
+  Epoch 200/200 | Loss: 0.0035
+  Modular | acc=0.9608 prec=1.0000 rec=0.9231 f1=0.9600 auc=0.9877
+Fold 3/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 22.2540
+  Epoch 5/200 | Loss: 17.4657
+  Epoch 10/200 | Loss: 13.0862
+  Epoch 15/200 | Loss: 9.1216
+  Epoch 20/200 | Loss: 5.8150
+  Epoch 25/200 | Loss: 2.8695
+  Epoch 30/200 | Loss: 1.1573
+  Epoch 35/200 | Loss: 1.0205
+  Epoch 40/200 | Loss: 0.9541
+  Epoch 45/200 | Loss: 0.8878
+  Epoch 50/200 | Loss: 0.8435
+  Epoch 55/200 | Loss: 0.8105
+  Epoch 60/200 | Loss: 0.7660
+  Epoch 65/200 | Loss: 0.7304
+  Epoch 70/200 | Loss: 0.7052
+  Epoch 75/200 | Loss: 0.7013
+  Epoch 80/200 | Loss: 0.7032
+  Epoch 85/200 | Loss: 0.6983
+  Epoch 90/200 | Loss: 0.6879
+  Epoch 95/200 | Loss: 0.6880
+  Epoch 100/200 | Loss: 0.6966
+  Epoch 105/200 | Loss: 0.6899
+  Epoch 110/200 | Loss: 0.6871
+  Epoch 115/200 | Loss: 0.6799
+  Epoch 120/200 | Loss: 0.6730
+  Epoch 125/200 | Loss: 0.6709
+  Epoch 130/200 | Loss: 0.6691
+  Epoch 135/200 | Loss: 0.6667
+  Epoch 140/200 | Loss: 0.6878
+  Epoch 145/200 | Loss: 0.6876
+  Epoch 150/200 | Loss: 0.6741
+  Epoch 155/200 | Loss: 0.6788
+  Epoch 160/200 | Loss: 0.6941
+  Epoch 165/200 | Loss: 0.6853
+  Epoch 170/200 | Loss: 0.6722
+  Epoch 175/200 | Loss: 0.6796
+  Epoch 180/200 | Loss: 0.6837
+  Epoch 185/200 | Loss: 0.6792
+  Epoch 190/200 | Loss: 0.6818
+  Epoch 195/200 | Loss: 0.6669
+  Epoch 200/200 | Loss: 0.6845
+  Single  | acc=0.6200 prec=0.6364 rec=0.5600 f1=0.5957 auc=0.6544
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 2.0758
+  Epoch 5/200 | Loss: 0.2557
+  Epoch 10/200 | Loss: 0.1549
+  Epoch 15/200 | Loss: 0.1231
+  Epoch 20/200 | Loss: 0.0921
+  Epoch 25/200 | Loss: 0.0748
+  Epoch 30/200 | Loss: 0.0621
+  Epoch 35/200 | Loss: 0.0602
+  Epoch 40/200 | Loss: 0.0472
+  Epoch 45/200 | Loss: 0.0419
+  Epoch 50/200 | Loss: 0.0407
+  Epoch 55/200 | Loss: 0.0397
+  Epoch 60/200 | Loss: 0.0339
+  Epoch 65/200 | Loss: 0.0279
+  Epoch 70/200 | Loss: 0.0238
+  Epoch 75/200 | Loss: 0.0215
+  Epoch 80/200 | Loss: 0.0211
+  Epoch 85/200 | Loss: 0.0208
+  Epoch 90/200 | Loss: 0.0177
+  Epoch 95/200 | Loss: 0.0147
+  Epoch 100/200 | Loss: 0.0141
+  Epoch 105/200 | Loss: 0.0143
+  Epoch 110/200 | Loss: 0.0130
+  Epoch 115/200 | Loss: 0.0132
+  Epoch 120/200 | Loss: 0.0111
+  Epoch 125/200 | Loss: 0.0120
+  Epoch 130/200 | Loss: 0.0087
+  Epoch 135/200 | Loss: 0.0093
+  Epoch 140/200 | Loss: 0.0077
+  Epoch 145/200 | Loss: 0.0087
+  Epoch 150/200 | Loss: 0.0079
+  Epoch 155/200 | Loss: 0.0079
+  Epoch 160/200 | Loss: 0.0066
+  Epoch 165/200 | Loss: 0.0058
+  Epoch 170/200 | Loss: 0.0052
+  Epoch 175/200 | Loss: 0.0055
+  Epoch 180/200 | Loss: 0.0051
+  Epoch 185/200 | Loss: 0.0044
+  Epoch 190/200 | Loss: 0.0053
+  Epoch 195/200 | Loss: 0.0038
+  Epoch 200/200 | Loss: 0.0043
+  Modular | acc=0.9400 prec=0.9583 rec=0.9200 f1=0.9388 auc=0.9904
+Fold 4/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 21.4130
+  Epoch 5/200 | Loss: 17.3065
+  Epoch 10/200 | Loss: 13.8760
+  Epoch 15/200 | Loss: 9.0865
+  Epoch 20/200 | Loss: 5.7247
+  Epoch 25/200 | Loss: 2.7594
+  Epoch 30/200 | Loss: 1.0926
+  Epoch 35/200 | Loss: 1.0359
+  Epoch 40/200 | Loss: 0.9210
+  Epoch 45/200 | Loss: 0.8374
+  Epoch 50/200 | Loss: 0.7841
+  Epoch 55/200 | Loss: 0.7446
+  Epoch 60/200 | Loss: 0.7103
+  Epoch 65/200 | Loss: 0.6837
+  Epoch 70/200 | Loss: 0.6815
+  Epoch 75/200 | Loss: 0.6761
+  Epoch 80/200 | Loss: 0.6697
+  Epoch 85/200 | Loss: 0.6713
+  Epoch 90/200 | Loss: 0.6929
+  Epoch 95/200 | Loss: 0.6897
+  Epoch 100/200 | Loss: 0.6640
+  Epoch 105/200 | Loss: 0.6870
+  Epoch 110/200 | Loss: 0.6613
+  Epoch 115/200 | Loss: 0.6679
+  Epoch 120/200 | Loss: 0.6796
+  Epoch 125/200 | Loss: 0.6634
+  Epoch 130/200 | Loss: 0.6765
+  Epoch 135/200 | Loss: 0.6580
+  Epoch 140/200 | Loss: 0.6561
+  Epoch 145/200 | Loss: 0.6864
+  Epoch 150/200 | Loss: 0.6698
+  Epoch 155/200 | Loss: 0.6600
+  Epoch 160/200 | Loss: 0.6726
+  Epoch 165/200 | Loss: 0.6917
+  Epoch 170/200 | Loss: 0.6783
+  Epoch 175/200 | Loss: 0.6709
+  Epoch 180/200 | Loss: 0.6816
+  Epoch 185/200 | Loss: 0.6621
+  Epoch 190/200 | Loss: 0.6777
+  Epoch 195/200 | Loss: 0.6719
+  Epoch 200/200 | Loss: 0.6637
+  Single  | acc=0.6000 prec=0.6190 rec=0.5200 f1=0.5652 auc=0.5664
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 10.7456
+  Epoch 5/200 | Loss: 0.7844
+  Epoch 10/200 | Loss: 0.1793
+  Epoch 15/200 | Loss: 0.1592
+  Epoch 20/200 | Loss: 0.1072
+  Epoch 25/200 | Loss: 0.0885
+  Epoch 30/200 | Loss: 0.0930
+  Epoch 35/200 | Loss: 0.0807
+  Epoch 40/200 | Loss: 0.0655
+  Epoch 45/200 | Loss: 0.0653
+  Epoch 50/200 | Loss: 0.0561
+  Epoch 55/200 | Loss: 0.0514
+  Epoch 60/200 | Loss: 0.0500
+  Epoch 65/200 | Loss: 0.0517
+  Epoch 70/200 | Loss: 0.0426
+  Epoch 75/200 | Loss: 0.0416
+  Epoch 80/200 | Loss: 0.0389
+  Epoch 85/200 | Loss: 0.0379
+  Epoch 90/200 | Loss: 0.0359
+  Epoch 95/200 | Loss: 0.0353
+  Epoch 100/200 | Loss: 0.0353
+  Epoch 105/200 | Loss: 0.0360
+  Epoch 110/200 | Loss: 0.0289
+  Epoch 115/200 | Loss: 0.0305
+  Epoch 120/200 | Loss: 0.0292
+  Epoch 125/200 | Loss: 0.0418
+  Epoch 130/200 | Loss: 0.0224
+  Epoch 135/200 | Loss: 0.0244
+  Epoch 140/200 | Loss: 0.0220
+  Epoch 145/200 | Loss: 0.0216
+  Epoch 150/200 | Loss: 0.0218
+  Epoch 155/200 | Loss: 0.0210
+  Epoch 160/200 | Loss: 0.0192
+  Epoch 165/200 | Loss: 0.0210
+  Epoch 170/200 | Loss: 0.0160
+  Epoch 175/200 | Loss: 0.0217
+  Epoch 180/200 | Loss: 0.0169
+  Epoch 185/200 | Loss: 0.0145
+  Epoch 190/200 | Loss: 0.0159
+  Epoch 195/200 | Loss: 0.0138
+  Epoch 200/200 | Loss: 0.0143
+  Modular | acc=0.8200 prec=0.9000 rec=0.7200 f1=0.8000 auc=0.9392
+Fold 5/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 21.2683
+  Epoch 5/200 | Loss: 16.7314
+  Epoch 10/200 | Loss: 13.4924
+  Epoch 15/200 | Loss: 8.7723
+  Epoch 20/200 | Loss: 5.4386
+  Epoch 25/200 | Loss: 2.6245
+  Epoch 30/200 | Loss: 1.1268
+  Epoch 35/200 | Loss: 0.9970
+  Epoch 40/200 | Loss: 0.9425
+  Epoch 45/200 | Loss: 0.8644
+  Epoch 50/200 | Loss: 0.8104
+  Epoch 55/200 | Loss: 0.7766
+  Epoch 60/200 | Loss: 0.7366
+  Epoch 65/200 | Loss: 0.7250
+  Epoch 70/200 | Loss: 0.7020
+  Epoch 75/200 | Loss: 0.6905
+  Epoch 80/200 | Loss: 0.6784
+  Epoch 85/200 | Loss: 0.6754
+  Epoch 90/200 | Loss: 0.6746
+  Epoch 95/200 | Loss: 0.6655
+  Epoch 100/200 | Loss: 0.6622
+  Epoch 105/200 | Loss: 0.6591
+  Epoch 110/200 | Loss: 0.6901
+  Epoch 115/200 | Loss: 0.6706
+  Epoch 120/200 | Loss: 0.6665
+  Epoch 125/200 | Loss: 0.6725
+  Epoch 130/200 | Loss: 0.6720
+  Epoch 135/200 | Loss: 0.6529
+  Epoch 140/200 | Loss: 0.6506
+  Epoch 145/200 | Loss: 0.6499
+  Epoch 150/200 | Loss: 0.6693
+  Epoch 155/200 | Loss: 0.6660
+  Epoch 160/200 | Loss: 0.6606
+  Epoch 165/200 | Loss: 0.6624
+  Epoch 170/200 | Loss: 0.6670
+  Epoch 175/200 | Loss: 0.6556
+  Epoch 180/200 | Loss: 0.6385
+  Epoch 185/200 | Loss: 0.6495
+  Epoch 190/200 | Loss: 0.6478
+  Epoch 195/200 | Loss: 0.6429
+  Epoch 200/200 | Loss: 0.6520
+  Single  | acc=0.6000 prec=0.6087 rec=0.5600 f1=0.5833 auc=0.5984
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 7.7256
+  Epoch 5/200 | Loss: 0.3824
+  Epoch 10/200 | Loss: 0.2168
+  Epoch 15/200 | Loss: 0.1896
+  Epoch 20/200 | Loss: 0.1305
+  Epoch 25/200 | Loss: 0.1103
+  Epoch 30/200 | Loss: 0.0966
+  Epoch 35/200 | Loss: 0.0860
+  Epoch 40/200 | Loss: 0.0732
+  Epoch 45/200 | Loss: 0.0698
+  Epoch 50/200 | Loss: 0.0645
+  Epoch 55/200 | Loss: 0.0607
+  Epoch 60/200 | Loss: 0.0466
+  Epoch 65/200 | Loss: 0.0492
+  Epoch 70/200 | Loss: 0.0397
+  Epoch 75/200 | Loss: 0.0382
+  Epoch 80/200 | Loss: 0.0351
+  Epoch 85/200 | Loss: 0.0330
+  Epoch 90/200 | Loss: 0.0335
+  Epoch 95/200 | Loss: 0.0427
+  Epoch 100/200 | Loss: 0.0328
+  Epoch 105/200 | Loss: 0.0249
+  Epoch 110/200 | Loss: 0.0281
+  Epoch 115/200 | Loss: 0.0266
+  Epoch 120/200 | Loss: 0.0214
+  Epoch 125/200 | Loss: 0.0197
+  Epoch 130/200 | Loss: 0.0190
+  Epoch 135/200 | Loss: 0.0199
+  Epoch 140/200 | Loss: 0.0168
+  Epoch 145/200 | Loss: 0.0195
+  Epoch 150/200 | Loss: 0.0158
+  Epoch 155/200 | Loss: 0.0179
+  Epoch 160/200 | Loss: 0.0137
+  Epoch 165/200 | Loss: 0.0130
+  Epoch 170/200 | Loss: 0.0141
+  Epoch 175/200 | Loss: 0.0124
+  Epoch 180/200 | Loss: 0.0126
+  Epoch 185/200 | Loss: 0.0114
+  Epoch 190/200 | Loss: 0.0114
+  Epoch 195/200 | Loss: 0.0127
+  Epoch 200/200 | Loss: 0.0096
+  Modular | acc=0.9200 prec=0.9200 rec=0.9200 f1=0.9200 auc=0.9552
+
+Results | Single: 0.6032±0.0442 | Modular: 0.9046±0.0496 | Diff: +0.3014
+
+
+[Dataset 9/9: 08_SPECTF_Heart]
+Loading dataset from: /root/global/QuantumAnnealerModule/Inference/Datasets/Datasets_balanced/08_SPECTF_Heart.csv
+Dataset num features: X=(80, 44),
+Class distribution: [40 40]
+Running 5-Fold Cross Validation
+Fold 1/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 20.7871
+  Epoch 5/200 | Loss: 19.3106
+  Epoch 10/200 | Loss: 17.6927
+  Epoch 15/200 | Loss: 16.1878
+  Epoch 20/200 | Loss: 14.8214
+  Epoch 25/200 | Loss: 13.5784
+  Epoch 30/200 | Loss: 12.4415
+  Epoch 35/200 | Loss: 11.3139
+  Epoch 40/200 | Loss: 10.3168
+  Epoch 45/200 | Loss: 9.3338
+  Epoch 50/200 | Loss: 8.3704
+  Epoch 55/200 | Loss: 7.4336
+  Epoch 60/200 | Loss: 6.5365
+  Epoch 65/200 | Loss: 5.6321
+  Epoch 70/200 | Loss: 4.7892
+  Epoch 75/200 | Loss: 3.9098
+  Epoch 80/200 | Loss: 3.0882
+  Epoch 85/200 | Loss: 2.2997
+  Epoch 90/200 | Loss: 1.6461
+  Epoch 95/200 | Loss: 1.2193
+  Epoch 100/200 | Loss: 1.0163
+  Epoch 105/200 | Loss: 0.9746
+  Epoch 110/200 | Loss: 0.9684
+  Epoch 115/200 | Loss: 0.9585
+  Epoch 120/200 | Loss: 0.9494
+  Epoch 125/200 | Loss: 0.9441
+  Epoch 130/200 | Loss: 0.9328
+  Epoch 135/200 | Loss: 0.9243
+  Epoch 140/200 | Loss: 0.9158
+  Epoch 145/200 | Loss: 0.9084
+  Epoch 150/200 | Loss: 0.9020
+  Epoch 155/200 | Loss: 0.8947
+  Epoch 160/200 | Loss: 0.8870
+  Epoch 165/200 | Loss: 0.8789
+  Epoch 170/200 | Loss: 0.8727
+  Epoch 175/200 | Loss: 0.8658
+  Epoch 180/200 | Loss: 0.8589
+  Epoch 185/200 | Loss: 0.8524
+  Epoch 190/200 | Loss: 0.8485
+  Epoch 195/200 | Loss: 0.8440
+  Epoch 200/200 | Loss: 0.8365
+  Single  | acc=0.5000 prec=0.5000 rec=0.7500 f1=0.6000 auc=0.2188
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 7.5589
+  Epoch 5/200 | Loss: 1.8865
+  Epoch 10/200 | Loss: 1.3380
+  Epoch 15/200 | Loss: 0.3781
+  Epoch 20/200 | Loss: 0.2833
+  Epoch 25/200 | Loss: 0.2323
+  Epoch 30/200 | Loss: 0.1632
+  Epoch 35/200 | Loss: 0.1239
+  Epoch 40/200 | Loss: 0.1019
+  Epoch 45/200 | Loss: 0.0889
+  Epoch 50/200 | Loss: 0.0772
+  Epoch 55/200 | Loss: 0.0673
+  Epoch 60/200 | Loss: 0.0600
+  Epoch 65/200 | Loss: 0.0545
+  Epoch 70/200 | Loss: 0.0495
+  Epoch 75/200 | Loss: 0.0442
+  Epoch 80/200 | Loss: 0.0414
+  Epoch 85/200 | Loss: 0.0379
+  Epoch 90/200 | Loss: 0.0345
+  Epoch 95/200 | Loss: 0.0324
+  Epoch 100/200 | Loss: 0.0307
+  Epoch 105/200 | Loss: 0.0285
+  Epoch 110/200 | Loss: 0.0267
+  Epoch 115/200 | Loss: 0.0252
+  Epoch 120/200 | Loss: 0.0234
+  Epoch 125/200 | Loss: 0.0218
+  Epoch 130/200 | Loss: 0.0207
+  Epoch 135/200 | Loss: 0.0198
+  Epoch 140/200 | Loss: 0.0191
+  Epoch 145/200 | Loss: 0.0178
+  Epoch 150/200 | Loss: 0.0170
+  Epoch 155/200 | Loss: 0.0162
+  Epoch 160/200 | Loss: 0.0156
+  Epoch 165/200 | Loss: 0.0151
+  Epoch 170/200 | Loss: 0.0141
+  Epoch 175/200 | Loss: 0.0136
+  Epoch 180/200 | Loss: 0.0134
+  Epoch 185/200 | Loss: 0.0124
+  Epoch 190/200 | Loss: 0.0123
+  Epoch 195/200 | Loss: 0.0116
+  Epoch 200/200 | Loss: 0.0114
+  Modular | acc=0.7500 prec=0.7000 rec=0.8750 f1=0.7778 auc=0.8438
+Fold 2/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 20.9715
+  Epoch 5/200 | Loss: 19.4821
+  Epoch 10/200 | Loss: 17.8294
+  Epoch 15/200 | Loss: 16.3721
+  Epoch 20/200 | Loss: 15.0187
+  Epoch 25/200 | Loss: 13.7491
+  Epoch 30/200 | Loss: 12.5652
+  Epoch 35/200 | Loss: 11.4433
+  Epoch 40/200 | Loss: 10.4156
+  Epoch 45/200 | Loss: 9.4108
+  Epoch 50/200 | Loss: 8.4461
+  Epoch 55/200 | Loss: 7.4865
+  Epoch 60/200 | Loss: 6.5751
+  Epoch 65/200 | Loss: 5.6485
+  Epoch 70/200 | Loss: 4.7618
+  Epoch 75/200 | Loss: 3.8869
+  Epoch 80/200 | Loss: 3.0423
+  Epoch 85/200 | Loss: 2.2105
+  Epoch 90/200 | Loss: 1.5165
+  Epoch 95/200 | Loss: 1.0558
+  Epoch 100/200 | Loss: 0.8916
+  Epoch 105/200 | Loss: 0.8806
+  Epoch 110/200 | Loss: 0.8741
+  Epoch 115/200 | Loss: 0.8646
+  Epoch 120/200 | Loss: 0.8563
+  Epoch 125/200 | Loss: 0.8504
+  Epoch 130/200 | Loss: 0.8469
+  Epoch 135/200 | Loss: 0.8396
+  Epoch 140/200 | Loss: 0.8335
+  Epoch 145/200 | Loss: 0.8281
+  Epoch 150/200 | Loss: 0.8228
+  Epoch 155/200 | Loss: 0.8179
+  Epoch 160/200 | Loss: 0.8128
+  Epoch 165/200 | Loss: 0.8076
+  Epoch 170/200 | Loss: 0.8030
+  Epoch 175/200 | Loss: 0.7988
+  Epoch 180/200 | Loss: 0.7936
+  Epoch 185/200 | Loss: 0.7897
+  Epoch 190/200 | Loss: 0.7860
+  Epoch 195/200 | Loss: 0.7795
+  Epoch 200/200 | Loss: 0.7762
+  Single  | acc=0.3125 prec=0.3333 rec=0.3750 f1=0.3529 auc=0.2344
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 10.9303
+  Epoch 5/200 | Loss: 6.3316
+  Epoch 10/200 | Loss: 1.0125
+  Epoch 15/200 | Loss: 0.9615
+  Epoch 20/200 | Loss: 0.2170
+  Epoch 25/200 | Loss: 0.1885
+  Epoch 30/200 | Loss: 0.1081
+  Epoch 35/200 | Loss: 0.0817
+  Epoch 40/200 | Loss: 0.0711
+  Epoch 45/200 | Loss: 0.0605
+  Epoch 50/200 | Loss: 0.0552
+  Epoch 55/200 | Loss: 0.0500
+  Epoch 60/200 | Loss: 0.0449
+  Epoch 65/200 | Loss: 0.0427
+  Epoch 70/200 | Loss: 0.0390
+  Epoch 75/200 | Loss: 0.0363
+  Epoch 80/200 | Loss: 0.0340
+  Epoch 85/200 | Loss: 0.0314
+  Epoch 90/200 | Loss: 0.0297
+  Epoch 95/200 | Loss: 0.0281
+  Epoch 100/200 | Loss: 0.0259
+  Epoch 105/200 | Loss: 0.0247
+  Epoch 110/200 | Loss: 0.0232
+  Epoch 115/200 | Loss: 0.0223
+  Epoch 120/200 | Loss: 0.0209
+  Epoch 125/200 | Loss: 0.0199
+  Epoch 130/200 | Loss: 0.0194
+  Epoch 135/200 | Loss: 0.0180
+  Epoch 140/200 | Loss: 0.0170
+  Epoch 145/200 | Loss: 0.0164
+  Epoch 150/200 | Loss: 0.0154
+  Epoch 155/200 | Loss: 0.0150
+  Epoch 160/200 | Loss: 0.0148
+  Epoch 165/200 | Loss: 0.0136
+  Epoch 170/200 | Loss: 0.0133
+  Epoch 175/200 | Loss: 0.0128
+  Epoch 180/200 | Loss: 0.0118
+  Epoch 185/200 | Loss: 0.0119
+  Epoch 190/200 | Loss: 0.0114
+  Epoch 195/200 | Loss: 0.0108
+  Epoch 200/200 | Loss: 0.0105
+  Modular | acc=0.6250 prec=0.5833 rec=0.8750 f1=0.7000 auc=0.7812
+Fold 3/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 20.7589
+  Epoch 5/200 | Loss: 19.3360
+  Epoch 10/200 | Loss: 17.6583
+  Epoch 15/200 | Loss: 16.1576
+  Epoch 20/200 | Loss: 14.8235
+  Epoch 25/200 | Loss: 13.5783
+  Epoch 30/200 | Loss: 12.4929
+  Epoch 35/200 | Loss: 11.3616
+  Epoch 40/200 | Loss: 10.3445
+  Epoch 45/200 | Loss: 9.3521
+  Epoch 50/200 | Loss: 8.4009
+  Epoch 55/200 | Loss: 7.4845
+  Epoch 60/200 | Loss: 6.5817
+  Epoch 65/200 | Loss: 5.6770
+  Epoch 70/200 | Loss: 4.8256
+  Epoch 75/200 | Loss: 3.9749
+  Epoch 80/200 | Loss: 3.1436
+  Epoch 85/200 | Loss: 2.3587
+  Epoch 90/200 | Loss: 1.6828
+  Epoch 95/200 | Loss: 1.2168
+  Epoch 100/200 | Loss: 1.0075
+  Epoch 105/200 | Loss: 0.9598
+  Epoch 110/200 | Loss: 0.9511
+  Epoch 115/200 | Loss: 0.9420
+  Epoch 120/200 | Loss: 0.9350
+  Epoch 125/200 | Loss: 0.9235
+  Epoch 130/200 | Loss: 0.9162
+  Epoch 135/200 | Loss: 0.9064
+  Epoch 140/200 | Loss: 0.9010
+  Epoch 145/200 | Loss: 0.8941
+  Epoch 150/200 | Loss: 0.8875
+  Epoch 155/200 | Loss: 0.8772
+  Epoch 160/200 | Loss: 0.8691
+  Epoch 165/200 | Loss: 0.8643
+  Epoch 170/200 | Loss: 0.8599
+  Epoch 175/200 | Loss: 0.8515
+  Epoch 180/200 | Loss: 0.8455
+  Epoch 185/200 | Loss: 0.8398
+  Epoch 190/200 | Loss: 0.8343
+  Epoch 195/200 | Loss: 0.8297
+  Epoch 200/200 | Loss: 0.8242
+  Single  | acc=0.3750 prec=0.4167 rec=0.6250 f1=0.5000 auc=0.2031
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 5.1997
+  Epoch 5/200 | Loss: 1.0598
+  Epoch 10/200 | Loss: 0.6931
+  Epoch 15/200 | Loss: 0.3827
+  Epoch 20/200 | Loss: 0.1853
+  Epoch 25/200 | Loss: 0.1417
+  Epoch 30/200 | Loss: 0.1229
+  Epoch 35/200 | Loss: 0.1002
+  Epoch 40/200 | Loss: 0.0816
+  Epoch 45/200 | Loss: 0.0744
+  Epoch 50/200 | Loss: 0.0642
+  Epoch 55/200 | Loss: 0.0587
+  Epoch 60/200 | Loss: 0.0541
+  Epoch 65/200 | Loss: 0.0473
+  Epoch 70/200 | Loss: 0.0440
+  Epoch 75/200 | Loss: 0.0396
+  Epoch 80/200 | Loss: 0.0381
+  Epoch 85/200 | Loss: 0.0342
+  Epoch 90/200 | Loss: 0.0324
+  Epoch 95/200 | Loss: 0.0302
+  Epoch 100/200 | Loss: 0.0280
+  Epoch 105/200 | Loss: 0.0267
+  Epoch 110/200 | Loss: 0.0246
+  Epoch 115/200 | Loss: 0.0228
+  Epoch 120/200 | Loss: 0.0218
+  Epoch 125/200 | Loss: 0.0206
+  Epoch 130/200 | Loss: 0.0198
+  Epoch 135/200 | Loss: 0.0183
+  Epoch 140/200 | Loss: 0.0178
+  Epoch 145/200 | Loss: 0.0167
+  Epoch 150/200 | Loss: 0.0161
+  Epoch 155/200 | Loss: 0.0149
+  Epoch 160/200 | Loss: 0.0143
+  Epoch 165/200 | Loss: 0.0138
+  Epoch 170/200 | Loss: 0.0131
+  Epoch 175/200 | Loss: 0.0128
+  Epoch 180/200 | Loss: 0.0121
+  Epoch 185/200 | Loss: 0.0113
+  Epoch 190/200 | Loss: 0.0113
+  Epoch 195/200 | Loss: 0.0110
+  Epoch 200/200 | Loss: 0.0104
+  Modular | acc=0.6875 prec=0.6667 rec=0.7500 f1=0.7059 auc=0.7812
+Fold 4/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 20.5851
+  Epoch 5/200 | Loss: 19.1035
+  Epoch 10/200 | Loss: 17.4110
+  Epoch 15/200 | Loss: 15.9983
+  Epoch 20/200 | Loss: 14.6434
+  Epoch 25/200 | Loss: 13.4322
+  Epoch 30/200 | Loss: 12.2934
+  Epoch 35/200 | Loss: 11.2363
+  Epoch 40/200 | Loss: 10.1914
+  Epoch 45/200 | Loss: 9.1971
+  Epoch 50/200 | Loss: 8.2531
+  Epoch 55/200 | Loss: 7.3428
+  Epoch 60/200 | Loss: 6.4296
+  Epoch 65/200 | Loss: 5.5460
+  Epoch 70/200 | Loss: 4.6815
+  Epoch 75/200 | Loss: 3.8139
+  Epoch 80/200 | Loss: 2.9952
+  Epoch 85/200 | Loss: 2.2166
+  Epoch 90/200 | Loss: 1.5652
+  Epoch 95/200 | Loss: 1.1599
+  Epoch 100/200 | Loss: 0.9818
+  Epoch 105/200 | Loss: 0.9524
+  Epoch 110/200 | Loss: 0.9462
+  Epoch 115/200 | Loss: 0.9377
+  Epoch 120/200 | Loss: 0.9305
+  Epoch 125/200 | Loss: 0.9204
+  Epoch 130/200 | Loss: 0.9128
+  Epoch 135/200 | Loss: 0.9072
+  Epoch 140/200 | Loss: 0.8985
+  Epoch 145/200 | Loss: 0.8918
+  Epoch 150/200 | Loss: 0.8848
+  Epoch 155/200 | Loss: 0.8770
+  Epoch 160/200 | Loss: 0.8729
+  Epoch 165/200 | Loss: 0.8635
+  Epoch 170/200 | Loss: 0.8592
+  Epoch 175/200 | Loss: 0.8532
+  Epoch 180/200 | Loss: 0.8486
+  Epoch 185/200 | Loss: 0.8420
+  Epoch 190/200 | Loss: 0.8358
+  Epoch 195/200 | Loss: 0.8302
+  Epoch 200/200 | Loss: 0.8258
+  Single  | acc=0.3750 prec=0.4286 rec=0.7500 f1=0.5455 auc=0.1875
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 1.7374
+  Epoch 5/200 | Loss: 0.7500
+  Epoch 10/200 | Loss: 0.4015
+  Epoch 15/200 | Loss: 0.2496
+  Epoch 20/200 | Loss: 0.1856
+  Epoch 25/200 | Loss: 0.1371
+  Epoch 30/200 | Loss: 0.1098
+  Epoch 35/200 | Loss: 0.0887
+  Epoch 40/200 | Loss: 0.0750
+  Epoch 45/200 | Loss: 0.0649
+  Epoch 50/200 | Loss: 0.0563
+  Epoch 55/200 | Loss: 0.0494
+  Epoch 60/200 | Loss: 0.0440
+  Epoch 65/200 | Loss: 0.0378
+  Epoch 70/200 | Loss: 0.0341
+  Epoch 75/200 | Loss: 0.0314
+  Epoch 80/200 | Loss: 0.0288
+  Epoch 85/200 | Loss: 0.0263
+  Epoch 90/200 | Loss: 0.0240
+  Epoch 95/200 | Loss: 0.0219
+  Epoch 100/200 | Loss: 0.0204
+  Epoch 105/200 | Loss: 0.0185
+  Epoch 110/200 | Loss: 0.0174
+  Epoch 115/200 | Loss: 0.0162
+  Epoch 120/200 | Loss: 0.0153
+  Epoch 125/200 | Loss: 0.0145
+  Epoch 130/200 | Loss: 0.0137
+  Epoch 135/200 | Loss: 0.0126
+  Epoch 140/200 | Loss: 0.0119
+  Epoch 145/200 | Loss: 0.0112
+  Epoch 150/200 | Loss: 0.0105
+  Epoch 155/200 | Loss: 0.0102
+  Epoch 160/200 | Loss: 0.0096
+  Epoch 165/200 | Loss: 0.0091
+  Epoch 170/200 | Loss: 0.0087
+  Epoch 175/200 | Loss: 0.0083
+  Epoch 180/200 | Loss: 0.0081
+  Epoch 185/200 | Loss: 0.0074
+  Epoch 190/200 | Loss: 0.0072
+  Epoch 195/200 | Loss: 0.0068
+  Epoch 200/200 | Loss: 0.0066
+  Modular | acc=0.7500 prec=0.8333 rec=0.6250 f1=0.7143 auc=0.7656
+Fold 5/5
+  Training FullIsingModule...
+Using model size: 50
+  Epoch 1/200 | Loss: 20.6162
+  Epoch 5/200 | Loss: 19.1857
+  Epoch 10/200 | Loss: 17.5641
+  Epoch 15/200 | Loss: 16.0959
+  Epoch 20/200 | Loss: 14.7352
+  Epoch 25/200 | Loss: 13.5105
+  Epoch 30/200 | Loss: 12.3631
+  Epoch 35/200 | Loss: 11.2708
+  Epoch 40/200 | Loss: 10.2757
+  Epoch 45/200 | Loss: 9.2586
+  Epoch 50/200 | Loss: 8.3139
+  Epoch 55/200 | Loss: 7.3741
+  Epoch 60/200 | Loss: 6.4854
+  Epoch 65/200 | Loss: 5.6362
+  Epoch 70/200 | Loss: 4.7577
+  Epoch 75/200 | Loss: 3.9200
+  Epoch 80/200 | Loss: 3.1019
+  Epoch 85/200 | Loss: 2.3161
+  Epoch 90/200 | Loss: 1.6368
+  Epoch 95/200 | Loss: 1.1596
+  Epoch 100/200 | Loss: 0.9608
+  Epoch 105/200 | Loss: 0.9129
+  Epoch 110/200 | Loss: 0.9102
+  Epoch 115/200 | Loss: 0.9040
+  Epoch 120/200 | Loss: 0.8923
+  Epoch 125/200 | Loss: 0.8842
+  Epoch 130/200 | Loss: 0.8783
+  Epoch 135/200 | Loss: 0.8748
+  Epoch 140/200 | Loss: 0.8670
+  Epoch 145/200 | Loss: 0.8616
+  Epoch 150/200 | Loss: 0.8521
+  Epoch 155/200 | Loss: 0.8486
+  Epoch 160/200 | Loss: 0.8426
+  Epoch 165/200 | Loss: 0.8384
+  Epoch 170/200 | Loss: 0.8299
+  Epoch 175/200 | Loss: 0.8254
+  Epoch 180/200 | Loss: 0.8201
+  Epoch 185/200 | Loss: 0.8150
+  Epoch 190/200 | Loss: 0.8095
+  Epoch 195/200 | Loss: 0.8058
+  Epoch 200/200 | Loss: 0.8014
+  Single  | acc=0.4375 prec=0.4286 rec=0.3750 f1=0.4000 auc=0.2188
+  Training ModularNetwork...
+Using model size: 50
+  Epoch 1/200 | Loss: 1.3849
+  Epoch 5/200 | Loss: 0.4436
+  Epoch 10/200 | Loss: 0.1794
+  Epoch 15/200 | Loss: 0.1027
+  Epoch 20/200 | Loss: 0.0666
+  Epoch 25/200 | Loss: 0.0482
+  Epoch 30/200 | Loss: 0.0393
+  Epoch 35/200 | Loss: 0.0316
+  Epoch 40/200 | Loss: 0.0275
+  Epoch 45/200 | Loss: 0.0227
+  Epoch 50/200 | Loss: 0.0209
+  Epoch 55/200 | Loss: 0.0181
+  Epoch 60/200 | Loss: 0.0174
+  Epoch 65/200 | Loss: 0.0152
+  Epoch 70/200 | Loss: 0.0141
+  Epoch 75/200 | Loss: 0.0130
+  Epoch 80/200 | Loss: 0.0119
+  Epoch 85/200 | Loss: 0.0109
+  Epoch 90/200 | Loss: 0.0106
+  Epoch 95/200 | Loss: 0.0097
+  Epoch 100/200 | Loss: 0.0091
+  Epoch 105/200 | Loss: 0.0084
+  Epoch 110/200 | Loss: 0.0082
+  Epoch 115/200 | Loss: 0.0076
+  Epoch 120/200 | Loss: 0.0072
+  Epoch 125/200 | Loss: 0.0069
+  Epoch 130/200 | Loss: 0.0065
+  Epoch 135/200 | Loss: 0.0061
+  Epoch 140/200 | Loss: 0.0059
+  Epoch 145/200 | Loss: 0.0056
+  Epoch 150/200 | Loss: 0.0054
+  Epoch 155/200 | Loss: 0.0052
+  Epoch 160/200 | Loss: 0.0050
+  Epoch 165/200 | Loss: 0.0047
+  Epoch 170/200 | Loss: 0.0045
+  Epoch 175/200 | Loss: 0.0044
+  Epoch 180/200 | Loss: 0.0042
+  Epoch 185/200 | Loss: 0.0042
+  Epoch 190/200 | Loss: 0.0039
+  Epoch 195/200 | Loss: 0.0039
+  Epoch 200/200 | Loss: 0.0036
+  Modular | acc=0.6250 prec=0.6250 rec=0.6250 f1=0.6250 auc=0.5469
+
+Results | Single: 0.4000±0.0637 | Modular: 0.6875±0.0559 | Diff: +0.2875
+
+
+[COMPLETED in 37435.9s]
+
+Generating summary plots...
+
+Wilcoxon signed-rank test: statistic=0.0000, p-value=0.0039
+Metrics CSV saved to: plots_20260518_104501/metrics_summary.csv
+Per-fold metrics CSV saved to: plots_20260518_104501/metrics_per_fold.csv
+All plots saved to plots_20260518_104501

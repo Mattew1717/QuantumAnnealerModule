@@ -1,0 +1,7 @@
+__pycache__
+venv
+logs
+results
+CLAUDE.md
+.claude
+.DS_Store
