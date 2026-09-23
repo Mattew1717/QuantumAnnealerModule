@@ -5,3 +5,6 @@ results
 CLAUDE.md
 .claude
 .DS_Store
+*.egg-info
+build
+dist

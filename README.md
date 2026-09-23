@@ -73,7 +73,9 @@ x ──► FullIsingModule × N  ──►  Linear(N→1)  ──►  output
 | `test_comparison_SZPvsTorch.py` | Direct comparison of original SZP vs `FullIsingModule` on Iris — validates the PyTorch port |
 | `test_sim_vs_qpu.py` | 2D XOR with the backend chosen by `ANNEALER_TYPE`: multi-run statistics on simulated annealing, or a single run on the QPU |
 
-All scripts seed `numpy` and `torch` from `RANDOM_SEED` for reproducibility, and write timestamped output directories (SVG + PDF plots, CSVs, `run_<ts>.log`) into the cwd.
+All scripts seed `numpy` and `torch` from `RANDOM_SEED` for reproducibility. `test_xor.py`, `test_datasetsUCI.py` and `test_sim_vs_qpu.py` write timestamped output directories (SVG + PDF plots, CSVs, `run_<ts>.log`) into the current working directory; `test_comparison_SZPvsTorch.py` saves its plots to `Inference/plots/` and logs only to stdout.
+
+Only `test_sim_vs_qpu.py` reads `ANNEALER_TYPE`; the other scripts always use simulated annealing.
 
 ---
 
@@ -95,9 +97,49 @@ Requires **Python ≥ 3.10**.
 ```bash
 git clone https://github.com/Mattew1717/QuantumAnnealerModule.git
 cd QuantumAnnealerModule
-pip install -r requirements.txt
-pip install -e .          # installs the full_ising_model package
 ```
+
+**Package only** (installs `full_ising_model`, distribution name `FullIsingModel`):
+
+```bash
+pip install .            # simulated / exact annealers
+pip install ".[qpu]"     # + dwave-system, needed for AnnealerType.QUANTUM
+```
+
+**Experiments** (`Inference/`, `NeuralNetwork/`, `SZP_Model/`): these also need scikit-learn, pandas, matplotlib, etc.
+
+```bash
+pip install -r requirements.txt   # includes an editable install of the package (-e .)
+```
+
+---
+
+## Usage
+
+```python
+import torch
+from full_ising_model import FullIsingModule, AnnealerType, AnnealingSettings
+
+settings = AnnealingSettings(
+    beta_range=[1, 10], num_reads=1, num_sweeps=1000, num_sweeps_per_beta=1,
+)
+
+model = FullIsingModule(
+    size_annealer=8,                    # number of spins (must be ≥ input features)
+    annealer_type=AnnealerType.SIMULATED,
+    annealing_settings=settings,        # required for SIMULATED, ignored otherwise
+    lambda_init=1.0,
+    offset_init=0.0,
+    num_workers=4,                      # sampler threads per forward pass
+    hidden_nodes_offset_value=-0.02,    # ε for padding inputs up to size_annealer
+)
+
+x = torch.randn(16, 2)                  # (batch, features)
+y = model(x)                            # shape (16,): λ·E₀ + b
+y.sum().backward()                      # gradients on model.gamma, model.lmd, model.offset
+```
+
+For the QPU backend, pass `annealer_type=AnnealerType.QUANTUM`, `profile="<dwave profile>"` and `num_reads=<n>` (requires the `qpu` extra and a configured D-Wave Leap account).
 
 ---
 
@@ -113,7 +155,8 @@ All hyperparameters live in `Inference/.env` and are read strictly (a missing ke
 - `HIDDEN_NODES_OFFSET_VALUE`: ε for the offset padding rule
 
 **Annealer**
-- `ANNEALER_TYPE`: `simulated` | `exact` | `quantum`
+- `ANNEALER_TYPE`: `simulated` | `exact` | `quantum` (used only by `test_sim_vs_qpu.py`)
+- `DWAVE_PROFILE`: D-Wave profile name from `~/.config/dwave/dwave.conf` (used only when `ANNEALER_TYPE=quantum`)
 - `NUM_READS`: samples per annealer call
 - `SA_NUM_SWEEPS`, `SA_SWEEPS_PER_BETA`, `SA_BETA_MIN`, `SA_BETA_MAX`: simulated annealing schedule
 - `MODEL_SIZE`: annealer size (`-1` for auto, i.e. `max(n_features, MINIMUM_MODEL_SIZE)`)
